@@ -81,11 +81,11 @@ with st.sidebar:
     
     if st.button("Agenda", key="mn_prog_agenda", use_container_width=True):
         st.switch_page("pages/Menorca_Program_Agenda.py")
-api_key = st.secrets["airtable"]["api_key"]
-base_id = st.secrets["airtable"]["base_id"]
+api_key = st.secrets["airtable_mexico_investment"]["api_key"]
+base_id = st.secrets["airtairtable_mexico_investmentable"]["base_id"]
 
-table_id_team = st.secrets["airtable"]["table_id_team"]
-table_id_em = st.secrets["airtable"]["table_id_em"]
+table_id_team = st.secrets["airtable_mexico_investment"]["table_id_team"]
+table_id_em = st.secrets["airtable_mexico_investment"]["table_id_em"]
 
 api = Api(api_key)
 table_em = api.table(base_id, table_id_em)
