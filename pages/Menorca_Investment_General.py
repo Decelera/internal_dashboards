@@ -178,9 +178,9 @@ with st.sidebar:
 st.image("https://images.squarespace-cdn.com/content/v1/67811e8fe702fd5553c65249/749161ba-4abb-4514-9642-edc82c1c9c9d/Decelera-Logo.png?format=1500w", width=500)
 
 # === Airtable Config ===
-AIRTABLE_PAT = st.secrets["airtable_menorca"]["api_key"]
-BASE_ID = st.secrets["airtable_menorca"]["base_id"]
-TABLE_ID = st.secrets["airtable_menorca"]["table_id"]
+AIRTABLE_PAT = st.secrets["airtable_menorca_investment"]["api_key"]
+BASE_ID = st.secrets["airtable_menorca_investment"]["base_id"]
+TABLE_ID = st.secrets["airtable_menorca_investment"]["table_id"]
 
 # === Airtable Connection ===
 api = Api(AIRTABLE_PAT)
