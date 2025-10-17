@@ -89,9 +89,9 @@ import streamlit as st
 import pandas as pd
 from pyairtable import Api
 
-api_key = st.secrets["airtable_mexico_program"]["api_key"]
-base_id = st.secrets["airtable_mexico_program"]["base_id"]
-table_id = st.secrets["airtable_mexico_program"]["table_id"]
+api_key = st.secrets["airtable_program"]["api_key"]
+base_id = st.secrets["airtable_program"]["base_id"]
+table_id = st.secrets["airtable_program"]["table_id"]
 
 api = Api(api_key)
 records = api.table(base_id, table_id).all(view="Guests Feedback")
