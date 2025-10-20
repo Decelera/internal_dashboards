@@ -279,6 +279,11 @@ fig.update_layout(
     )
 )
 
+fig.add_annotation(x=1.25, y=3.8, text="Riesgo alto, recompensa alta", showarrow=False, font=dict(size=12))
+fig.add_annotation(x=3.5,  y=3.8, text="Riesgo bajo, recompensa alta", showarrow=False, font=dict(size=12))
+fig.add_annotation(x=1.25, y=1.4, text="Riesgo alto, recompensa baja", showarrow=False, font=dict(size=12))
+fig.add_annotation(x=3.5,  y=1.4, text="Riesgo bajo, recompensa baja", showarrow=False, font=dict(size=12))
+
 st.plotly_chart(fig)
 
 st.markdown("""
