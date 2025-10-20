@@ -4,7 +4,7 @@ import streamlit as st
 st.set_page_config(
     page_title="Mexico - Program - General",
     page_icon="../.streamlit/static/favicon.png",
-    layout="wide"
+    layout="centered"
 )
 
 # Hide default Streamlit navigation elements
