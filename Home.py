@@ -273,47 +273,33 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Header with logo and title
-st.markdown('<div class="header-container">', unsafe_allow_html=True)
-
-col_logo, col_title = st.columns([1, 2])
-
-with col_logo:
-    # Check if logo exists, if not show placeholder
-    logo_path = ".streamlit/static/decelera_logo.png"
-    if os.path.exists(logo_path):
-        st.image(logo_path, width=250)
-    else:
-        st.markdown("#### 📍 Logo")
-        st.caption("Upload to: `.streamlit/static/decelera_logo.png`")
-
-with col_title:
-    st.markdown('<div class="page-title">Dashboard Analytics</div>', unsafe_allow_html=True)
-
-st.markdown('</div>', unsafe_allow_html=True)
-
-# Info Section
-st.markdown("""
-<div class="info-section">
-    <h3 style="margin-top: 0; font-size: 1.5rem;">📊 What's Inside</h3>
-    <div class="info-grid">
-        <div class="info-card">
-            <h4>Investment General</h4>
-            <p>Overview of metrics that relate to the investment process.</p>
-        </div>
-        <div class="info-card">
-            <h4>Investment Per Startup</h4>
-            <p>Detailed breakdown of individual startup metrics from team, EMs, and other stakeholders.</p>
-        </div>
-        <div class="info-card">
-            <h4>Program General</h4>
-            <p>Overall program health metrics.</p>
-        </div>
-        <div class="info-card">
-            <h4>Program Agenda</h4>
-            <p>Deeper breakdown of program details and their respective analytical outcomes.</p>
-        </div>
-    </div>
+#========LOGO Y EL TÍTULO============
+st.markdown(body="""
+<style>
+.outer-container {
+    display: flex;
+    justify-content: center; /* Centra horizontalmente */
+    width: 100%; /* Ocupa todo el ancho disponible */
+}
+.container {
+    display: flex;
+    align-items: center;
+}
+.logo-img {
+    width: 80px;
+    height: 80px;
+    margin-right: 20px;
+}
+.title-text {
+    font-size: 2.5em; /* Tamaño del título */
+    font-weight: bold;
+}
+</style>
+<div class="outer-container">
+<div class="container">
+    <img class="logo-img" src="https://images.squarespace-cdn.com/content/v1/67811e8fe702fd5553c65249/c5500619-9712-4b9b-83ee-a697212735ae/Disen%CC%83o+sin+ti%CC%81tulo+%2840%29.png">
+    <h1 class="title-text">Decelera Program and<br>Investment Dashboards</h1>
+</div>
 </div>
 """, unsafe_allow_html=True)
 
