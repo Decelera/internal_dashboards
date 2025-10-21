@@ -1,116 +1,10 @@
-import streamlit as st
-
-# Page configuration
-st.set_page_config(
-    page_title="Menorca - Investment - Per Startup",
-    page_icon="../.streamlit/static/favicon.png",
-    layout="wide"
-)
-
-# Hide default Streamlit navigation elements
-st.markdown("""
-    <style>
-        [data-testid="stSidebarNav"] {
-            display: none;
-        }
-    </style>
-""", unsafe_allow_html=True)
-
-# Custom hierarchical navigation
-with st.sidebar:
-    # Home button at the top
-    if st.button("🏠 Home", key="home_btn", use_container_width=True):
-        st.switch_page("Home.py")
-    
-    st.markdown("---")
-    
-    # Mexico (Title 1)
-    st.markdown("#### Mexico")
-    
-    # 2025 (Title 2)
-    st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;**2025**")
-    
-    # Investment section (Title 4)
-    st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Investment**")
-    
-    # Investment pages (Title 5)
-    if st.button("General", key="mx_inv_general", use_container_width=True):
-        st.switch_page("pages/Mexico_Investment_General.py")
-    
-    if st.button("Per Startup", key="mx_inv_startup", use_container_width=True):
-        st.switch_page("pages/Mexico_Investment_Per_Startup.py")
-    
-    # Program section (Title 4)
-    st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Program**")
-    
-    # Program pages (Title 5)
-    if st.button("General", key="mx_prog_general", use_container_width=True):
-        st.switch_page("pages/Mexico_Program_General.py")
-    
-    if st.button("Agenda", key="mx_prog_agenda", use_container_width=True):
-        st.switch_page("pages/Mexico_Program_Agenda.py")
-    
-    st.markdown("---")
-    
-    # Menorca (Title 1)
-    st.markdown("#### Menorca")
-    
-    # 2025 (Title 2)
-    st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;**2025**")
-    
-    # Investment section (Title 4)
-    st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Investment**")
-    
-    # Investment pages (Title 5)
-    if st.button("General", key="mn_inv_general", use_container_width=True):
-        st.switch_page("pages/Menorca_Investment_General.py")
-    
-    if st.button("Per Startup", key="mn_inv_startup", use_container_width=True):
-        st.switch_page("pages/Menorca_Investment_Per_Startup.py")
-    
-    # Program section (Title 4)
-    st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Program**")
-    
-    # Program pages (Title 5)
-    if st.button("General", key="mn_prog_general", use_container_width=True):
-        st.switch_page("pages/Menorca_Program_General.py")
-    
-    if st.button("Agenda", key="mn_prog_agenda", use_container_width=True):
-        st.switch_page("pages/Menorca_Program_Agenda.py")
-
-
 import numpy as np
 from pyairtable import Api
 import pandas as pd
+import streamlit as st
 import plotly.graph_objects as go
 import statistics
 import math
-
-VIEW_NAME: str = "Menorca 2025"
-
-startup_founders = {
-    "Heuristik": ["Antxon Caballero", "Thomas Carson"],
-    "Metly": ["Anna Torrents", "Graeme Harris", "Lydia Taranilla"],
-    "Skor": ["Aditya Malhotra", "Carlos Moreno Martín"],
-    "Robopedics": ["Dionís Guzmán", "Iván Martínez", "Marc Serra"],
-    "Quix": ["Ignacio Barrea", "Santiago Gomez"],
-    "Calliope": ["Joaquin Diez", "Rafael Casuso"],
-    "Nidus Lab": ["Ana Lozano Portillo"],
-    "Vivra": ["Carlos Arboleya", "Carlos Saro"],
-    "Lowerton": ["Artem Loginov", "Dimitry Zaets", "Gorka Muñecas"],
-    "Chemometric Brain": ["Henrik Stamm Kristensen", "Jacob Kristensen Illán"],
-    "Stamp": ["Javier Castrillo"],
-    "SheerMe": ["Shakil Satar"],
-    "Zell": ["Alberto Garagnani", "Moritz Beck"],
-    "Anyformat": ["Alejandro Fernández Rodríguez", "Juan Huguet"],
-    "Valerdat": ["Eduard Aran Calonja"],
-    "Kestrix Ltd.": ["Lucy Lyons"],
-    "Gaddex": ["Alejandro Paloma", "Victor Vicente Sánchez"],
-    "Sheldonn": ["Francisco Alejandro Jurado Pérez", "Giorgio Fidei"],
-    "Vixiees": ["Alex Sanchez", "Nil Rodas"],
-    "IKI Health Group sL": ["Patricia Puiggros", "Silvia Fernandez Mulero"],
-    "ByteHide": ["Juan Alberto España Garcia"]
-}
 
 # Page configuration
 st.set_page_config(
@@ -219,9 +113,9 @@ table_em = api.table(base_id, table_id_em)
 table_team = api.table(base_id, table_id_team)
 table_olbi = api.table(base_id, table_id_olbi)
 
-records_team = table_team.all(view=VIEW_NAME)
-records_em = table_em.all(view=VIEW_NAME)
-records_olbi = table_olbi.all(view=VIEW_NAME)
+records_team = table_team.all(view="Menorca 2025")
+records_em = table_em.all(view="Menorca 2025")
+records_olbi = table_olbi.all(view="Menorca 2025")
 
 data_team = [record['fields'] for record in records_team]
 data_em = [record['fields'] for record in records_em]
@@ -240,14 +134,32 @@ df_team = df_team.map(fix_cell)
 df_em = df_em.map(fix_cell)
 df_olbi = df_olbi.map(fix_cell)
 
-#-------------------------------------------------Por ahora quito a Sean (quitar de general tambien)
-condition: bool = (df_em["EM_Name"].str.startswith("Sean"))
-df_em = df_em[~condition]
-#-----------------------------------------------------
-
 #Vamos con ellooooo
 
 #==================CONFIG==============================
+startup_founders = {
+    "Heuristik": ["Antxon Caballero", "Thomas Carson"],
+    "Metly": ["Anna Torrents", "Graeme Harris", "Lydia Taranilla"],
+    "Skor": ["Aditya Malhotra", "Carlos Moreno Martín"],
+    "Robopedics": ["Dionís Guzmán", "Iván Martínez", "Marc Serra"],
+    "Quix": ["Ignacio Barrea", "Santiago Gomez"],
+    "Calliope": ["Joaquin Diez", "Rafael Casuso"],
+    "Nidus Lab": ["Ana Lozano Portillo"],
+    "Vivra": ["Carlos Arboleya", "Carlos Saro"],
+    "Lowerton": ["Artem Loginov", "Dimitry Zaets", "Gorka Muñecas"],
+    "Chemometric Brain": ["Henrik Stamm Kristensen", "Jacob Kristensen Illán"],
+    "Stamp": ["Javier Castrillo"],
+    "SheerMe": ["Shakil Satar"],
+    "Zell": ["Alberto Garagnani", "Moritz Beck"],
+    "Anyformat": ["Alejandro Fernández Rodríguez", "Juan Huguet"],
+    "Valerdat": ["Eduard Aran Calonja"],
+    "Kestrix Ltd.": ["Lucy Lyons"],
+    "Gaddex": ["Alejandro Paloma", "Victor Vicente Sánchez"],
+    "Sheldonn": ["Francisco Alejandro Jurado Pérez", "Giorgio Fidei"],
+    "Vixiees": ["Alex Sanchez", "Nil Rodas"],
+    "IKI Health Group sL": ["Patricia Puiggros", "Silvia Fernandez Mulero"],
+    "ByteHide": ["Juan Alberto España Garcia"]
+}
 
 startups = list(startup_founders.keys())
 
@@ -269,9 +181,7 @@ fields = {
         "Paellas contest | Flexibility (Individual)",
         "Paellas contest | Self awareness and management of emotions (Individual)",
         "Openness",
-        "Purpose",
-        "Dilema 1", #Confidence
-        "Dilema 2" #Ambition
+        "Purpose"
     ]
 }
 
