@@ -298,7 +298,7 @@ st.markdown(body="""
 <div class="outer-container">
 <div class="container">
     <img class="logo-img" src="https://images.squarespace-cdn.com/content/v1/67811e8fe702fd5553c65249/c5500619-9712-4b9b-83ee-a697212735ae/Disen%CC%83o+sin+ti%CC%81tulo+%2840%29.png">
-    <h1 class="title-text">Decelera Program and<br>Investment Dashboards</h1>
+    <h1 class="title-text">Decelera<br>Dashboards</h1>
 </div>
 </div>
 """, unsafe_allow_html=True)
