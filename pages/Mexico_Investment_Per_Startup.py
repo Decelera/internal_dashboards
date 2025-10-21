@@ -551,7 +551,7 @@ with st.container(border=True):
         em_list = ["---"]
     experience_maker = st.selectbox("Experience Maker Feedback", em_list, index=0)
     df_em_startup_em = df_em_startup[df_em_startup["EM_Name"] == experience_maker]
-    st.markdown(body="----Risk----") if experience_maker != "---" else continue
+    st.markdown(body="----Risk----") if experience_maker != "---"
     for i, field in enumerate(fields_risk):
         if not df_em_startup_em[risk_reward_fields["risk_flags"][i]].empty:
             flag = df_em_startup_em[risk_reward_fields["risk_flags"][i]].item()
@@ -578,7 +578,7 @@ with st.container(border=True):
             <span style="color: black;">{explanation}</span></p>
             """, unsafe_allow_html=True)
 
-    st.markdown(body="----Reward----") if experience_maker != "---" else continue
+    st.markdown(body="----Reward----") if experience_maker != "---"
     for i, field in enumerate(fields_reward):
         if not df_em_startup_em[risk_reward_fields["reward_flags"][i]].empty:
             flag = df_em_startup_em[risk_reward_fields["reward_flags"][i]].item()
