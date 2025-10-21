@@ -354,7 +354,7 @@ with st.container(border=True):
     </div>
     """, unsafe_allow_html=True)
     
-    with st.container():
+    with st.container(border=True):
         st.markdown('<div class="grey-box-start"></div>', unsafe_allow_html=True)
         col_mn_inv, col_mn_prog = st.columns(2)
         
