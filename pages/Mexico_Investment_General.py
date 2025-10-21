@@ -109,6 +109,11 @@ def fix_cell(val):
 df_team = df_team.map(fix_cell)
 df_em = df_em.map(fix_cell)
 
+#----------------------------------Voy a quitar a Sean-------
+condition: bool = (df_em["EM_Name"].str.startswith("Sean"))
+df_em: DataFrame = df_em[~condition]
+#--------------------------------------------------------------
+
 #=============CONFIG===========================
 startup_founders = {
     "ROOK": ["Marco Benitez", "Jonas Ducker", "Daniel Martínez"],
