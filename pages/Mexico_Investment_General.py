@@ -279,11 +279,6 @@ fig.update_layout(
     )
 )
 
-fig.add_annotation(x=1.25, y=3.8, text="Riesgo alto, recompensa alta", showarrow=False, font=dict(size=12))
-fig.add_annotation(x=3.5,  y=3.8, text="Riesgo bajo, recompensa alta", showarrow=False, font=dict(size=12))
-fig.add_annotation(x=1.25, y=1.4, text="Riesgo alto, recompensa baja", showarrow=False, font=dict(size=12))
-fig.add_annotation(x=3.5,  y=1.4, text="Riesgo bajo, recompensa baja", showarrow=False, font=dict(size=12))
-
 st.plotly_chart(fig)
 
 st.markdown("""
@@ -307,7 +302,7 @@ for startup in df_em_ordered["Startup"].tolist():
             st.markdown(f"""
                 <div style="display: flex; align-items: left; margin-left: 0;">
                     <img src={logo_url} width="50">
-                    <h4 style="margin-left: 10px; font-weight: bold; color: #333;"><a href="https://mexico25-feedback-m2zfbuktrvtslpcmgfzcad.streamlit.app/General-overview?startup={startup}">{startup}</a></h4>
+                    <h4 style="margin-left: 10px; font-weight: bold; color: #333;"><a href="https://decelera-dashboards.streamlit.app/Mexico_Investment_Per_Startup?startup={startup}">{startup}</a></h4>
                 </div>
                 """,
                 unsafe_allow_html=True)
