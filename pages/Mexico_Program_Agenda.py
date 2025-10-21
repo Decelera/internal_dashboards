@@ -1,4 +1,8 @@
 import streamlit as st
+import streamlit as st
+import pandas as pd
+from pyairtable import Api
+import plotly.graph_objects as go
 
 # Page configuration
 st.set_page_config(
@@ -77,18 +81,8 @@ with st.sidebar:
     
     if st.button("Agenda", key="mn_prog_agenda", use_container_width=True):
         st.switch_page("pages/Menorca_Program_Agenda.py")
-# Breadcrumb navigation
-st.caption("Mexico → 2025 → Investment → Program → Agenda")
-
-# Page header
-st.title("Mexico - Program - Agenda")
 
 st.markdown("---")
-
-import streamlit as st
-import pandas as pd
-from pyairtable import Api
-import plotly.graph_objects as go
 
 api_key = st.secrets["airtable_program"]["api_key"]
 base_id = st.secrets["airtable_program"]["base_id"]
