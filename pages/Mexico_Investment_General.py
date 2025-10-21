@@ -111,7 +111,7 @@ df_em = df_em.map(fix_cell)
 
 #----------------------------------Voy a quitar a Sean-------
 condition: bool = (df_em["EM_Name"].str.startswith("Sean"))
-df_em: DataFrame = df_em[~condition]
+df_em = df_em[~condition]
 #--------------------------------------------------------------
 
 #=============CONFIG===========================
