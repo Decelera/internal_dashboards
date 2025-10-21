@@ -273,6 +273,19 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+#CSS para el container
+st.markdown(body="""
+<style>
+    div[data-testid="stVerticalBlock"] div[data-testid="stVerticalBlock"] div.st-emotion-cache-1jicfl2 {
+        background-color: #d8dbdb;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border: 2px solid black;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 #========LOGO Y EL TÍTULO============
 st.markdown(body="""
 <style>
@@ -304,8 +317,8 @@ st.markdown(body="""
 """, unsafe_allow_html=True)
 
 # Mexico Location Block
-with st.container():
-    st.markdown("""
+with st.container(border=True):
+    st.markdown(body="""
     <div class="location-header">
         🌎 Mexico
         <span class="year-badge">2025</span>
@@ -330,11 +343,11 @@ with st.container():
             if st.button("Agenda", key="mx_prog_agenda_link", use_container_width=True):
                 st.switch_page("pages/Mexico_Program_Agenda.py")
         
-        st.markdown('<div class="grey-box-end"></div>', unsafe_allow_html=True)
+        st.markdown(body='<div class="grey-box-end"></div>', unsafe_allow_html=True)
 
 # Menorca Location Block
-with st.container():
-    st.markdown("""
+with st.container(border=True):
+    st.markdown(body="""
     <div class="location-header">
         🏝️ Menorca
         <span class="year-badge">2025</span>
