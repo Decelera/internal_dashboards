@@ -134,6 +134,11 @@ df_team = df_team.map(fix_cell)
 df_em = df_em.map(fix_cell)
 df_olbi = df_olbi.map(fix_cell)
 
+#-------------------------------------------------Por ahora quito a Sean (quitar de general tambien)
+condition: bool = (df_em["EM_Name"].str.startswith("Sean"))
+df_em = df_em[~condition]
+#-----------------------------------------------------
+
 #Vamos con ellooooo
 
 #==================CONFIG==============================
