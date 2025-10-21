@@ -124,7 +124,7 @@ st.markdown("""
             background: white;
             font-size: 1.8rem;
             font-weight: 700;
-            color: #62CDEB;
+            color: black;
             padding: 1.5rem;
             margin-bottom: 0;
             border-radius: 10px 10px 0 0;
@@ -137,7 +137,7 @@ st.markdown("""
         
         .year-badge {
             display: inline-block;
-            background-color: #62CDEB;
+            background-color: #1FD0EF;
             color: white;
             padding: 0.3rem 1rem;
             border-radius: 20px;
@@ -214,9 +214,9 @@ st.markdown("""
         }
         
         .stButton button:hover {
-            background-color: #62CDEB !important;
+            background-color: #1FD0EF !important;
             color: white !important;
-            border-color: #62CDEB !important;
+            border-color: #1FD0EF !important;
             transform: translateY(-2px) !important;
             box-shadow: 0 4px 8px rgba(98, 205, 235, 0.3) !important;
         }
