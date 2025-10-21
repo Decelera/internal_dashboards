@@ -13,6 +13,24 @@ st.set_page_config(
     layout="wide"
 )
 
+#center metrics
+st.markdown(
+    """
+    <style>
+    /* Apunta al contenedor de la métrica */
+    div[data-testid="stMetric"] {
+        /* "align-self" le dice a este elemento que se centre 
+           dentro de su contenedor (la columna) */
+        align-self: center;
+        
+        /* (Opcional) Centra el texto *dentro* de la métrica */
+        text-align: center;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 # Hide default Streamlit navigation elements
 st.markdown("""
     <style>
@@ -442,8 +460,8 @@ with st.container(border=True):
 
         st.plotly_chart(fig)
 
-        cols_2 = st.columns(10)
-        with cols_2[4]:
+        cols_2 = st.columns(spec=3)
+        with cols_2[1]:
             st.metric(label="mean", value=round(fields_mean_risk, 2), delta=round(fields_mean_risk - fields_mean_risk_total, 2))
 
     with cols[1]:
@@ -478,8 +496,8 @@ with st.container(border=True):
 
         st.plotly_chart(fig)
 
-        cols_2 = st.columns(10)
-        with cols_2[4]:
+        cols_2 = st.columns(3)
+        with cols_2[1]:
             st.metric(label="mean", value=round(fields_mean_reward, 2), delta=round(fields_mean_reward - fields_mean_reward_total, 2))
 
     with cols[2]:
@@ -512,8 +530,8 @@ with st.container(border=True):
         ))
         st.plotly_chart(fig)
 
-        cols_2 = st.columns(10)
-        with cols_2[4]:
+        cols_2 = st.columns(3)
+        with cols_2[1]:
             st.metric(label="mean", value=round(fields_mean_workstations, 2), delta=round(fields_mean_workstations - fields_mean_workstations_total, 2))
     
     if not df_em_startup["EM_Name"].empty:
