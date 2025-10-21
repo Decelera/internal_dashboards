@@ -128,7 +128,7 @@ st.markdown("""
             padding: 1.5rem;
             margin-bottom: 0;
             border-radius: 10px 10px 0 0;
-            border: 1px solid #e8e9eb;
+            border: none;
             border-bottom: none;
             display: flex;
             align-items: center;
