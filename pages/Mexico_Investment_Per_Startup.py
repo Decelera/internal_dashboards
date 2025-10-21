@@ -354,8 +354,7 @@ logo_data = row.get("original logo")
 if isinstance(logo_data, list) and len(logo_data) > 0 and 'url' in logo_data[0]:
     logo_url = logo_data[0]['url']
     st.image(logo_url, width=250)
-#--------------------------Parte de business metrics--------------------hacer ahoraaaaaaaaa
-
+#--------------------------Parte de business metrics---------------------------------
 fields_risk = risk_reward_fields["risk_scores"]
 fields_reward = risk_reward_fields["reward_scores"]
 fields_workstations = ["Workstations | Challenge clearness (Bussiness)", "Workstations | Challenge importance (Bussiness)"]
@@ -397,15 +396,12 @@ means_risk.append(means_risk[0])
 means_risk_total.append(means_risk_total[0])
 means_reward.append(means_reward[0])
 means_reward_total.append(means_reward_total[0])
-means_workstations.append(means_workstations[0])
-means_workstations_total.append(means_workstations_total[0])
 
 labels_risk = labels["risk"]
 labels_risk.append(labels_risk[0])
 labels_reward = labels["reward"]
 labels_reward.append(labels_reward[0])
 labels_workstations = ["Challenge clearness", "Challenge importance"]
-labels_workstations.append(labels_workstations[0])
 
 with st.container(border=True):
     st.markdown("""
@@ -489,34 +485,33 @@ with st.container(border=True):
     with cols[2]:
         fig = go.Figure()
 
-        fig.add_trace(go.Scatterpolar(
-            name="All",
-            r=means_workstations_total,
-            theta=labels_workstations,
-            line=dict(color='rgb(255, 185, 80)')
-        ))
-
-        fig.add_trace(go.Scatterpolar(
-            name="Startup",
-            r=means_workstations,
-            theta=labels_workstations,
-            fill='toself',
-            fillcolor='rgba(47, 208, 239, 0.4)',
-            line=dict(color='rgb(47, 208, 239)')
-        ))
-
-        fig.update_layout(
-                polar=dict(
-                    radialaxis=dict(
-                    visible=True,
-                    range=[0, 4]
-                    )),
-                height=375,
-                width=375,
-                title='Workstations metrics'
+        fig.add_trace(trace=go.Bar(
+            x=labels_workstations,
+            y=means_workstations,
+            name='Startup',
+            marker=dict(
+                color='rgba(47, 208, 239, 0.6)',
+                line=dict(
+                    color='#2D3852',
+                    width=2
+                )
             )
+        ))
 
+        fig.add_trace(trace=go.Bar(
+            x=labels_workstations,
+            y=means_workstations_total,
+            name='All',
+            marker=dict(
+                color='rgba(0, 0, 0, 0)',
+                line=dict(
+                    color='#FFB950',
+                    width=2
+                )
+            )
+        ))
         st.plotly_chart(fig)
+        
         cols_2 = st.columns(10)
         with cols_2[4]:
             st.metric(label="mean", value=round(fields_mean_workstations, 2), delta=round(fields_mean_workstations - fields_mean_workstations_total, 2))
