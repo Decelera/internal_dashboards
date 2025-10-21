@@ -119,7 +119,7 @@ startup_founders = {
     "Calliope": ["Joaquin Diez", "Rafael Casuso"],
     "Nidus Lab": ["Ana Lozano Portillo"],
     "Vivra": ["Carlos Arboleya", "Carlos Saro"],
-    "Lowerton": ["Artem Loginov", "Dimitry Zaets", "Gorka Muñecas"],
+    "Lowerton ": ["Artem Loginov", "Dimitry Zaets", "Gorka Muñecas"],
     "Chemometric Brain": ["Henrik Stamm Kristensen", "Jacob Kristensen Illán"],
     "Stamp": ["Javier Castrillo"],
     "SheerMe": ["Shakil Satar"],
