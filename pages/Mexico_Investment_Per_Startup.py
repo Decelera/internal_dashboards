@@ -492,7 +492,7 @@ with st.container(border=True):
             marker=dict(
                 color='rgba(47, 208, 239, 0.6)',
                 line=dict(
-                    color='#2D3852',
+                    color='rgb(47, 208, 239)',
                     width=2
                 )
             )
@@ -503,15 +503,15 @@ with st.container(border=True):
             y=means_workstations_total,
             name='All',
             marker=dict(
-                color='rgba(0, 0, 0, 0)',
+                color='rgba(255, 185, 80, 0.6)',
                 line=dict(
-                    color='#FFB950',
+                    color='rgb(255, 185, 80)',
                     width=2
                 )
             )
         ))
         st.plotly_chart(fig)
-        
+
         cols_2 = st.columns(10)
         with cols_2[4]:
             st.metric(label="mean", value=round(fields_mean_workstations, 2), delta=round(fields_mean_workstations - fields_mean_workstations_total, 2))
