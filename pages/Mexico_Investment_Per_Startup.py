@@ -528,6 +528,12 @@ with st.container(border=True):
                 )
             )
         ))
+
+        fig.update_layout(
+            title='Workstations',
+            width=375,
+            height=375
+        )
         st.plotly_chart(fig)
 
         cols_2 = st.columns(3)
@@ -643,8 +649,8 @@ with st.container(border=True):
     st.markdown(f"<h5>Team DD for {startup}</h5>", unsafe_allow_html=True)
     st.plotly_chart(fig, use_container_width=True)
 
-    cols = st.columns(20)
-    with cols[9]:
+    cols = st.columns(3)
+    with cols[1]:
         st.metric(label="Team mean", value=round(fields_mean_team, 2), delta=round(fields_mean_team - fields_mean_team_total, 2))
 
 #=========================Parte de Individual=================================
