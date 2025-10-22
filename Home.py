@@ -20,7 +20,7 @@ st.markdown("""
 # Custom hierarchical navigation
 with st.sidebar:
     # Home button at the top
-    if st.button("Home", key="home_btn", use_container_width=True):
+    if st.button("🏠 Home", key="home_btn", use_container_width=True):
         st.switch_page("Home.py")
     
     st.markdown("---")
@@ -28,27 +28,27 @@ with st.sidebar:
     # Mexico (Title 1)
     st.markdown("#### Mexico")
     
-    # 2025 (Title 2)
-    st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;**2025**")
+    # Year selection in sidebar
+    st.markdown(f"&nbsp;&nbsp;&nbsp;&nbsp;**{st.session_state.selected_year}**")
     
     # Investment section (Title 4)
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Investment**")
     
     # Investment pages (Title 5)
-    if st.button("General", key="mx_inv_general", use_container_width=True):
+    if st.button("Risk-Reward", key="mx_inv_general", use_container_width=True):
         st.switch_page("pages/Mexico_Investment_General.py")
     
-    if st.button("Per Startup", key="mx_inv_startup", use_container_width=True):
+    if st.button("Feedback details", key="mx_inv_startup", use_container_width=True):
         st.switch_page("pages/Mexico_Investment_Per_Startup.py")
     
     # Program section (Title 4)
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Program**")
     
     # Program pages (Title 5)
-    if st.button("General", key="mx_prog_general", use_container_width=True):
+    if st.button("Guests feedback", key="mx_prog_general", use_container_width=True):
         st.switch_page("pages/Mexico_Program_General.py")
     
-    if st.button("Agenda", key="mx_prog_agenda", use_container_width=True):
+    if st.button("Breathe-Focus-Grow", key="mx_prog_agenda", use_container_width=True):
         st.switch_page("pages/Mexico_Program_Agenda.py")
     
     st.markdown("---")
@@ -56,27 +56,27 @@ with st.sidebar:
     # Menorca (Title 1)
     st.markdown("#### Menorca")
     
-    # 2025 (Title 2)
-    st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;**2025**")
+    # Year selection in sidebar
+    st.markdown(f"&nbsp;&nbsp;&nbsp;&nbsp;**{st.session_state.selected_year}**")
     
     # Investment section (Title 4)
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Investment**")
     
     # Investment pages (Title 5)
-    if st.button("General", key="mn_inv_general", use_container_width=True):
+    if st.button("Risk-Reward", key="mn_inv_general", use_container_width=True):
         st.switch_page("pages/Menorca_Investment_General.py")
     
-    if st.button("Per Startup", key="mn_inv_startup", use_container_width=True):
+    if st.button("Feedback details", key="mn_inv_startup", use_container_width=True):
         st.switch_page("pages/Menorca_Investment_Per_Startup.py")
     
     # Program section (Title 4)
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Program**")
     
     # Program pages (Title 5)
-    if st.button("General", key="mn_prog_general", use_container_width=True):
+    if st.button("Guests feedback", key="mn_prog_general", use_container_width=True):
         st.switch_page("pages/Menorca_Program_General.py")
     
-    if st.button("Agenda", key="mn_prog_agenda", use_container_width=True):
+    if st.button("Breathe-Focus-Grow", key="mn_prog_agenda", use_container_width=True):
         st.switch_page("pages/Menorca_Program_Agenda.py")
 
 # Custom CSS with Decelera colors
@@ -318,10 +318,10 @@ st.markdown(body="""
 
 # Mexico Location Block
 with st.container(border=True):
-    st.markdown(body="""
+    st.markdown(body=f"""
     <div class="location-header">
         🌎 Mexico
-        <span class="year-badge">2025</span>
+        <span class="year-badge">{st.session_state.selected_year}</span>
     </div>
     """, unsafe_allow_html=True)
     
@@ -332,25 +332,25 @@ with st.container(border=True):
         with col_mx_inv:
             st.markdown('<div class="section-title">Investment</div>', unsafe_allow_html=True)
             if st.button("General", key="mx_inv_gen_link", use_container_width=True):
-                st.switch_page("pages/Mexico_Investment_General.py")
+                st.switch_page(f"pages/Mexico_Investment_General_{st.session_state.selected_year}.py")
             if st.button("Per Startup", key="mx_inv_startup_link", use_container_width=True):
-                st.switch_page("pages/Mexico_Investment_Per_Startup.py")
+                st.switch_page(f"pages/Mexico_Investment_Per_Startup_{st.session_state.selected_year}.py")
         
         with col_mx_prog:
             st.markdown('<div class="section-title">Program</div>', unsafe_allow_html=True)
             if st.button("General", key="mx_prog_gen_link", use_container_width=True):
-                st.switch_page("pages/Mexico_Program_General.py")
+                st.switch_page(f"pages/Mexico_Program_General_{st.session_state.selected_year}.py")
             if st.button("Agenda", key="mx_prog_agenda_link", use_container_width=True):
-                st.switch_page("pages/Mexico_Program_Agenda.py")
+                st.switch_page(f"pages/Mexico_Program_Agenda_{st.session_state.selected_year}.py")
         
         st.markdown(body='<div class="grey-box-end"></div>', unsafe_allow_html=True)
 
 # Menorca Location Block
 with st.container(border=True):
-    st.markdown(body="""
+    st.markdown(body=f"""
     <div class="location-header">
         🏝️ Menorca
-        <span class="year-badge">2025</span>
+        <span class="year-badge">{st.session_state.selected_year}</span>
     </div>
     """, unsafe_allow_html=True)
     
@@ -361,23 +361,23 @@ with st.container(border=True):
         with col_mn_inv:
             st.markdown('<div class="section-title">Investment</div>', unsafe_allow_html=True)
             if st.button("General", key="mn_inv_gen_link", use_container_width=True):
-                st.switch_page("pages/Menorca_Investment_General.py")
+                st.switch_page(f"pages/Menorca_Investment_General_{st.session_state.selected_year}.py")
             if st.button("Per Startup", key="mn_inv_startup_link", use_container_width=True):
-                st.switch_page("pages/Menorca_Investment_Per_Startup.py")
+                st.switch_page(f"pages/Menorca_Investment_Per_Startup_{st.session_state.selected_year}.py")
         
         with col_mn_prog:
             st.markdown('<div class="section-title">Program</div>', unsafe_allow_html=True)
             if st.button("General", key="mn_prog_gen_link", use_container_width=True):
-                st.switch_page("pages/Menorca_Program_General.py")
+                st.switch_page(f"pages/Menorca_Program_General_{st.session_state.selected_year}.py")
             if st.button("Agenda", key="mn_prog_agenda_link", use_container_width=True):
-                st.switch_page("pages/Menorca_Program_Agenda.py")
+                st.switch_page(f"pages/Menorca_Program_Agenda_{st.session_state.selected_year}.py")
         
         st.markdown('<div class="grey-box-end"></div>', unsafe_allow_html=True)
 
 # Footer
-st.markdown("""
+st.markdown(f"""
 <div class="footer">
-    <strong>Decelera</strong> | Multi-Location Analytics Platform | 2025
+    <strong>Decelera</strong> | Multi-Location Analytics Platform | {st.session_state.selected_year}
 </div>
 """, unsafe_allow_html=True)
 
