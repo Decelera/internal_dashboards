@@ -206,19 +206,6 @@ def barras(values, labels, title) -> None:
 def metric(value, label) -> None:
     st.metric(value=value, label=label)
 
-# Apply normalization manually to avoid type issues
-fields_to_normalize: list[str] = [
-    "Confidence of growth",
-    "Connections with EM's",
-    "Connections with VC's",
-    "Connections with other Startups",
-    "Investment ready",
-    "Satisfaction"
-]
-
-df[fields_to_normalize] = df[fields_to_normalize].apply(lambda x: (x.astype(float) / 10 * 3) + 1)
-
-
 #===================================Vamos con Founders===================================
 
 #------------------------------Saquemos las medias-------------------------------------
