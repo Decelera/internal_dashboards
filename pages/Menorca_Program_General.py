@@ -88,7 +88,7 @@ base_id = st.secrets["airtable_program"]["base_id"]
 table_id = st.secrets["airtable_program"]["table_id"]
 
 api = Api(api_key)
-records = api.table(base_id, table_id).all(view="Guests Feedback")
+records = api.table(base_id, table_id).all(view="Menorca 2025")
 data = [record["fields"] for record in records]
 df = pd.DataFrame(data)
 
