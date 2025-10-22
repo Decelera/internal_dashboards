@@ -156,7 +156,10 @@ fields: dict = {
             "Founder Arena - Rui Fernandez",
             "Founder arena - Mesa de VC's",
             "Founder Arena - Jose V. Fernandez",
-            "Focus | 1:1's matching (Day 3)"
+            "Focus | 1:1's matching (Day 3)",
+            "Cenote",
+            "Focus | Paellas contest",
+            "Kiin Beh"
         ]
     },
     "Grow": {
@@ -174,6 +177,24 @@ fields: dict = {
             "Grow | Demo day"
         ]
     }
+}
+
+general_fields: dict = {
+    "Breathe": [
+        "Breathe | Satisfaction",
+        "Breathe | Wellbeing",
+        "Breathe | Organization"
+    ],
+    "Focus": [
+        "Focus | Satisfaction",
+        "Focus | Wellbeing",
+        "Focus | Organization"
+    ],
+    "Grow": [
+        "Grow | Satisfaction",
+        "Grow | Wellbeing",
+        "Grow | Organization"
+    ]
 }
 
 labels: dict = {
@@ -229,7 +250,10 @@ labels: dict = {
             "Founder Arena Rui Fernandez",
             "Founder arena Mesa de VC's",
             "Founder Arena Jose V. Fernandez",
-            "1:1's matching"
+            "1:1's matching",
+            "Cenote",
+            "Cooking Contest",
+            "Kiin Beh"
         ]
     },
     "Grow": {
@@ -248,6 +272,12 @@ labels: dict = {
         ]
     }
 }
+
+general_labels: list = [
+    "Overall experience",
+    "Wellbeing dynamics",
+    "Information and coordination"
+]
 
 phases = ["Breathe", "Focus", "Grow"]
 categories_to_merge = ["Talks", "Well-being", "Networking"]
@@ -308,11 +338,23 @@ def barras(values, labels, title) -> None:
 def metric(value, label) -> None:
     st.metric(value=value, label=label)
 
+#medias de satisfaction, wellbeing y organization
+
+general_means_per_phase: dict[str, list[float]] = {}
+for phase in general_fields.keys():
+    general_means_per_phase[phase] = []
+    for field in general_fields[phase]:
+        mean: float = float(df[field].dropna().astype(float).mean())
+        general_means_per_phase[phase].append(mean)
+
+general_means: list[float] = [0.0, 0.0, 0.0]
+for i in range(3):
+    for phase in general_means_per_phase.keys():
+        general_means[i] += general_means_per_phase[phase][i]
+
+general_means: list[float] = [x / 3 for x in general_means]
+
 #===================================Vamos con Breathe===================================
-
-cols = st.columns(4)
-
-
 
 #------------------------------Saquemos las medias-------------------------------------
 means_breathe: dict = {}
@@ -366,6 +408,11 @@ st.markdown(body="Here you will find the average score for each event in the pro
 
 st.markdown(body="<h1 style='text-align: center;'>General</h1>", unsafe_allow_html=True)
 
+cols = st.columns(3)
+for i in range(3):
+    with cols[i]:
+        st.metric(value=general_means[i], label=general_labels[i])
+
 for category in fields["General"].keys():
     ordered_pairs_general = sorted(zip(means_general[category], labels_general[category]), reverse=True)
     values_graph_general = [value for value, label in ordered_pairs_general]
@@ -375,6 +422,12 @@ for category in fields["General"].keys():
 st.markdown(body="---")
 
 st.markdown(body="<h1 style='text-align: center;'>Breathe</h1>", unsafe_allow_html=True)
+
+#satisfaction, wellbeing y organization
+cols = st.columns(3)
+for i in range(3):
+    with cols[i]:
+        st.metric(value=general_means_per_phase["Breathe"][i], label=general_labels[i], delta=(general_means_per_phase["Breathe"][i] - general_means[0]))
 
 for category in fields["Breathe"].keys():
     ordered_pairs_breathe = sorted(zip(means_breathe[category], labels_breathe[category]), reverse=True)
@@ -386,6 +439,11 @@ st.markdown(body="---")
 
 st.markdown(body="<h1 style='text-align: center;'>Focus</h1>", unsafe_allow_html=True)
 
+cols = st.columns(3)
+for i in range(3):
+    with cols[i]:
+        st.metric(value=general_means_per_phase["Focus"][i], label=general_labels[i], delta=(general_means_per_phase["Focus"][i] - general_means[1]))
+
 for category in fields["Focus"].keys():
     ordered_pairs_focus = sorted(zip(means_focus[category], labels_focus[category]), reverse=True)
     values_graph_focus = [value for value, label in ordered_pairs_focus]
@@ -395,6 +453,11 @@ for category in fields["Focus"].keys():
 st.markdown(body="---")
 
 st.markdown(body="<h1 style='text-align: center;'>Grow</h1>", unsafe_allow_html=True)
+
+cols = st.columns(3)
+for i in range(3):
+    with cols[i]:
+        st.metric(value=general_means_per_phase["Grow"][i], label=general_labels[i], delta=(general_means_per_phase["Grow"][i] - general_means[2]))
 
 for category in fields["Grow"].keys():
     ordered_pairs_grow = sorted(zip(means_grow[category], labels_grow[category]), reverse=True)
