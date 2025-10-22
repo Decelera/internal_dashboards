@@ -227,8 +227,7 @@ fields_to_normalize: list[str] = [
     "Connections with EM's",
     "Connections with VC's",
     "Connections with other Startups",
-    "Investment ready",
-    "Satisfaction"
+    "Investment ready"
 ]
 
 df[fields_to_normalize] = df[fields_to_normalize].apply(lambda x: (x.astype(float) / 10 * 3) + 1)
