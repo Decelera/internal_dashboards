@@ -13,6 +13,34 @@ st.set_page_config(
     layout="wide"
 )
 
+#center metrics
+st.markdown(
+    """
+    <style>
+    /* 1. Centra el BLOQUE entero de la métrica en su columna */
+    div[data-testid="stMetric"] {
+        align-self: center;
+    }
+
+    /* 2. Centra el TEXTO de la etiqueta */
+    div[data-testid="stMetricLabel"] {
+        text-align: center;
+    }
+    
+    /* 3. Centra el VALOR (que es un contenedor flex) */
+    div[data-testid="stMetricValue"] {
+        justify-content: center;
+    }
+    
+    /* 4. (Opcional) Centra el DELTA (también es flex) */
+    div[data-testid="stMetricDelta"] {
+        justify-content: center;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 # Hide default Streamlit navigation elements
 st.markdown("""
     <style>
