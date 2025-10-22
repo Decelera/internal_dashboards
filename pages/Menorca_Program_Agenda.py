@@ -1,4 +1,7 @@
 import streamlit as st
+import pandas as pd
+from pyairtable import Api
+import plotly.graph_objects as go
 
 # Page configuration
 st.set_page_config(
@@ -34,20 +37,20 @@ with st.sidebar:
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Investment**")
     
     # Investment pages (Title 5)
-    if st.button("General", key="mx_inv_general", use_container_width=True):
+    if st.button("Risk-Reward", key="mx_inv_general", use_container_width=True):
         st.switch_page("pages/Mexico_Investment_General.py")
     
-    if st.button("Per Startup", key="mx_inv_startup", use_container_width=True):
+    if st.button("Feedback details", key="mx_inv_startup", use_container_width=True):
         st.switch_page("pages/Mexico_Investment_Per_Startup.py")
     
     # Program section (Title 4)
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Program**")
     
     # Program pages (Title 5)
-    if st.button("General", key="mx_prog_general", use_container_width=True):
+    if st.button("Guests feedback", key="mx_prog_general", use_container_width=True):
         st.switch_page("pages/Mexico_Program_General.py")
     
-    if st.button("Agenda", key="mx_prog_agenda", use_container_width=True):
+    if st.button("Breathe-Focus-Grow", key="mx_prog_agenda", use_container_width=True):
         st.switch_page("pages/Mexico_Program_Agenda.py")
     
     st.markdown("---")
@@ -62,33 +65,21 @@ with st.sidebar:
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Investment**")
     
     # Investment pages (Title 5)
-    if st.button("General", key="mn_inv_general", use_container_width=True):
+    if st.button("Risk-Reward", key="mn_inv_general", use_container_width=True):
         st.switch_page("pages/Menorca_Investment_General.py")
     
-    if st.button("Per Startup", key="mn_inv_startup", use_container_width=True):
+    if st.button("Feedback details", key="mn_inv_startup", use_container_width=True):
         st.switch_page("pages/Menorca_Investment_Per_Startup.py")
     
     # Program section (Title 4)
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Program**")
     
     # Program pages (Title 5)
-    if st.button("General", key="mn_prog_general", use_container_width=True):
+    if st.button("Guests feedback", key="mn_prog_general", use_container_width=True):
         st.switch_page("pages/Menorca_Program_General.py")
     
-    if st.button("Agenda", key="mn_prog_agenda", use_container_width=True):
+    if st.button("Breathe-Focus-Grow", key="mn_prog_agenda", use_container_width=True):
         st.switch_page("pages/Menorca_Program_Agenda.py")
-# Breadcrumb navigation
-st.caption("Menorca → 2025 → Investment → Program → Agenda")
-
-# Page header
-st.title("Menorca - Program - Agenda")
-
-st.markdown("---")
-
-import streamlit as st
-import pandas as pd
-from pyairtable import Api
-import plotly.graph_objects as go
 
 api_key = st.secrets["airtable_program"]["api_key"]
 base_id = st.secrets["airtable_program"]["base_id"]
