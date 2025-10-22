@@ -60,56 +60,56 @@ with st.sidebar:
     # Mexico (Title 1)
     st.markdown("#### Mexico")
     
-    # 2025 (Title 2)
-    st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;**2025**")
+    # Year selection in sidebar
+    st.markdown(f"&nbsp;&nbsp;&nbsp;&nbsp;**{st.session_state.selected_year}**")
     
     # Investment section (Title 4)
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Investment**")
     
     # Investment pages (Title 5)
     if st.button("Risk-Reward", key="mx_inv_general", use_container_width=True):
-        st.switch_page("pages/Mexico_Investment_General.py")
+        st.switch_page(f"pages/Mexico_Risk_Reward_{st.session_state.selected_year}.py")
     
     if st.button("Feedback details", key="mx_inv_startup", use_container_width=True):
-        st.switch_page("pages/Mexico_Investment_Per_Startup.py")
+        st.switch_page(f"pages/Mexico_Feedback_Details_{st.session_state.selected_year}.py")
     
     # Program section (Title 4)
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Program**")
     
     # Program pages (Title 5)
     if st.button("Guests feedback", key="mx_prog_general", use_container_width=True):
-        st.switch_page("pages/Mexico_Program_General.py")
+        st.switch_page(f"pages/Mexico_Guests_Feedback_{st.session_state.selected_year}.py")
     
     if st.button("Breathe-Focus-Grow", key="mx_prog_agenda", use_container_width=True):
-        st.switch_page("pages/Mexico_Program_Agenda.py")
+        st.switch_page(f"pages/Mexico_Breathe-Focus-Grow_{st.session_state.selected_year}.py")
     
     st.markdown("---")
     
     # Menorca (Title 1)
     st.markdown("#### Menorca")
     
-    # 2025 (Title 2)
-    st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;**2025**")
+    # Year selection in sidebar
+    st.markdown(f"&nbsp;&nbsp;&nbsp;&nbsp;**{st.session_state.selected_year}**")
     
     # Investment section (Title 4)
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Investment**")
     
     # Investment pages (Title 5)
     if st.button("Risk-Reward", key="mn_inv_general", use_container_width=True):
-        st.switch_page("pages/Menorca_Investment_General.py")
+        st.switch_page(f"pages/Menorca_Risk_Reward_{st.session_state.selected_year}.py")
     
     if st.button("Feedback details", key="mn_inv_startup", use_container_width=True):
-        st.switch_page("pages/Menorca_Investment_Per_Startup.py")
+        st.switch_page(f"pages/Menorca_Feedback_Details_{st.session_state.selected_year}.py")
     
     # Program section (Title 4)
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Program**")
     
     # Program pages (Title 5)
     if st.button("Guests feedback", key="mn_prog_general", use_container_width=True):
-        st.switch_page("pages/Menorca_Program_General.py")
+        st.switch_page(f"pages/Menorca_Guests_Feedback_{st.session_state.selected_year}.py")
     
     if st.button("Breathe-Focus-Grow", key="mn_prog_agenda", use_container_width=True):
-        st.switch_page("pages/Menorca_Program_Agenda.py")
+        st.switch_page(f"pages/Menorca_Breathe-Focus-Grow_{st.session_state.selected_year}.py")
 
 api_key = st.secrets["airtable_program"]["api_key"]
 base_id = st.secrets["airtable_program"]["base_id"]
