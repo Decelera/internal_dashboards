@@ -12,6 +12,35 @@ st.set_page_config(
     layout="wide"
 )
 
+st.markdown(body="""
+<style>
+.outer-container {
+    display: flex;
+    justify-content: center; /* Centra horizontalmente */
+    width: 100%; /* Ocupa todo el ancho disponible */
+}
+.container {
+    display: flex;
+    align-items: center;
+}
+.logo-img {
+    width: 80px;
+    height: 80px;
+    margin-right: 20px;
+}
+.title-text {
+    font-size: 2.5em; /* Tamaño del título */
+    font-weight: bold;
+}
+</style>
+<div class="outer-container">
+<div class="container">
+    <img class="logo-img" src="https://images.squarespace-cdn.com/content/v1/67811e8fe702fd5553c65249/c5500619-9712-4b9b-83ee-a697212735ae/Disen%CC%83o+sin+ti%CC%81tulo+%2840%29.png">
+    <h1 class="title-text">Decelera Program<br>Guests</h1>
+</div>
+</div>
+""", unsafe_allow_html=True)
+
 # Hide default Streamlit navigation elements
 st.markdown("""
     <style>
