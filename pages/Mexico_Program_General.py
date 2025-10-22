@@ -224,10 +224,11 @@ df[fields_to_normalize] = df[fields_to_normalize].apply(lambda x: (x.astype(floa
 #===================================Vamos con Founders===================================
 
 #------------------------------Saquemos las medias-------------------------------------
+df_startup = df["Startup" in df["Guest_type"]]
 means_founder: list = []
 labels_startup = labels["Founders"]
 for field in fields["Founders"]:
-    mean_founder: float = float(df[field].dropna().astype(float).mean())
+    mean_founder: float = float(df_startup[field].dropna().astype(float).mean())
     means_founder.append(mean_founder)
 
 #==================================Vamos con EMs==================================
