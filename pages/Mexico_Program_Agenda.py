@@ -344,7 +344,7 @@ general_means_per_phase: dict[str, list[float]] = {}
 for phase in general_fields.keys():
     general_means_per_phase[phase] = []
     for field in general_fields[phase]:
-        mean: float = float(df[field].dropna().astype(float).mean())
+        mean: float = round(float(df[field].dropna().astype(float).mean()), 2)
         general_means_per_phase[phase].append(mean)
 
 general_means: list[float] = [0.0, 0.0, 0.0]
