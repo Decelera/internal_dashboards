@@ -12,6 +12,34 @@ st.set_page_config(
     layout="wide"
 )
 
+#center metrics
+st.markdown(
+    """
+    <style>
+    /* 1. Centra el BLOQUE entero de la métrica en su columna */
+    div[data-testid="stMetric"] {
+        align-self: center;
+    }
+
+    /* 2. Centra el TEXTO de la etiqueta */
+    div[data-testid="stMetricLabel"] {
+        text-align: center;
+    }
+    
+    /* 3. Centra el VALOR (que es un contenedor flex) */
+    div[data-testid="stMetricValue"] {
+        justify-content: center;
+    }
+    
+    /* 4. (Opcional) Centra el DELTA (también es flex) */
+    div[data-testid="stMetricDelta"] {
+        justify-content: center;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 # Hide default Streamlit navigation elements
 st.markdown("""
     <style>
@@ -206,18 +234,35 @@ def barras(values, labels, title) -> None:
 def metric(value, label) -> None:
     st.metric(value=value, label=label)
 
+def calculate_nps(df, field):
+    scores = df[field].dropna().astype(float).tolist()
+    n_prom = 0
+    n_detr = 0
+    for score in scores:
+        if score == 9 or score == 10:
+            n_prom += 1
+        elif 0 <= score <= 6:
+            n_detr += 1
+        else:
+            pass
+    return (n_prom - n_detr) / len(scores) * 100
+
 #===================================Vamos con Founders===================================
 
 #------------------------------Saquemos las medias-------------------------------------
+df_startup = df[df["Guest_type"].apply(lambda x: "Startup" in x)]
+
 means_founder: list = []
 labels_startup = labels["Founders"]
 for field in fields["Founders"]:
-    mean_founder: float = float(df[field].dropna().astype(float).mean())
+    mean_founder: float = float(df_startup[field].dropna().astype(float).mean())
     means_founder.append(mean_founder)
 
 #==================================Vamos con EMs==================================
 
 #------------------------------Saquemos las medias-------------------------------------
+df_em = df[df["Guest_type"].apply(lambda x: "EM" in x)]
+
 means_em: list = []
 labels_em = labels["EMs"]
 for field in fields["EMs"]:
@@ -227,15 +272,19 @@ for field in fields["EMs"]:
 #=================================Vamos con VCs==================================
 
 #------------------------------Saquemos las medias-------------------------------------
+df_vc = df[df["Guest_type"].apply(lambda x: "VC" in x)]
+
 means_vc: list = []
 labels_vc = labels["VCs"]
 for field in fields["VCs"]:
-    mean_vc: float = float(df[field].dropna().astype(float).mean())
+    mean_vc: float = float(df_vc[field].dropna().astype(float).mean())
     means_vc.append(mean_vc)
 #--------------------------------------------------------------------------------------------
 st.markdown(body="Here you will find the feedback submitted by founders, experience makers and VC's about the program")
 
 st.markdown(body="<h1 style='text-align: center;'>Founders</h1>", unsafe_allow_html=True)
+
+
 
 ordered_pairs_founder = sorted(zip(means_founder, labels["Founders"]), reverse=True)
 values_graph_founder = [value for value, label in ordered_pairs_founder]
