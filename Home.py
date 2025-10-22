@@ -40,20 +40,20 @@ with st.sidebar:
     
     # Investment pages (Title 5)
     if st.button("Risk-Reward", key="mx_inv_general", use_container_width=True):
-        st.switch_page("pages/Mexico_Investment_General.py")
+        st.switch_page(f"pages/Mexico_Investment_General_{st.session_state.selected_year}.py")
     
     if st.button("Feedback details", key="mx_inv_startup", use_container_width=True):
-        st.switch_page("pages/Mexico_Investment_Per_Startup.py")
+        st.switch_page(f"pages/Mexico_Investment_Per_Startup_{st.session_state.selected_year}.py")
     
     # Program section (Title 4)
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Program**")
     
     # Program pages (Title 5)
     if st.button("Guests feedback", key="mx_prog_general", use_container_width=True):
-        st.switch_page("pages/Mexico_Program_General.py")
+        st.switch_page(f"pages/Mexico_Program_General_{st.session_state.selected_year}.py")
     
     if st.button("Breathe-Focus-Grow", key="mx_prog_agenda", use_container_width=True):
-        st.switch_page("pages/Mexico_Program_Agenda.py")
+        st.switch_page(f"pages/Mexico_Program_Agenda_{st.session_state.selected_year}.py")
     
     st.markdown("---")
     
@@ -68,20 +68,20 @@ with st.sidebar:
     
     # Investment pages (Title 5)
     if st.button("Risk-Reward", key="mn_inv_general", use_container_width=True):
-        st.switch_page("pages/Menorca_Investment_General.py")
+        st.switch_page(f"pages/Menorca_Investment_General_{st.session_state.selected_year}.py")
     
     if st.button("Feedback details", key="mn_inv_startup", use_container_width=True):
-        st.switch_page("pages/Menorca_Investment_Per_Startup.py")
+        st.switch_page(f"pages/Menorca_Investment_Per_Startup_{st.session_state.selected_year}.py")
     
     # Program section (Title 4)
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Program**")
     
     # Program pages (Title 5)
     if st.button("Guests feedback", key="mn_prog_general", use_container_width=True):
-        st.switch_page("pages/Menorca_Program_General.py")
+        st.switch_page(f"pages/Menorca_Program_General_{st.session_state.selected_year}.py")
     
     if st.button("Breathe-Focus-Grow", key="mn_prog_agenda", use_container_width=True):
-        st.switch_page("pages/Menorca_Program_Agenda.py")
+        st.switch_page(f"pages/Menorca_Program_Agenda_{st.session_state.selected_year}.py")
 
 # Custom CSS with Decelera colors
 st.markdown("""
@@ -319,6 +319,24 @@ st.markdown(body="""
 </div>
 </div>
 """, unsafe_allow_html=True)
+
+# Year selection buttons
+st.markdown("### Select Year", unsafe_allow_html=True)
+col1, col2, col3 = st.columns(3)
+with col1:
+    if st.button("2023", key="year_2023", use_container_width=True):
+        st.session_state.selected_year = "2023"
+        st.rerun()
+with col2:
+    if st.button("2024", key="year_2024", use_container_width=True):
+        st.session_state.selected_year = "2024"
+        st.rerun()
+with col3:
+    if st.button("2025", key="year_2025", use_container_width=True):
+        st.session_state.selected_year = "2025"
+        st.rerun()
+
+st.markdown("---")
 
 # Mexico Location Block
 with st.container(border=True):
