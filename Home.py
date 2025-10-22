@@ -326,35 +326,84 @@ st.markdown("### Select Year", unsafe_allow_html=True)
 # Add custom CSS for selected year button
 st.markdown("""
 <style>
-    /* Style for selected year buttons with checkmark */
+    /* Style for selected year buttons */
     .stButton > button[data-testid="stButton"] {
         transition: all 0.3s ease;
     }
     .stButton > button[data-testid="stButton"]:hover {
         transform: translateY(-2px);
     }
+    /* Custom style for selected year button */
+    .selected-year-btn {
+        background-color: #1FD0EF !important;
+        color: white !important;
+        border-color: #1FD0EF !important;
+    }
+    .selected-year-btn:hover {
+        background-color: #17a0c9 !important;
+        border-color: #17a0c9 !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
 col1, col2, col3 = st.columns(3)
 with col1:
-    btn_label = "✓ 2023" if st.session_state.selected_year == "2023" else "2023"
-    btn_type = "primary" if st.session_state.selected_year == "2023" else "secondary"
-    if st.button(btn_label, key="year_2023", use_container_width=True, type=btn_type):
+    btn_label = "2023"
+    if st.button(btn_label, key="year_2023", use_container_width=True):
         st.session_state.selected_year = "2023"
         st.rerun()
+    # Apply custom style to selected button
+    if st.session_state.selected_year == "2023":
+        st.markdown("""
+        <script>
+        setTimeout(function() {
+            const buttons = document.querySelectorAll('[data-testid="stButton"] button');
+            buttons.forEach(button => {
+                if (button.textContent === '2023') {
+                    button.classList.add('selected-year-btn');
+                }
+            });
+        }, 100);
+        </script>
+        """, unsafe_allow_html=True)
 with col2:
-    btn_label = "✓ 2024" if st.session_state.selected_year == "2024" else "2024"
-    btn_type = "primary" if st.session_state.selected_year == "2024" else "secondary"
-    if st.button(btn_label, key="year_2024", use_container_width=True, type=btn_type):
+    btn_label = "2024"
+    if st.button(btn_label, key="year_2024", use_container_width=True):
         st.session_state.selected_year = "2024"
         st.rerun()
+    # Apply custom style to selected button
+    if st.session_state.selected_year == "2024":
+        st.markdown("""
+        <script>
+        setTimeout(function() {
+            const buttons = document.querySelectorAll('[data-testid="stButton"] button');
+            buttons.forEach(button => {
+                if (button.textContent === '2024') {
+                    button.classList.add('selected-year-btn');
+                }
+            });
+        }, 100);
+        </script>
+        """, unsafe_allow_html=True)
 with col3:
-    btn_label = "✓ 2025" if st.session_state.selected_year == "2025" else "2025"
-    btn_type = "primary" if st.session_state.selected_year == "2025" else "secondary"
-    if st.button(btn_label, key="year_2025", use_container_width=True, type=btn_type):
+    btn_label = "2025"
+    if st.button(btn_label, key="year_2025", use_container_width=True):
         st.session_state.selected_year = "2025"
         st.rerun()
+    # Apply custom style to selected button
+    if st.session_state.selected_year == "2025":
+        st.markdown("""
+        <script>
+        setTimeout(function() {
+            const buttons = document.querySelectorAll('[data-testid="stButton"] button');
+            buttons.forEach(button => {
+                if (button.textContent === '2025') {
+                    button.classList.add('selected-year-btn');
+                }
+            });
+        }, 100);
+        </script>
+        """, unsafe_allow_html=True)
 
 st.markdown("---")
 
