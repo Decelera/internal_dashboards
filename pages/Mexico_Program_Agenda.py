@@ -427,7 +427,7 @@ st.markdown(body="<h1 style='text-align: center;'>Breathe</h1>", unsafe_allow_ht
 cols = st.columns(3)
 for i in range(3):
     with cols[i]:
-        st.metric(value=general_means_per_phase["Breathe"][i], label=general_labels[i], delta=(general_means_per_phase["Breathe"][i] - general_means[0]))
+        st.metric(value=general_means_per_phase["Breathe"][i], label=general_labels[i], delta=round(general_means_per_phase["Breathe"][i] - general_means[0], 2))
 
 for category in fields["Breathe"].keys():
     ordered_pairs_breathe = sorted(zip(means_breathe[category], labels_breathe[category]), reverse=True)
@@ -442,7 +442,7 @@ st.markdown(body="<h1 style='text-align: center;'>Focus</h1>", unsafe_allow_html
 cols = st.columns(3)
 for i in range(3):
     with cols[i]:
-        st.metric(value=general_means_per_phase["Focus"][i], label=general_labels[i], delta=(general_means_per_phase["Focus"][i] - general_means[1]))
+        st.metric(value=general_means_per_phase["Focus"][i], label=general_labels[i], delta=round(general_means_per_phase["Focus"][i] - general_means[1], 2))
 
 for category in fields["Focus"].keys():
     ordered_pairs_focus = sorted(zip(means_focus[category], labels_focus[category]), reverse=True)
@@ -457,7 +457,7 @@ st.markdown(body="<h1 style='text-align: center;'>Grow</h1>", unsafe_allow_html=
 cols = st.columns(3)
 for i in range(3):
     with cols[i]:
-        st.metric(value=general_means_per_phase["Grow"][i], label=general_labels[i], delta=(general_means_per_phase["Grow"][i] - general_means[2]))
+        st.metric(value=general_means_per_phase["Grow"][i], label=general_labels[i], delta=round(general_means_per_phase["Grow"][i] - general_means[2], 2))
 
 for category in fields["Grow"].keys():
     ordered_pairs_grow = sorted(zip(means_grow[category], labels_grow[category]), reverse=True)
