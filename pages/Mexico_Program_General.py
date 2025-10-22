@@ -250,6 +250,7 @@ for field in fields["VCs"]:
     mean_vc: float = float(df[field].dropna().astype(float).mean())
     means_vc.append(mean_vc)
 #--------------------------------------------------------------------------------------------
+st.markdown(body="Here you will find the feedback submitted by founders, experience makers and VC's about the program")
 
 st.markdown(body="<h1 style='text-align: center;'>Founders</h1>", unsafe_allow_html=True)
 
