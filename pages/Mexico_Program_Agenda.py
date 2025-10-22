@@ -362,6 +362,8 @@ for category in fields["General"].keys():
 
 #--------------------------------------------------------------------------------------------
 
+st.markdown(body="Here you will find the average score for each event in the program, divided by Talks, Well-being and Networking:\n1. General: all events per category\n2. Breathe - Focus - Grow: all events too, but also divided by the phases")
+
 st.markdown(body="<h1 style='text-align: center;'>General</h1>", unsafe_allow_html=True)
 
 for category in fields["General"].keys():
