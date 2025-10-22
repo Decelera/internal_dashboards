@@ -1,3 +1,4 @@
+from plotly.graph_objs._figure import Figure
 import numpy as np
 from pyairtable import Api
 import pandas as pd
@@ -38,20 +39,20 @@ with st.sidebar:
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Investment**")
     
     # Investment pages (Title 5)
-    if st.button("General", key="mx_inv_general", use_container_width=True):
+    if st.button("Risk-Reward", key="mx_inv_general", use_container_width=True):
         st.switch_page("pages/Mexico_Investment_General.py")
     
-    if st.button("Per Startup", key="mx_inv_startup", use_container_width=True):
+    if st.button("Feedback details", key="mx_inv_startup", use_container_width=True):
         st.switch_page("pages/Mexico_Investment_Per_Startup.py")
     
     # Program section (Title 4)
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Program**")
     
     # Program pages (Title 5)
-    if st.button("General", key="mx_prog_general", use_container_width=True):
+    if st.button("Guests feedback", key="mx_prog_general", use_container_width=True):
         st.switch_page("pages/Mexico_Program_General.py")
     
-    if st.button("Agenda", key="mx_prog_agenda", use_container_width=True):
+    if st.button("Breathe-Focus-Grow", key="mx_prog_agenda", use_container_width=True):
         st.switch_page("pages/Mexico_Program_Agenda.py")
     
     st.markdown("---")
@@ -66,21 +67,22 @@ with st.sidebar:
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Investment**")
     
     # Investment pages (Title 5)
-    if st.button("General", key="mn_inv_general", use_container_width=True):
+    if st.button("Risk-Reward", key="mn_inv_general", use_container_width=True):
         st.switch_page("pages/Menorca_Investment_General.py")
     
-    if st.button("Per Startup", key="mn_inv_startup", use_container_width=True):
+    if st.button("Feedback details", key="mn_inv_startup", use_container_width=True):
         st.switch_page("pages/Menorca_Investment_Per_Startup.py")
     
     # Program section (Title 4)
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Program**")
     
     # Program pages (Title 5)
-    if st.button("General", key="mn_prog_general", use_container_width=True):
+    if st.button("Guests feedback", key="mn_prog_general", use_container_width=True):
         st.switch_page("pages/Menorca_Program_General.py")
     
-    if st.button("Agenda", key="mn_prog_agenda", use_container_width=True):
+    if st.button("Breathe-Focus-Grow", key="mn_prog_agenda", use_container_width=True):
         st.switch_page("pages/Menorca_Program_Agenda.py")
+        
 api_key = st.secrets["airtable_mexico_investment"]["api_key"]
 base_id = st.secrets["airtable_mexico_investment"]["base_id"]
 
@@ -241,7 +243,7 @@ def grouped_means(df):
 df_em_means = df_em.groupby("Startup").apply(grouped_means).reset_index()
 df_em_means["Distance"] = np.sqrt((df_em_means["risk_mean"]) ** 2 + (4 - df_em_means["reward_mean"]) ** 2)
 
-fig = go.Figure()
+fig: Figure = go.Figure()
 
 fig.add_trace(go.Scatter(
     x=df_em_means["risk_mean"],
@@ -253,7 +255,7 @@ fig.add_trace(go.Scatter(
         size=10,
         color=df_em_means["risk_mean"],
         colorscale='RdYlGn_r',
-        showscale=True,
+        showscale=False,
         colorbar=dict(
             title="Distance to (risk=0, reward=4)"
         )
