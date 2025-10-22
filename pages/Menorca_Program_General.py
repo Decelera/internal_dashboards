@@ -154,9 +154,7 @@ fields = {
         "Satisfaction",
         "Guest logistics",
         "Off campus",
-        "Program website",
         "Wellbeing",
-        "EM's Fb | Demo day",
         "Networking",
     ]
 }
@@ -187,9 +185,7 @@ labels = {
         "Overall experience",
         "Guest logistics",
         "Off campus activities",
-        "Program website",
         "Wellbeing dynamics",
-        "Demo day",
         "Networking dynamics"
     ]
 }
