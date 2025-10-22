@@ -224,7 +224,7 @@ df[fields_to_normalize] = df[fields_to_normalize].apply(lambda x: (x.astype(floa
 #===================================Vamos con Founders===================================
 
 #------------------------------Saquemos las medias-------------------------------------
-df_startup = df[df["Guest_type"].apply(lambda x: isinstance(x, list) and "Startup" in x)]
+df_startup = df[df["Guest_type"].apply(lambda x: "Startup" in x)]
 means_founder: list = []
 labels_startup = labels["Founders"]
 for field in fields["Founders"]:
@@ -234,7 +234,7 @@ for field in fields["Founders"]:
 #==================================Vamos con EMs==================================
 
 #------------------------------Saquemos las medias-------------------------------------
-df_em = df[df["Guest_type"].apply(lambda x: isinstance(x, list) and "EM" in x)]
+df_em = df[df["Guest_type"].apply(lambda x: "EM" in x)]
 
 means_em: list = []
 labels_em = labels["EMs"]
@@ -245,7 +245,7 @@ for field in fields["EMs"]:
 #=================================Vamos con VCs==================================
 
 #------------------------------Saquemos las medias-------------------------------------
-df_vc = df[df["Guest_type"].apply(lambda x: isinstance(x, list) and "VC" in x)]
+df_vc = df[df["Guest_type"].apply(lambda x: "VC" in x)]
 
 means_vc: list = []
 labels_vc = labels["VCs"]
