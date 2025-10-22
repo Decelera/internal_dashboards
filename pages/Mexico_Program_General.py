@@ -224,7 +224,7 @@ df[fields_to_normalize] = df[fields_to_normalize].apply(lambda x: (x.astype(floa
 #===================================Vamos con Founders===================================
 
 #------------------------------Saquemos las medias-------------------------------------
-df_startup = df[df["Guest_type"] == ["Startup"]]
+df_startup = df[df["Guest_type"].apply(lambda x: isinstance(x, list) and "Startup" in x)]
 means_founder: list = []
 labels_startup = labels["Founders"]
 for field in fields["Founders"]:
@@ -234,19 +234,23 @@ for field in fields["Founders"]:
 #==================================Vamos con EMs==================================
 
 #------------------------------Saquemos las medias-------------------------------------
+df_em = df[df["Guest_type"].apply(lambda x: isinstance(x, list) and "EM" in x)]
+
 means_em: list = []
 labels_em = labels["EMs"]
 for field in fields["EMs"]:
-    mean_em: float = float(df[field].dropna().astype(float).mean())
+    mean_em: float = float(df_em[field].dropna().astype(float).mean())
     means_em.append(mean_em)
 
 #=================================Vamos con VCs==================================
 
 #------------------------------Saquemos las medias-------------------------------------
+df_vc = df[df["Guest_type"].apply(lambda x: isinstance(x, list) and "VC" in x)]
+
 means_vc: list = []
 labels_vc = labels["VCs"]
 for field in fields["VCs"]:
-    mean_vc: float = float(df[field].dropna().astype(float).mean())
+    mean_vc: float = float(df_vc[field].dropna().astype(float).mean())
     means_vc.append(mean_vc)
 #--------------------------------------------------------------------------------------------
 st.markdown(body="Here you will find the feedback submitted by founders, experience makers and VC's about the program")
