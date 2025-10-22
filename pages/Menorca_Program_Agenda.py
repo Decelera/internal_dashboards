@@ -211,7 +211,7 @@ fields: dict = {
             "Grow | Pitching (Day 8)",
             "Grow | Open arena (Day 8)",
             "Grow | 1:1's (Day 9)",
-            "Grow | Wrap up (Day 9)",
+            "Grow | Warp up (Day 9)",
             "Grow | Farewell party (Day 9)"
         ]
     }
