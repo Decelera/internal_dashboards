@@ -6,7 +6,16 @@ st.set_page_config(
     layout="wide"
 )
 
+# Hide default Streamlit navigation elements
+st.markdown("""
+    <style>
+        [data-testid="stSidebarNav"] {
+            display: none;
+        }
+    </style>
+""", unsafe_allow_html=True)
 
+# Custom hierarchical navigation
 with st.sidebar:
     # Home button at the top
     if st.button("🏠 Home", key="home_btn", use_container_width=True):
