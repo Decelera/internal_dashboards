@@ -320,6 +320,23 @@ st.markdown(body="""
 </div>
 """, unsafe_allow_html=True)
 
+st.markdown("""
+    <p>Here you will find the different dashboards available, for INVESTMENT and PROGRAM.</p>
+    <ol>
+        <li>Investment</li>
+            <ul>
+                <li>Risk-Reward: Risk-Reward analysis for each startup.</li>
+                <li>Feedback details: Human and Business Due Diligence carried out throughout the program.</li>
+            </ul>
+        <li>Program</li>
+            <ul>
+                <li>Guests feedback: Feedback received from guests about the program.</li>
+                <li>Breathe-Focus-Grow: Feedback received from Founders about the different phases of the program.</li>
+            </ul>
+    </ol>
+    """,
+unsafe_allow_html=True)
+
 # Year selection buttons
 st.markdown("### Select Year", unsafe_allow_html=True)
 
