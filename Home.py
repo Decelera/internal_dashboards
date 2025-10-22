@@ -346,24 +346,19 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-col1, col2, col3 = st.columns(3)
+col1, col2 = st.columns(2)
+
 with col1:
-    btn_label = "2023"
-    btn_type = "primary" if st.session_state.selected_year == "2023" else "secondary"
-    if st.button(btn_label, key="year_2023", use_container_width=True, type=btn_type):
-        st.session_state.selected_year = "2023"
-        st.rerun()
-with col2:
-    btn_label = "2024"
-    btn_type = "primary" if st.session_state.selected_year == "2024" else "secondary"
-    if st.button(btn_label, key="year_2024", use_container_width=True, type=btn_type):
-        st.session_state.selected_year = "2024"
-        st.rerun()
-with col3:
     btn_label = "2025"
     btn_type = "primary" if st.session_state.selected_year == "2025" else "secondary"
     if st.button(btn_label, key="year_2025", use_container_width=True, type=btn_type):
         st.session_state.selected_year = "2025"
+        st.rerun()
+with col2:
+    btn_label = "2026"
+    btn_type = "primary" if st.session_state.selected_year == "2026" else "secondary"
+    if st.button(btn_label, key="year_2026", use_container_width=True, type=btn_type):
+        st.session_state.selected_year = "2026"
         st.rerun()
 
 st.markdown("---")
