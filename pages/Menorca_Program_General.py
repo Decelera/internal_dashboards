@@ -190,6 +190,15 @@ labels = {
     ]
 }
 
+#normalizo todos los valores del 1 al 4
+all_fields = set()
+for guest in fields.keys():
+    for field in fields[guest]:
+        all_fields.add(field)
+
+for field in all_fields:
+    df[field] = df[field].astype(float) / 10 * 3 + 1
+
 def barras(values, labels, title) -> None:
     
     fig = go.Figure()
