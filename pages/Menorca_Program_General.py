@@ -256,6 +256,7 @@ def calculate_nps(df, field):
 
 #------------------------------Saquemos las medias-------------------------------------
 df_startup = df[df["Guest_type"].apply(lambda x: "Startup" in x)]
+nps_startup_startup = calculate_nps(df=df_startup, field="Recommendation to Startups")
 
 means_founder: list = []
 labels_startup = labels["Founders"]
@@ -268,6 +269,9 @@ for field in fields["Founders"]:
 #------------------------------Saquemos las medias-------------------------------------
 df_em = df[df["Guest_type"].apply(lambda x: "EM" in x)]
 
+nps_em_startup = calculate_nps(df=df_em, field="Recommendation to Startups")
+nps_em_em = calculate_nps(df=df_em, field="EM's Fb | Recommendation to EM")
+
 means_em: list = []
 labels_em = labels["EMs"]
 for field in fields["EMs"]:
@@ -279,6 +283,9 @@ for field in fields["EMs"]:
 #------------------------------Saquemos las medias-------------------------------------
 df_vc = df[df["Guest_type"].apply(lambda x: "VC" in x)]
 
+nps_vc_startup = calculate_nps(df=df_vc, field="Recommendation to Startups")
+nps_vc_vc = calculate_nps(df=df_vc, field="VC's | Recommendation to vc")
+
 means_vc: list = []
 labels_vc = labels["VCs"]
 for field in fields["VCs"]:
@@ -289,25 +296,37 @@ st.markdown(body="Here you will find the feedback submitted by founders, experie
 
 st.markdown(body="<h1 style='text-align: center;'>Founders</h1>", unsafe_allow_html=True)
 
-
+st.metric(value=nps_startup, label="NPS Startups to Startups")
 
 ordered_pairs_founder = sorted(zip(means_founder, labels["Founders"]), reverse=True)
 values_graph_founder = [value for value, label in ordered_pairs_founder]
 labels_graph_founder = [label for value, label in ordered_pairs_founder]
 barras(values=values_graph_founder, labels=labels_graph_founder, title=f"Founders feedback")
 
-st.markdown(body="---")
+st.markdown(body="---") #==============================================================================0
 
 st.markdown(body="<h1 style='text-align: center;'>EM's</h1>", unsafe_allow_html=True)
+
+cols = st.columns(2)
+with cols[0]:
+    st.metric(value=nps_em_em, label="NPS EM's to EM's")
+with cols[1]:
+    st.metric(value=nps_em_startup, label="NPS EM's to Startup")
 
 ordered_pairs_em = sorted(zip(means_em, labels["EMs"]), reverse=True)
 values_graph_em = [value for value, label in ordered_pairs_em]
 labels_graph_em = [label for value, label in ordered_pairs_em]
 barras(values=values_graph_em, labels=labels_graph_em, title=f"EM's feedback")
 
-st.markdown(body="---")
+st.markdown(body="---") #====================================================================================0
 
 st.markdown(body="<h1 style='text-align: center;'>VC's</h1>", unsafe_allow_html=True)
+
+cols = st.columns(2)
+with cols[0]:
+    st.metric(value=nps_vc_vc, label="NPS VC's to VC's")
+with cols[1]:
+    st.metric(value=nps_vc_startup, label="NPS VC's to Startups")
 
 ordered_pairs_vc = sorted(zip(means_vc, labels["VCs"]), reverse=True)
 values_graph_vc = [value for value, label in ordered_pairs_vc]
