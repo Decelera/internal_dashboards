@@ -296,7 +296,7 @@ st.markdown(body="Here you will find the feedback submitted by founders, experie
 
 st.markdown(body="<h1 style='text-align: center;'>Founders</h1>", unsafe_allow_html=True)
 
-st.metric(value=nps_startup, label="NPS Startups to Startups")
+st.metric(value=nps_startup_startup, label="NPS Startups to Startups")
 
 ordered_pairs_founder = sorted(zip(means_founder, labels["Founders"]), reverse=True)
 values_graph_founder = [value for value, label in ordered_pairs_founder]
