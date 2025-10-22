@@ -1,12 +1,15 @@
+from typing import Any
+import streamlit as st
 import streamlit as st
 import pandas as pd
 from pyairtable import Api
+import plotly.graph_objects as go
 
 # Page configuration
 st.set_page_config(
-    page_title="Menorca - Program - General",
+    page_title="Mexico - Program - Agenda",
     page_icon="../.streamlit/static/favicon.png",
-    layout="centered"
+    layout="wide"
 )
 
 # Hide default Streamlit navigation elements
@@ -85,7 +88,7 @@ base_id = st.secrets["airtable_program"]["base_id"]
 table_id = st.secrets["airtable_program"]["table_id"]
 
 api = Api(api_key)
-records = api.table(base_id, table_id).all(view="Menorca 2025")
+records = api.table(base_id, table_id).all(view="Guests Feedback")
 data = [record["fields"] for record in records]
 df = pd.DataFrame(data)
 
@@ -94,9 +97,8 @@ def fix_cell(val):
         return float("nan")
     return val
 
-df = df.map(fix_cell)
-
-#=========================CONFIG==============================
+df = df.map(func=fix_cell)
+#=========================CONFIG========================================
 
 fields = {
     "Founders": [
@@ -164,280 +166,111 @@ labels = {
     ]
 }
 
-def calculate_nps(df, field):
-    scores = df[field].dropna().astype(float).tolist()
-    n_prom = 0
-    n_detr = 0
-    for score in scores:
-        if score == 9 or score == 10:
-            n_prom += 1
-        elif 0 <= score <= 6:
-            n_detr += 1
-        else:
-            pass
-    return (n_prom - n_detr) / len(scores) * 100
+def barras(values, labels, title) -> None:
+    
+    fig = go.Figure()
+    
+    fig.add_trace(go.Bar(
+        x=labels,
+        y=values,
+        texttemplate='%{y:.2f}',
+        textposition='outside',
+        marker=dict(
+            color=values,
+            colorscale='RdYlGn',
+            line=dict(
+                color='black',
+                width=1.5
+            )
+        ),
+        textfont=dict(color='black')
+    ))
+    
+    range_max = max(values) * 1.15 if values else 1
 
-num_columns = 3
-#=================================FOUNDERS===============================================
+    fig.update_layout(
+        title=title,
+        yaxis_title='Mean Score',
+        template="plotly_white",
+        yaxis=dict(
+            range=[1, range_max]
+        ),
+        xaxis=dict(
+            tickfont=dict(color='black'),
+            tickangle=-45
+        )
+    )
+    
+    st.plotly_chart(fig, use_container_width=True)
 
-st.markdown("<h1 style='text-align: center;'>Founders feedback</h1>", unsafe_allow_html=True)
-CATEGORY = "Founders"
-RECOMENDATION = "Recommendation to Startups"
-df_startups = df[df["Guest_type"].apply(lambda x: "Startup" in x)]
+def metric(value, label) -> None:
+    st.metric(value=value, label=label)
 
-num_rows = (len(fields[CATEGORY]) + num_columns -1) // num_columns
-nps = calculate_nps(df_startups, RECOMENDATION)
+# Apply normalization manually to avoid type issues
+fields_to_normalize: list[str] = [
+    "Confidence of growth",
+    "Connections with EM's",
+    "Connections with VC's",
+    "Connections with other Startups",
+    "Investment ready",
+    "Satisfaction"
+]
 
-st.markdown(
-        f"""
-        <div style="
-            border: 2px solid #909090;
-            border-radius: 15px; /* Bordes redondeados */
-            padding: 20px;
-            text-align: center;
-            background-color: #f9f9f9;
-            box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
-            height: 150px; /* Altura fija para alinear tarjetas */
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        ">
-            <h4 style="margin-bottom: 10px;">NPS to other startups</h4>
-            <p style="font-size: 28px; font-weight: bold; margin: 0;">{nps:.2f}</p>
-        </div>
-        """,
-        unsafe_allow_html=True)
-st.write("")
+df[fields_to_normalize] = df[fields_to_normalize].apply(lambda x: (x.astype(float) / 10 * 3) + 1)
 
-for i in range(num_rows):
-    cols = st.columns(num_columns)
 
-    row_fields = fields[CATEGORY][i * num_columns : (i + 1) * num_columns]
+#===================================Vamos con Founders===================================
 
-    for j, field in enumerate(row_fields):
-        mean = df_startups[field].dropna().astype(float).mean()
+#------------------------------Saquemos las medias-------------------------------------
+means_founder: list = []
+labels_startup = labels["Founders"]
+for field in fields["Founders"]:
+    mean_founder: float = float(df[field].dropna().astype(float).mean())
+    means_founder.append(mean_founder)
 
-        with cols[j]:
+#==================================Vamos con EMs==================================
 
-            st.markdown(
-                f"""
-                <div style="
-                    border: 2px solid #909090;
-                    border-radius: 15px; /* Bordes redondeados */
-                    padding: 20px;
-                    text-align: center;
-                    background-color: #f9f9f9;
-                    box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
-                    height: 150px; /* Altura fija para alinear tarjetas */
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: center;
-                ">
-                    <h4 style="margin-bottom: 10px;">{labels[CATEGORY][fields[CATEGORY].index(field)]}</h4>
-                    <p style="font-size: 28px; font-weight: bold; margin: 0;">{mean:.2f}</p>
-                </div>
-                """,
-                unsafe_allow_html=True)
-            st.write("")
+#------------------------------Saquemos las medias-------------------------------------
+means_em: list = []
+labels_em = labels["EMs"]
+for field in fields["EMs"]:
+    mean_em: float = float(df[field].dropna().astype(float).mean())
+    means_em.append(mean_em)
 
-improvement = df_startups[["Name", "Grow | Comments"]].dropna()
+#=================================Vamos con VCs==================================
 
-with st.expander("Ver comentarios del programa"):
-    for i, comment in enumerate(improvement["Grow | Comments"].tolist()):
-        with st.expander(f"Ver comentarios de {improvement['Name'].iloc[i]}"):
-            st.info(comment)
+#------------------------------Saquemos las medias-------------------------------------
+means_vc: list = []
+labels_vc = labels["VCs"]
+for field in fields["VCs"]:
+    mean_vc: float = float(df[field].dropna().astype(float).mean())
+    means_vc.append(mean_vc)
+#--------------------------------------------------------------------------------------------
+st.markdown(body="Here you will find the feedback submitted by founders, experience makers and VC's about the program")
 
-st.markdown("---")
-#===================================EM's===================================================
+st.markdown(body="<h1 style='text-align: center;'>Founders</h1>", unsafe_allow_html=True)
 
-st.markdown("<h1 style='text-align: center;'>EM's feedback</h1>", unsafe_allow_html=True)
-CATEGORY = "EMs"
-RECOMENDATION_1 = "EM's Fb | Recommendation to EM"
-RECOMENDATION_2 = "Recommendation to Startups"
-df_em = df[df["Guest_type"].apply(lambda x: "EM" in x)]
+ordered_pairs_founder = sorted(zip(means_founder, labels["Founders"]), reverse=True)
+values_graph_founder = [value for value, label in ordered_pairs_founder]
+labels_graph_founder = [label for value, label in ordered_pairs_founder]
+barras(values=values_graph_founder, labels=labels_graph_founder, title=f"Founders feedback")
 
-num_rows = (len(fields[CATEGORY]) + num_columns -1) // num_columns
-nps_startups = calculate_nps(df_em, RECOMENDATION_1)
-nps_em = calculate_nps(df_em, RECOMENDATION_2)
+st.markdown(body="---")
 
-st.markdown(
-        f"""
-        <div style="
-            border: 2px solid #909090;
-            border-radius: 15px; /* Bordes redondeados */
-            padding: 20px;
-            text-align: center;
-            background-color: #f9f9f9;
-            box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
-            height: 150px; /* Altura fija para alinear tarjetas */
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        ">
-            <h4 style="margin-bottom: 10px;">NPS to other startups</h4>
-            <p style="font-size: 28px; font-weight: bold; margin: 0;">{nps_startups:.2f}</p>
-        </div>
-        """,
-        unsafe_allow_html=True)
-st.write("")
+st.markdown(body="<h1 style='text-align: center;'>EM's</h1>", unsafe_allow_html=True)
 
-st.markdown(
-        f"""
-        <div style="
-            border: 2px solid #909090;
-            border-radius: 15px; /* Bordes redondeados */
-            padding: 20px;
-            text-align: center;
-            background-color: #f9f9f9;
-            box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
-            height: 150px; /* Altura fija para alinear tarjetas */
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        ">
-            <h4 style="margin-bottom: 10px;">NPS to other EM's</h4>
-            <p style="font-size: 28px; font-weight: bold; margin: 0;">{nps_em:.2f}</p>
-        </div>
-        """,
-        unsafe_allow_html=True)
-st.write("")
+ordered_pairs_em = sorted(zip(means_em, labels["EMs"]), reverse=True)
+values_graph_em = [value for value, label in ordered_pairs_em]
+labels_graph_em = [label for value, label in ordered_pairs_em]
+barras(values=values_graph_em, labels=labels_graph_em, title=f"EM's feedback")
 
-for i in range(num_rows):
-    cols = st.columns(num_columns)
+st.markdown(body="---")
 
-    row_fields = fields[CATEGORY][i * num_columns : (i + 1) * num_columns]
+st.markdown(body="<h1 style='text-align: center;'>VC's</h1>", unsafe_allow_html=True)
 
-    for j, field in enumerate(row_fields):
-        mean = df_em[field].dropna().astype(float).mean()
+ordered_pairs_vc = sorted(zip(means_vc, labels["VCs"]), reverse=True)
+values_graph_vc = [value for value, label in ordered_pairs_vc]
+labels_graph_vc = [label for value, label in ordered_pairs_vc]
+barras(values=values_graph_vc, labels=labels_graph_vc, title=f"VC's feedback")
 
-        with cols[j]:
-
-            st.markdown(
-                f"""
-                <div style="
-                    border: 2px solid #909090;
-                    border-radius: 15px; /* Bordes redondeados */
-                    padding: 20px;
-                    text-align: center;
-                    background-color: #f9f9f9;
-                    box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
-                    height: 150px; /* Altura fija para alinear tarjetas */
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: center;
-                ">
-                    <h4 style="margin-bottom: 10px;">{labels[CATEGORY][fields[CATEGORY].index(field)]}</h4>
-                    <p style="font-size: 28px; font-weight: bold; margin: 0;">{mean:.2f}</p>
-                </div>
-                """,
-                unsafe_allow_html=True)
-            st.write("")
-
-comments = df_em[["Name", "Comments"]].dropna()
-top3 = df_em[["Name", "EM's Fb | Top3 1:1's"]].dropna()
-
-with st.expander("Ver comentarios de EM's"):
-    for i, comment in enumerate(comments["Comments"].tolist()):
-        with st.expander(f"Ver comentario de {comments['Name'].iloc[i]}"):
-            st.info(comment)
-
-with st.expander("Ver top 3 1:1's de EM's"):
-    for i, comment in enumerate(top3["EM's Fb | Top3 1:1's"].tolist()):
-        with st.expander(f"Ver top 3 1:1's de {top3['Name'].iloc[i]}"):
-            st.info(comment)
-
-st.markdown("---")
-
-#=======================================VCs==================================================
-
-st.markdown("<h1 style='text-align: center;'>VC's feedback</h1>", unsafe_allow_html=True)
-CATEGORY = "VCs"
-RECOMENDATION_1 = "VC's | Recommendation to vc"
-RECOMENDATION_2 = "Recommendation to Startups"
-df_vc = df[df["Guest_type"].apply(lambda x: "VC" in x)]
-
-num_rows = (len(fields[CATEGORY]) + num_columns -1) // num_columns
-nps_startups = calculate_nps(df_vc, RECOMENDATION_1)
-nps_vc = calculate_nps(df_vc, RECOMENDATION_2)
-
-st.markdown(
-        f"""
-        <div style="
-            border: 2px solid #909090;
-            border-radius: 15px; /* Bordes redondeados */
-            padding: 20px;
-            text-align: center;
-            background-color: #f9f9f9;
-            box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
-            height: 150px; /* Altura fija para alinear tarjetas */
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        ">
-            <h4 style="margin-bottom: 10px;">NPS to other startups</h4>
-            <p style="font-size: 28px; font-weight: bold; margin: 0;">{nps_startups:.2f}</p>
-        </div>
-        """,
-        unsafe_allow_html=True)
-st.write("")
-
-st.markdown(
-        f"""
-        <div style="
-            border: 2px solid #909090;
-            border-radius: 15px; /* Bordes redondeados */
-            padding: 20px;
-            text-align: center;
-            background-color: #f9f9f9;
-            box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
-            height: 150px; /* Altura fija para alinear tarjetas */
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        ">
-            <h4 style="margin-bottom: 10px;">NPS to other VCs</h4>
-            <p style="font-size: 28px; font-weight: bold; margin: 0;">{nps_vc:.2f}</p>
-        </div>
-        """,
-        unsafe_allow_html=True)
-st.write("")
-
-for i in range(num_rows):
-    cols = st.columns(num_columns)
-
-    row_fields = fields[CATEGORY][i * num_columns : (i + 1) * num_columns]
-
-    for j, field in enumerate(row_fields):
-        mean = df_vc[field].dropna().astype(float).mean()
-
-        with cols[j]:
-
-            st.markdown(
-                f"""
-                <div style="
-                    border: 2px solid #909090;
-                    border-radius: 15px; /* Bordes redondeados */
-                    padding: 20px;
-                    text-align: center;
-                    background-color: #f9f9f9;
-                    box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
-                    height: 150px; /* Altura fija para alinear tarjetas */
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: center;
-                ">
-                    <h4 style="margin-bottom: 10px;">{labels[CATEGORY][fields[CATEGORY].index(field)]}</h4>
-                    <p style="font-size: 28px; font-weight: bold; margin: 0;">{mean:.2f}</p>
-                </div>
-                """,
-                unsafe_allow_html=True)
-            st.write("")
-
-comments = df_vc[["Name", "Comments"]].dropna()
-
-with st.expander("Ver qué influyó en el interés de inversión de VC's"):
-    for i, comment in enumerate(comments["Comments"].tolist()):
-        with st.expander(f"Ver comentario de {comments['Name'].iloc[i]}"):
-            st.info(comment)
-
-st.markdown("---")
+st.markdown(body="---")
