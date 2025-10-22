@@ -224,7 +224,7 @@ df[fields_to_normalize] = df[fields_to_normalize].apply(lambda x: (x.astype(floa
 #===================================Vamos con Founders===================================
 
 #------------------------------Saquemos las medias-------------------------------------
-df_startup = df["Startup" in df["Guest_type"]]
+df_startup = df[df["Guest_type"] == ["Startup"]]
 means_founder: list = []
 labels_startup = labels["Founders"]
 for field in fields["Founders"]:
