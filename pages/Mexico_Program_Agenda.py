@@ -350,9 +350,9 @@ for phase in general_fields.keys():
 general_means: list[float] = [0.0, 0.0, 0.0]
 for i in range(3):
     for phase in general_means_per_phase.keys():
-        general_means[i] += general_means_per_phase[phase][i]
+        general_means[i] += round(general_means_per_phase[phase][i], 2)
 
-general_means: list[float] = [x / 3 for x in general_means]
+general_means: list[float] = [round(x / 3, 2) for x in general_means]
 
 #===================================Vamos con Breathe===================================
 
