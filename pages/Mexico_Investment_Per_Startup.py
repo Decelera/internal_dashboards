@@ -17,14 +17,24 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-    /* Apunta al contenedor de la métrica */
+    /* 1. Centra el BLOQUE entero de la métrica en su columna */
     div[data-testid="stMetric"] {
-        /* "align-self" le dice a este elemento que se centre 
-           dentro de su contenedor (la columna) */
         align-self: center;
-        
-        /* (Opcional) Centra el texto *dentro* de la métrica */
+    }
+
+    /* 2. Centra el TEXTO de la etiqueta */
+    div[data-testid="stMetricLabel"] {
         text-align: center;
+    }
+    
+    /* 3. Centra el VALOR (que es un contenedor flex) */
+    div[data-testid="stMetricValue"] {
+        justify-content: center;
+    }
+    
+    /* 4. (Opcional) Centra el DELTA (también es flex) */
+    div[data-testid="stMetricDelta"] {
+        justify-content: center;
     }
     </style>
     """,
@@ -299,7 +309,7 @@ labels = {
     ]
 }
 #==========================================================
-
+#Estilos CSS para el contenedor
 st.markdown("""
 <style>
     div[data-testid="stVerticalBlock"] div[data-testid="stVerticalBlock"] div.st-emotion-cache-1jicfl2 {
