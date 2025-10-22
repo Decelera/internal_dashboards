@@ -296,7 +296,7 @@ st.markdown(body="Here you will find the feedback submitted by founders, experie
 
 st.markdown(body="<h1 style='text-align: center;'>Founders</h1>", unsafe_allow_html=True)
 
-st.metric(value=nps_startup_startup, label="NPS Startups to Startups")
+st.metric(value=round(nps_startup_startup, 2), label="NPS Startups to Startups")
 
 ordered_pairs_founder = sorted(zip(means_founder, labels["Founders"]), reverse=True)
 values_graph_founder = [value for value, label in ordered_pairs_founder]
@@ -309,9 +309,9 @@ st.markdown(body="<h1 style='text-align: center;'>EM's</h1>", unsafe_allow_html=
 
 cols = st.columns(2)
 with cols[0]:
-    st.metric(value=nps_em_em, label="NPS EM's to EM's")
+    st.metric(value=round(nps_em_em, 2), label="NPS EM's to EM's")
 with cols[1]:
-    st.metric(value=nps_em_startup, label="NPS EM's to Startup")
+    st.metric(value=round(nps_em_startup, 2), label="NPS EM's to Startup")
 
 ordered_pairs_em = sorted(zip(means_em, labels["EMs"]), reverse=True)
 values_graph_em = [value for value, label in ordered_pairs_em]
@@ -324,9 +324,9 @@ st.markdown(body="<h1 style='text-align: center;'>VC's</h1>", unsafe_allow_html=
 
 cols = st.columns(2)
 with cols[0]:
-    st.metric(value=nps_vc_vc, label="NPS VC's to VC's")
+    st.metric(value=round(nps_vc_vc, 2), label="NPS VC's to VC's")
 with cols[1]:
-    st.metric(value=nps_vc_startup, label="NPS VC's to Startups")
+    st.metric(value=round(nps_vc_startup, 2), label="NPS VC's to Startups")
 
 ordered_pairs_vc = sorted(zip(means_vc, labels["VCs"]), reverse=True)
 values_graph_vc = [value for value, label in ordered_pairs_vc]
