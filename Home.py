@@ -322,17 +322,37 @@ st.markdown(body="""
 
 # Year selection buttons
 st.markdown("### Select Year", unsafe_allow_html=True)
+
+# Add custom CSS for selected year button
+st.markdown("""
+<style>
+    /* Style for selected year buttons with checkmark */
+    .stButton > button[data-testid="stButton"] {
+        transition: all 0.3s ease;
+    }
+    .stButton > button[data-testid="stButton"]:hover {
+        transform: translateY(-2px);
+    }
+</style>
+""", unsafe_allow_html=True)
+
 col1, col2, col3 = st.columns(3)
 with col1:
-    if st.button("2023", key="year_2023", use_container_width=True):
+    btn_label = "✓ 2023" if st.session_state.selected_year == "2023" else "2023"
+    btn_type = "primary" if st.session_state.selected_year == "2023" else "secondary"
+    if st.button(btn_label, key="year_2023", use_container_width=True, type=btn_type):
         st.session_state.selected_year = "2023"
         st.rerun()
 with col2:
-    if st.button("2024", key="year_2024", use_container_width=True):
+    btn_label = "✓ 2024" if st.session_state.selected_year == "2024" else "2024"
+    btn_type = "primary" if st.session_state.selected_year == "2024" else "secondary"
+    if st.button(btn_label, key="year_2024", use_container_width=True, type=btn_type):
         st.session_state.selected_year = "2024"
         st.rerun()
 with col3:
-    if st.button("2025", key="year_2025", use_container_width=True):
+    btn_label = "✓ 2025" if st.session_state.selected_year == "2025" else "2025"
+    btn_type = "primary" if st.session_state.selected_year == "2025" else "secondary"
+    if st.button(btn_label, key="year_2025", use_container_width=True, type=btn_type):
         st.session_state.selected_year = "2025"
         st.rerun()
 
