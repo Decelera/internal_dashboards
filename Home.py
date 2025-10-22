@@ -325,13 +325,13 @@ st.markdown("""
     <ol>
         <li>Investment</li>
             <ul>
-                <li>Risk-Reward: Risk-Reward analysis for each startup.</li>
-                <li>Feedback details: Human and Business Due Diligence carried out throughout the program.</li>
+                <li style='padding-left: 40px;'>Risk-Reward: Risk-Reward analysis for each startup.</li>
+                <li style='padding-left: 40px;'>Feedback details: Human and Business Due Diligence carried out throughout the program.<br></li>
             </ul>
         <li>Program</li>
             <ul>
-                <li>Guests feedback: Feedback received from guests about the program.</li>
-                <li>Breathe-Focus-Grow: Feedback received from Founders about the different phases of the program.</li>
+                <li style='padding-left: 40px;'>Guests feedback: Feedback received from guests about the program.<br></li>
+                <li style='padding-left: 40px;'>Breathe-Focus-Grow: Feedback received from Founders about the different phases of the program.<br></li>
             </ul>
     </ol>
     """,
