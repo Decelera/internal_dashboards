@@ -1,6 +1,10 @@
 import streamlit as st
 import os
 
+# Initialize session state for selected year if not exists
+if 'selected_year' not in st.session_state:
+    st.session_state.selected_year = "2025"
+
 # Page configuration
 st.set_page_config(
     page_title="Decelera Dashboards",
