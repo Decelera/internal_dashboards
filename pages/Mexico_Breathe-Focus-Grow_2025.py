@@ -353,6 +353,12 @@ for category in categories_to_merge:
         all_items.extend(labels[phase].get(category, []))
     labels["General"][category] = all_items
 
+color_scale=[
+    [0.0, '#FFB950'],
+    [0.5, '#FAF3DC'],
+    [1.0, '#1FD0EF']
+]
+
 def barras(values, labels, title) -> None:
     
     fig = go.Figure()
@@ -364,7 +370,7 @@ def barras(values, labels, title) -> None:
         textposition='outside',
         marker=dict(
             color=values,
-            colorscale='RdYlGn',
+            colorscale=color_scale,
             line=dict(
                 color='black',
                 width=1.5
