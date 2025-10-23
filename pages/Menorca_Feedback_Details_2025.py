@@ -627,8 +627,8 @@ for field in fields_team:
     mean_total = df_team[field].dropna().astype(float).mean()
     means_team_total.append(mean_total)
 
-fields_mean_team = statistics.mean(means_team)
-fields_mean_team_total = statistics.mean(means_team_total)
+fields_mean_team = np.mean(means_team)
+fields_mean_team_total = np.mean(means_team_total)
 
 means_team_total.append(means_team_total[0])
 means_team.append(means_team[0])
