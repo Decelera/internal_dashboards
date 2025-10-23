@@ -191,9 +191,7 @@ fields = {
         "Workstations | Openness (Individual)",
         "Paellas contest | Openness (Individual)",
         "Workstations | Purpose (Individual)",
-        "1:1's | Purpose (Individual)",
-        "Dilema 1", #Confidence
-        "Dilema 2" #Ambition
+        "1:1's | Purpose (Individual)"
     ]
 }
 
