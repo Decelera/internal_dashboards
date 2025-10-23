@@ -324,7 +324,7 @@ for startup in df_em_ordered["Startup"].tolist():
 
     #primero calculo las medias de individual y de team para ponerlas
     df_startup = df_team[df_team["Startup"] == startup]
-    df_individual = df_team[df_team["Founder_str"].isin(startup_founders[startup])]
+    df_individual = df_team[df_team["Founder_str"].str.replace(" ", "").str.lower().isin([s.replace(" ", "").lower() for s in startup_founders[startup]])]
     
     mean_startup_individual = df_individual[fields["individual"]].astype(float).mean().mean()
     mean_startup_team = df_startup[fields["team"]].astype(float).mean().mean()
