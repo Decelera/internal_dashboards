@@ -171,6 +171,32 @@ risk_reward_fields = {
     ]
 }
 
+fields = {
+    "team": [
+        "Castle Contest | Conflict resolution (Team)", "Castle Contest | Clear vision and alignment (Team)",
+        "Castle Contest | Confidence and respect between founders (Team)",
+        "Castle Contest | Clear roles",
+        "Castle Contest | Complementary hard skills between founders",
+        "Castle Contest | Execution and speed (Team)",
+        "1:1's | Team ambition (Team)",
+        "1:1's | Product and customer focus (Team)"
+    ],
+    "individual": [
+        "Workstations | Integrity and honesty (Individual)",
+        "Workstations | Relevant experience and network (Individual)",
+        "Paellas contest | Visionary leadership (Individual)",
+        "Paellas contest | Active listening (Individual)",
+        "Paellas contest | Flexibility (Individual)",
+        "Paellas contest | Self awareness and management of emotions (Individual)",
+        "Workstations | Openness (Individual)",
+        "Paellas contest | Openness (Individual)",
+        "Workstations | Purpose (Individual)",
+        "1:1's | Purpose (Individual)",
+        "Dilema 1", #Confidence
+        "Dilema 2" #Ambition
+    ]
+}
+
 for subject in ["risk_scores", "reward_scores"]:
     for field in risk_reward_fields[subject]:
         if field not in df_em.columns:
@@ -290,24 +316,36 @@ st.markdown("""
 df_em_ordered = df_em_means.sort_values(by="Distance", ascending=True)
 
 for startup in df_em_ordered["Startup"].tolist():
-    if startup in startup_founders.keys():
 
-        row = df_team[df_team["Startup"] == startup].iloc[0]
-        logo_data = row.get("original logo")
-        if isinstance(logo_data, list) and len(logo_data) > 0 and 'url' in logo_data[0]:
-            logo_url = logo_data[0]['url']
-        else:
-            logo_url = ""
+    #primero calculo las medias de individual y de team para ponerlas
+    df_startup = df_team[df_team["Startup"] == startup]
+    df_individual = df_team[df_team["Founder_str"].str.replace(" ", "").str.lower().isin([s.replace(" ", "").lower() for s in startup_founders[startup]])]
+    
+    mean_startup_individual = df_individual[fields["individual"]].astype(float).mean().mean()
+    mean_startup_team = df_startup[fields["team"]].astype(float).mean().mean()
+    mean_all_individual = df_team[fields["individual"]].astype(float).mean().mean()
+    mean_all_team = df_team[fields["team"]].astype(float).mean().mean()
 
-        with st.container(border=True):
-
-            st.markdown(f"""
-                <div style="display: flex; align-items: left; margin-left: 0;">
-                    <img src={logo_url} width="50">
-                    <h4 style="margin-left: 10px; font-weight: bold; color: #333;"><a href="https://decelera-dashboards.streamlit.app/Menorca_Investment_Per_Startup?startup={startup}">{startup}</a></h4>
-                </div>
-                """,
-                unsafe_allow_html=True)
-            st.metric(label="Distance to (risk=0, reward=4)", value=round(df_em_ordered[df_em_ordered["Startup"] == startup]["Distance"].values[0], 2))
+    row = df_team[df_team["Startup"] == startup].iloc[0]
+    logo_data = row.get("original logo")
+    if isinstance(logo_data, list) and len(logo_data) > 0 and 'url' in logo_data[0]:
+        logo_url = logo_data[0]['url']
     else:
-        continue
+        logo_url = ""
+
+    with st.container(border=True):
+
+        st.markdown(f"""
+            <div style="display: flex; align-items: left; margin-left: 0;">
+                <img src={logo_url} width="50">
+                <h4 style="margin-left: 10px; font-weight: bold; color: #333;"><a href="https://decelera-dashboards.streamlit.app/Menorca_Feedback_Details_{st.session_state.selected_year}?startup={startup}">{startup}</a></h4>
+            </div>
+            """,
+            unsafe_allow_html=True)
+        cols = st.columns(3)
+        with cols[0]:
+            st.metric(label="Distance to (risk=0, reward=4)", value=round(df_em_ordered[df_em_ordered["Startup"] == startup]["Distance"].values[0], 2))
+        with cols[1]:
+            st.metric(label="Individual Mean", value=round(mean_startup_individual, 2), delta=round(mean_startup_individual - mean_all_individual, 2))
+        with cols[2]:
+            st.metric(label="Team Mean", value=round(mean_startup_team, 2), delta=round(mean_startup_team - mean_all_team, 2))
