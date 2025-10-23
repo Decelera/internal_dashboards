@@ -326,10 +326,10 @@ for startup in df_em_ordered["Startup"].tolist():
     df_startup = df_team[df_team["Startup"] == startup]
     df_individual = df_team[df_team["Founder_str"].isin(startup_founders[startup])]
     
-    mean_startup_individual = df_individual[fields["individual"]].mean().mean()
-    mean_startup_team = df_startup[fields["team"]].mean().mean()
-    mean_all_individual = df_team[fields["individual"]].mean().mean()
-    mean_all_team = df_team[fields["team"]].mean().mean()
+    mean_startup_individual = df_individual[fields["individual"]].astype(float).mean().mean()
+    mean_startup_team = df_startup[fields["team"]].astype(float).mean().mean()
+    mean_all_individual = df_team[fields["individual"]].astype(float).mean().mean()
+    mean_all_team = df_team[fields["team"]].astype(float).mean().mean()
 
     row = df_startup.iloc[0]
     logo_data = row.get("original logo")
