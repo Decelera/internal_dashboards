@@ -140,7 +140,7 @@ startup_founders = {
     "Verticcal": ["Santiago Gallo Restrepo", "Pablo Sanchez Villamarin"],
     "Neat": ["Nicolas Chacon", "Javier Benavides"],
     "CIFRATO": ["Yerson Cacua", "Juan Pisco"],
-    "Konvex": ["Andres Cristobal", "Sosa Tellez"]
+    "Konvex": ["Andres Cristobal Sosa Tellez"]
 }
 
 risk_reward_fields = {
