@@ -193,8 +193,10 @@ fields = {
         "Paellas contest | Active listening (Individual)",
         "Paellas contest | Flexibility (Individual)",
         "Paellas contest | Self awareness and management of emotions (Individual)",
-        "Openness",
-        "Purpose",
+        "Workstations | Openness (Individual)",
+        "Paellas contest | Openness (Individual)",
+        "Workstations | Purpose (Individual)",
+        "1:1's | Purpose (Individual)",
         "Dilema 1", #Confidence
         "Dilema 2" #Ambition
     ]
