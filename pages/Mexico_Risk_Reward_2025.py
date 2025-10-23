@@ -343,7 +343,7 @@ for startup in df_em_ordered["Startup"].tolist():
         st.markdown(f"""
             <div style="display: flex; align-items: left; margin-left: 0;">
                 <img src={logo_url} width="50">
-                <h4 style="margin-left: 10px; font-weight: bold; color: #333;"><a href="https://decelera-dashboards.streamlit.app/Mexico_Investment_Per_Startup?startup={startup}">{startup}</a></h4>
+                <h4 style="margin-left: 10px; font-weight: bold; color: #333;"><a href="https://decelera-dashboards.streamlit.app/Mexico_Feedback_Details_{st.session_state.selected_year}?startup={startup}">{startup}</a></h4>
             </div>
             """,
             unsafe_allow_html=True)
