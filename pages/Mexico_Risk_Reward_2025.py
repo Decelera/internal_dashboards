@@ -12,7 +12,8 @@ st.set_page_config(
     layout="wide"
 )
 
-st.session_state.selected_year = st.session_state.selected_year or "2025"
+if "selected_year" not in st.session_state:
+    st.session_state.selected_year = "2025"
 
 # Hide default Streamlit navigation elements
 st.markdown("""
