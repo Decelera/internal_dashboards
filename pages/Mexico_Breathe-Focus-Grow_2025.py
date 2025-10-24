@@ -186,7 +186,6 @@ fields: dict = {
     },
     "Focus": {
         "Talks": [
-            "Talk by Alejandro Lopez",
             "Talk by Javier Cardona",
             "Talk by Eyal Shatz",
             "Talk by Sofia Storberg",
@@ -280,7 +279,6 @@ labels: dict = {
     },
     "Focus": {
         "Talks": [
-            "Talk by Alejandro Lopez",
             "Talk by Javier Cardona",
             "Talk by Eyal Shatz",
             "Talk by Sofia Storberg",
