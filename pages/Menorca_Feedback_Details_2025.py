@@ -9,7 +9,7 @@ import math
 # Page configuration
 st.set_page_config(
     page_title="Mexico - Investment - Per Startup",
-    page_icon="../.streamlit/static/favicon.png",
+    page_icon="https://images.squarespace-cdn.com/content/v1/67811e8fe702fd5553c65249/c5500619-9712-4b9b-83ee-a697212735ae/Disen%CC%83o+sin+ti%CC%81tulo+%2840%29.png",
     layout="wide"
 )
 
