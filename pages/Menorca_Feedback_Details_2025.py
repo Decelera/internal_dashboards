@@ -796,54 +796,48 @@ if coincidence.any():
             if not df_olbi_founder.empty:
                 st.markdown(f"{founders[i]}")
 
+                st.markdown(f"""
+                <style>
+                /* Contenedor principal para la fila de métricas */
+                .metric-row {{
+                    display: flex;
+                    justify-content: space-between;
+                    gap: 15px; /* Espacio entre las cajas */
+                }}
 
-                cols = st.columns(3)
-                with cols[2]:
-                    st.metric(label="Human DD Average", value=round(olbi_average, 2), delta=round(olbi_average - olbi_total_average, 2))
+                /* Estilo para la etiqueta (el título de la métrica) */
+                .metric-label {{
+                    font-size: 16px;
+                    color: #555;
+                    margin-bottom: 5px;
+                }}
 
-                with cols[0]:
-                    st.markdown(f"""
-                    <style>
-                    /* Contenedor principal para la fila de métricas */
-                    .metric-row {{
-                        display: flex;
-                        justify-content: space-between;
-                        gap: 15px; /* Espacio entre las cajas */
-                    }}
+                /* Estilo para el valor (el número o texto principal) */
+                .metric-value {{
+                    font-size: 20px; /* <-- ¡CAMBIA ESTE VALOR PARA AJUSTAR EL TAMAÑO! */
+                    font-weight: bold;
+                    color: #1E293B;
+                }}
+                </style>
 
-                    /* Estilo para la etiqueta (el título de la métrica) */
-                    .metric-label {{
-                        font-size: 16px;
-                        color: #555;
-                        margin-bottom: 5px;
-                    }}
-
-                    /* Estilo para el valor (el número o texto principal) */
-                    .metric-value {{
-                        font-size: 20px; /* <-- ¡CAMBIA ESTE VALOR PARA AJUSTAR EL TAMAÑO! */
-                        font-weight: bold;
-                        color: #1E293B;
-                    }}
-                    </style>
-
-                    <div class="metric-row">
-                        <div class="metric-box">
-                            <div class="metric-label">BRS</div>
-                            <div class="metric-value">{df_olbi_founder["BRS_Calculation"].iloc[0]}</div>
-                        </div>
-                        <div class="metric-box">
-                            <div class="metric-label">GRIT</div>
-                            <div class="metric-value">{df_olbi_founder["GRIT_Calculation"].iloc[0]}</div>
-                        </div>
-                        <div class="metric-box">
-                            <div class="metric-label">OLBI Exhaustion</div>
-                            <div class="metric-value">{df_olbi_founder["OLBI_Exhaustion_Descriptor"].iloc[0]}</div>
-                        </div>
-                        <div class="metric-box">
-                            <div class="metric-label">OLBI Disengagement</div>
-                            <div class="metric-value">{df_olbi_founder["OLBI_Disengagement_Descriptor"].iloc[0]}</div>
-                        </div>
+                <div class="metric-row">
+                    <div class="metric-box">
+                        <div class="metric-label">BRS</div>
+                        <div class="metric-value">{df_olbi_founder["BRS_Calculation"].iloc[0]}</div>
                     </div>
-                    """, unsafe_allow_html=True)
+                    <div class="metric-box">
+                        <div class="metric-label">GRIT</div>
+                        <div class="metric-value">{df_olbi_founder["GRIT_Calculation"].iloc[0]}</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">OLBI Exhaustion</div>
+                        <div class="metric-value">{df_olbi_founder["OLBI_Exhaustion_Descriptor"].iloc[0]}</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">OLBI Disengagement</div>
+                        <div class="metric-value">{df_olbi_founder["OLBI_Disengagement_Descriptor"].iloc[0]}</div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
             else:
                 continue
