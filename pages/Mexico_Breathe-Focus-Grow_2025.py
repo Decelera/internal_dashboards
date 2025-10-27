@@ -331,8 +331,6 @@ labels: dict = {
             "Journaling (grow)",
             "Human pitch wrap up",
         ],
-        "Networking": [
-        ],
         "Investment": [
             "Demo day"
         ]
