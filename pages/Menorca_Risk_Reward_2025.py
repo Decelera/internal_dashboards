@@ -11,6 +11,9 @@ st.set_page_config(
     layout="wide"
 )
 
+if "selected_year" not in st.session_state:
+    st.session_state.selected_year = "2025"
+
 # Hide default Streamlit navigation elements
 st.markdown("""
     <style>
@@ -261,12 +264,16 @@ def grouped_means(df):
 
 df_em_means = df_em.groupby("Startup").apply(grouped_means).reset_index()
 df_em_means["Distance"] = np.sqrt((df_em_means["risk_mean"]) ** 2 + (4 - df_em_means["reward_mean"]) ** 2)
+num_feedback = df_em.groupby("Startup").size().reset_index(name="num_feedback")
+df_em_means = df_em_means.merge(num_feedback, on="Startup")
 
 fig = go.Figure()
 
 fig.add_trace(go.Scatter(
     x=df_em_means["risk_mean"],
     y=df_em_means["reward_mean"],
+    customdata=df_em_means["num_feedback"],
+    hovertemplate="Feedback enviado: %{customdata}<br>Risk: %{x:.2f}<br>Reward: %{y:.2f}<extra></extra>",
     mode='markers+text',
     text=df_em_means["Startup"],
     textposition="top center",
