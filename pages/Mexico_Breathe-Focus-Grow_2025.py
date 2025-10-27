@@ -187,7 +187,7 @@ fields: dict = {
         "Investment": [
             "Breathe | Pitching dynamic (Day 2)",
             "Breathe | Workstations",
-        ],
+        ]
     },
     "Focus": {
         "Talks": [
@@ -344,7 +344,7 @@ general_labels: list = [
 ]
 
 phases = ["Breathe", "Focus", "Grow"]
-categories_to_merge = ["Talks", "Well-being", "Networking"]
+categories_to_merge = ["Talks", "Well-being", "Networking", "Investment"]
 
 if "General" not in fields:
     fields["General"] = {}
