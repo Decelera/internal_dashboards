@@ -243,7 +243,7 @@ fields: dict = {
         ],
         "Networking": [
             "Grow | Open arena (Day 8)",
-            "Grow | Warp up (Day 9)",
+            "Grow | Human Pitch",
             "Grow | Farewell party (Day 9)"
         ],
         "Investment": [
@@ -337,7 +337,7 @@ labels: dict = {
         ],
         "Networking": [
             "Open arena (Day 8)",
-            "Wrap up (Day 9)",
+            "Human pitch wrap up",
             "Farewell party (Day 9)"
         ],
         "Investment": [
