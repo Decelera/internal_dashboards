@@ -271,8 +271,8 @@ def grouped_means(df):
 
 df_em_means = df_em.groupby("Startup").apply(grouped_means).reset_index()
 df_em_means["Distance"] = np.sqrt((df_em_means["risk_mean"]) ** 2 + (4 - df_em_means["reward_mean"]) ** 2)
-num_feedback = df_em.groupby("Startup").size().reset_index(name="num_feedback")
-df_em_means = df_em_means.merge(num_feedback, on="Startup")
+num_feedback: Series = df_means.groupby(by="Startup").size()
+df_em_means["num_feedback"] = df_em_means["Startup"].map(num_feedback)
 
 fig: Figure = go.Figure()
 
