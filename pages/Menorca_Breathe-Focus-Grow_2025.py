@@ -10,6 +10,10 @@ st.set_page_config(
     page_icon="https://images.squarespace-cdn.com/content/v1/67811e8fe702fd5553c65249/c5500619-9712-4b9b-83ee-a697212735ae/Disen%CC%83o+sin+ti%CC%81tulo+%2840%29.png",
     layout="wide"
 )
+
+if "selected_year" not in st.session_state:
+    st.session_state.selected_year = "2025"
+
 st.markdown(body="""
 <style>
 .outer-container {
