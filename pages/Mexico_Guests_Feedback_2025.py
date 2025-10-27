@@ -218,13 +218,15 @@ color_scale=[
 ]
 
 # --- Función 'barras' comparativa y robusta ---
-def barras(values_actual, labels, values_pasado, title) -> None:
+def barras(values_actual, labels, values_pasado, title, n_actual, n_pasado) -> None:
     fig = go.Figure()
     
     fig.add_trace(go.Bar(
         name='Mexico 2025',
         x=labels,
         y=values_actual,
+        customdata=n_actual,
+        hovertemplate='Muestra: %{customdata}<extra></extra>',
         texttemplate=[f'{y:.2f}' if pd.notna(y) else '' for y in values_actual],
         textposition='outside',
         marker=dict(
@@ -242,6 +244,8 @@ def barras(values_actual, labels, values_pasado, title) -> None:
             name='Menorca 2025',
             x=labels,
             y=values_pasado,
+            customdata=n_pasado,
+            hovertemplate='Muestra: %{customdata}<extra></extra>',
             texttemplate=[f'{y:.2f}' if pd.notna(y) else '' for y in values_pasado],
             textposition='outside',
             marker=dict(
@@ -339,6 +343,12 @@ def safe_check_guest_type(x, type_name):
         return x == type_name
     return False
 
+# FUncion segura para contar el numero de datos de cada metrica
+def safe_count(df_to_check, field):
+    if not df_to_check.empty and field in df_to_check.columns:
+        return int(df_to_check[field].dropna().count())
+    return float("nan")
+
 #===================================Vamos con Founders===================================
 
 #------------------------------Saquemos las medias-------------------------------------
@@ -353,10 +363,16 @@ nps_startup_startup = calculate_nps(df=df_startup, field="Recommendation to Star
 
 means_founder: list = []
 means_founder_pasado: list = []
+n_founder: list = []
+n_founder_pasado: list = []
+
 labels_startup = labels["Founders"]
 for field in fields["Founders"]:
     means_founder.append(safe_mean(df_startup, field))
     means_founder_pasado.append(safe_mean(df_startup_past, field))
+
+    n_founder.append(safe_count(df_startup, field))
+    n_founder_pasado.append(safe_count(df_startup_past, field))
 
 #==================================Vamos con EMs==================================
 
@@ -373,10 +389,16 @@ nps_em_em = calculate_nps(df=df_em, field="EM's Fb | Recommendation to EM")
 
 means_em: list = []
 means_em_pasado: list = []
+n_em: list = []
+n_em_pasado: list = []
+
 labels_em = labels["EMs"]
 for field in fields["EMs"]:
     means_em.append(safe_mean(df_em, field))
     means_em_pasado.append(safe_mean(df_em_past, field))
+
+    n_em.append(safe_count(df_em, field))
+    n_em_pasado.append(safe_count(df_em_past, field))
 
 #=================================Vamos con VCs==================================
 
@@ -394,9 +416,15 @@ nps_vc_vc = calculate_nps(df=df_vc, field="VC's | Recommendation to vc")
 means_vc: list = []
 means_vc_pasado: list = []
 labels_vc = labels["VCs"]
+n_vc: list = []
+n_vc_pasado: list = []
+
 for field in fields["VCs"]:
     means_vc.append(safe_mean(df_vc, field))
     means_vc_pasado.append(safe_mean(df_vc_past, field))
+
+    n_vc.append(safe_count(df_vc, field))
+    n_vc_pasado.append(safe_count(df_vc_past, field))
 #--------------------------------------------------------------------------------------------
 st.markdown(body="Here you will find the feedback submitted by founders, experience makers and VC's about the program")
 
@@ -405,19 +433,23 @@ st.markdown(body="<h1 style='text-align: center;'>Founders</h1>", unsafe_allow_h
 st.metric(value=round(nps_startup_startup, 2) if pd.notna(nps_startup_startup) else "N/A", label="NPS Startups to Startups")
 
 ordered_pairs_founder = sorted(
-    zip(means_founder, means_founder_pasado, labels["Founders"]),
+    zip(means_founder, means_founder_pasado, n_founder, n_founder_pasado, labels["Founders"]),
     key=lambda x: -1 if pd.isna(x[0]) else x[0],
     reverse=True
 )
-values_graph_founder = [v_act for v_act, v_pas, lab in ordered_pairs_founder]
-values_graph_founder_pasado = [v_pas for v_act, v_pas, lab in ordered_pairs_founder]
-labels_graph_founder = [lab for v_act, v_pas, lab in ordered_pairs_founder]
+values_graph_founder = [v_act for v_act, v_pas, n_act, n_pas, lab in ordered_pairs_founder]
+values_graph_founder_pasado = [v_pas for v_act, v_pas, n_act, n_pas, lab in ordered_pairs_founder]
+n_graph_founder = [n_act for v_act, v_pas, n_act, n_pas, lab in ordered_pairs_founder]
+n_graph_founder_pasado = [n_pas for v_act, v_pas, n_act, n_pas, lab in ordered_pairs_founder]
+labels_graph_founder = [lab for v_act, v_pas, n_act, n_pas, lab in ordered_pairs_founder]
 
 barras(
     values_actual=values_graph_founder,
     labels=labels_graph_founder,
     values_pasado=values_graph_founder_pasado,
-    title=f"Founders feedback"
+    title=f"Founders feedback",
+    n_actual=n_graph_founder,
+    n_pasado=n_graph_founder_pasado
 )
 
 st.markdown(body="---") #==============================================================================
@@ -431,19 +463,23 @@ with cols[1]:
     st.metric(value=round(nps_em_startup, 2) if pd.notna(nps_em_startup) else "N/A", label="NPS EM's to Startup")
 
 ordered_pairs_em = sorted(
-    zip(means_em, means_em_pasado, labels["EMs"]),
+    zip(means_em, means_em_pasado, n_em, n_em_pasado, labels["EMs"]),
     key=lambda x: -1 if pd.isna(x[0]) else x[0],
     reverse=True
 )
-values_graph_em = [v_act for v_act, v_pas, lab in ordered_pairs_em]
-values_graph_em_pasado = [v_pas for v_act, v_pas, lab in ordered_pairs_em]
-labels_graph_em = [lab for v_act, v_pas, lab in ordered_pairs_em]
+values_graph_em = [v_act for v_act, v_pas, n_act, n_pas, lab in ordered_pairs_em]
+values_graph_em_pasado = [v_pas for v_act, v_pas, n_act, n_pas, lab in ordered_pairs_em]
+labels_graph_em = [lab for v_act, v_pas, n_act, n_pas, lab in ordered_pairs_em]
+n_graph_em = [n_act for v_act, v_pas, n_act, n_pas, lab in ordered_pairs_em]
+n_graph_em_pasado = [n_pas for v_act, v_pas, n_act, n_pas, lab in ordered_pairs_em]
 
 barras(
     values_actual=values_graph_em,
     labels=labels_graph_em,
     values_pasado=values_graph_em_pasado,
-    title=f"EM's feedback"
+    title=f"EM's feedback",
+    n_actual=n_graph_em,
+    n_pasado=n_graph_em_pasado
 )
 
 st.markdown(body="---") #======================================================================================0
@@ -457,19 +493,23 @@ with cols[1]:
     st.metric(value=round(nps_vc_startup, 2) if pd.notna(nps_vc_startup) else "N/A", label="NPS VC's to Startups")
 
 ordered_pairs_vc = sorted(
-    zip(means_vc, means_vc_pasado, labels["VCs"]),
+    zip(means_vc, means_vc_pasado, n_vc, n_vc_pasado, labels["VCs"]),
     key=lambda x: -1 if pd.isna(x[0]) else x[0],
     reverse=True
 )
-values_graph_vc = [v_act for v_act, v_pas, lab in ordered_pairs_vc]
-values_graph_vc_pasado = [v_pas for v_act, v_pas, lab in ordered_pairs_vc]
-labels_graph_vc = [lab for v_act, v_pas, lab in ordered_pairs_vc]
+values_graph_vc = [v_act for v_act, v_pas, n_act, n_pas, lab in ordered_pairs_vc]
+values_graph_vc_pasado = [v_pas for v_act, v_pas, n_act, n_pas, lab in ordered_pairs_vc]
+n_graph_vc = [n_act for v_act, v_pas, n_act, n_pas, lab in ordered_pairs_vc]
+n_graph_vc_pasado = [n_pas for v_act, v_pas, n_act, n_pas, lab in ordered_pairs_vc]
+labels_graph_vc = [lab for v_act, v_pas, n_act, n_pas, lab in ordered_pairs_vc]
 
 barras(
     values_actual=values_graph_vc,
     labels=labels_graph_vc,
     values_pasado=values_graph_vc_pasado,
-    title=f"VC's feedback"
+    title=f"VC's feedback",
+    n_actual=n_graph_vc,
+    n_pasado=n_graph_vc_pasado
 )
 
 st.markdown(body="---")
