@@ -222,7 +222,7 @@ def barras(values_actual, labels, values_pasado, title) -> None:
     fig = go.Figure()
     
     fig.add_trace(go.Bar(
-        name='Año Actual (2025)',
+        name='Mexico 2025',
         x=labels,
         y=values_actual,
         texttemplate=[f'{y:.2f}' if pd.notna(y) else '' for y in values_actual],
@@ -239,7 +239,7 @@ def barras(values_actual, labels, values_pasado, title) -> None:
 
     if hay_datos_pasados:
         fig.add_trace(go.Bar(
-            name='Año Pasado (2024)',
+            name='Menorca 2025',
             x=labels,
             y=values_pasado,
             texttemplate=[f'{y:.2f}' if pd.notna(y) else '' for y in values_pasado],
