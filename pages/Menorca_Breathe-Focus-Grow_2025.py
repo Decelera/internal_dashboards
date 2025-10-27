@@ -247,7 +247,7 @@ fields: dict = {
             "Grow | Farewell party (Day 9)"
         ],
         "Investment": [
-            "Grow | Pitching (Day 8)",
+            "Grow | Demo day",
             "Grow | 1:1's (Day 9)"
         ]
     }
@@ -341,7 +341,7 @@ labels: dict = {
             "Farewell party (Day 9)"
         ],
         "Investment": [
-            "Pitching (Day 8)",
+            "Demo day",
             "1:1's (Day 9)"
         ]
     }
