@@ -175,14 +175,16 @@ fields: dict = {
             "Breathe | Journaling (Day 2)",
         ],
         "Networking": [
-            "Breathe | Pitching dynamic (Day 2)",
-            "Breathe | Workstations",
             "Breathe | Founder Arena (1)",
             "Breathe | Founder Arena (2)",
             "Breathe | Founder Arena (3)",
             "Breathe | Cocktail at Binibeca (Day 1)",
             "Breathe | New connections"
-        ]
+        ],
+        "Investment": [
+            "Breathe | Pitching dynamic (Day 2)",
+            "Breathe | Workstations",
+        ],
     },
     "Focus": {
         "Talks": [
@@ -210,10 +212,12 @@ fields: dict = {
             "Founder Arena - Rui Fernandez",
             "Founder arena - Mesa de VC's",
             "Founder Arena - Jose V. Fernandez",
-            "Focus | 1:1's matching (Day 3)",
             "Cenote",
             "Focus | Paellas contest",
             "Kiin Beh"
+        ],
+        "Investment": [
+            "Focus | 1:1's matching (Day 3)"
         ]
     },
     "Grow": {
@@ -268,13 +272,15 @@ labels: dict = {
             "Journaling (breathe)",
         ],
         "Networking": [
-            "Pitching dynamic",
-            "Workstations",
             "Founder Arena Rui and Juanma",
             "Founder Arena Jose de la Luz",
             "Founder Arena Alex Wieland",
             "Welcome Cocktail",
             "New connections value"
+        ],
+        "Investment": [
+            "Pitching dynamic",
+            "Workstations"
         ]
     },
     "Focus": {
@@ -303,10 +309,12 @@ labels: dict = {
             "Founder Arena Rui Fernandez",
             "Founder arena Mesa de VC's",
             "Founder Arena Jose V. Fernandez",
-            "1:1's matching",
             "Cenote",
             "Cooking Contest",
             "Kiin Beh"
+        ],
+        "Investment": [
+            "1:1's matching"
         ]
     },
     "Grow": {
