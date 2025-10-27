@@ -13,6 +13,9 @@ st.set_page_config(
     layout="wide"
 )
 
+if "selected_year" not in st.session_state:
+    st.session_state.selected_year = "2025"
+
 st.markdown(body="""
 <style>
 .outer-container {
