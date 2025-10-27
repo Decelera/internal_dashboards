@@ -218,16 +218,18 @@ fields: dict = {
             "Focus | Soft yoga (Day 7)",
         ],
         "Networking": [
-            "Focus | 1:1's matching (Day 3)",
             "Focus | The founder arena (1)",
-            "Focus | 1:1's matching (Day 4)",
             "Focus | Castle contest (Day 4)",
-            "Focus | 1:1's matching (Day 5)",
             "Focus | 10th anniversary (Day 5)",
-            "Focus | Workstations (Day 6)",
             "Focus | Founder arena (2)",
-            "Focus | 1:1's matching (Day 7)",
             "Focus | Paellas contest"
+        ],
+        "Investment": [
+            "Focus | 1:1's matching (Day 3)",
+            "Focus | 1:1's matching (Day 4)",
+            "Focus | 1:1's matching (Day 5)",
+            "Focus | Workstations (Day 6)",
+            "Focus | 1:1's matching (Day 7)"
         ]
     },
     "Grow": {
@@ -240,11 +242,13 @@ fields: dict = {
             "Grow | Mindfulness (Day 9)"
         ],
         "Networking": [
-            "Grow | Pitching (Day 8)",
             "Grow | Open arena (Day 8)",
-            "Grow | 1:1's (Day 9)",
             "Grow | Warp up (Day 9)",
             "Grow | Farewell party (Day 9)"
+        ],
+        "Investment": [
+            "Grow | Pitching (Day 8)",
+            "Grow | 1:1's (Day 9)"
         ]
     }
 }
@@ -308,16 +312,18 @@ labels: dict = {
             "Soft yoga (Day 7)",
         ],
         "Networking": [
-            "1:1's matching (Day 3)",
             "The founder arena (1)",
-            "1:1's matching (Day 4)",
             "Castle contest (Day 4)",
-            "1:1's matching (Day 5)",
             "10th anniversary (Day 5)",
-            "Workstations (Day 6)",
             "Founder arena (2)",
-            "1:1's matching (Day 7)",
             "Paellas contest"
+        ],
+        "Investment": [
+            "1:1's matching (Day 3)",
+            "1:1's matching (Day 4)",
+            "1:1's matching (Day 5)",
+            "Workstations (Day 6)",
+            "1:1's matching (Day 7)"
         ]
     },
     "Grow": {
@@ -330,11 +336,13 @@ labels: dict = {
             "Mindfulness (Day 9)"
         ],
         "Networking": [
-            "Pitching (Day 8)",
             "Open arena (Day 8)",
-            "1:1's (Day 9)",
             "Wrap up (Day 9)",
             "Farewell party (Day 9)"
+        ],
+        "Investment": [
+            "Pitching (Day 8)",
+            "1:1's (Day 9)"
         ]
     }
 }
