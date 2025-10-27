@@ -1,6 +1,4 @@
 from typing import Any
-from narwhals.functions import all_
-import streamlit as st
 import streamlit as st
 import pandas as pd
 from pyairtable import Api
@@ -153,12 +151,17 @@ records = api.table(base_id, table_id).all(view="Breathe-Focus-Grow")
 data = [record["fields"] for record in records]
 df = pd.DataFrame(data)
 
+records_past = api.table(base_id, table_id).all(view='Menorca 2025')
+data_past = [record["fields"] for record in records_past]
+df_past = pd.DataFrame(data_past)
+
 def fix_cell(val):
     if isinstance(val, dict) and "specialValue" in val:
         return float("nan")
     return val
 
 df = df.map(func=fix_cell)
+df_past = df_past.map(func=fix_cell)
 #=========================CONFIG========================================
 
 fields: dict = {
@@ -337,6 +340,9 @@ labels: dict = {
     }
 }
 
+# Voy a intentar quedarme con los campos de menorca 2025 que coinciden con los de este año
+
+
 general_labels: list = [
     "Overall experience",
     "Wellbeing dynamics",
@@ -368,42 +374,71 @@ color_scale=[
     [1.0, '#1FD0EF']
 ]
 
-def barras(values, labels, title) -> None:
-    
+# <--- MODIFICADO --- He actualizado la función 'barras' para la comparativa con los colores solicitados
+def barras(values_actual, labels, values_pasado, title) -> None:
+    """
+    Genera un gráfico de barras comparativo (actual vs. pasado).
+    'values_pasado' debe tener la misma longitud que 'labels' y 'values_actual',
+    usando float("nan") para los campos que no coinciden.
+    """
     fig = go.Figure()
     
+    # --- Trace 1: Año Actual --- (Aplica la escala de colores original)
     fig.add_trace(go.Bar(
+        name='Mexico 2025', # Etiqueta para la leyenda
         x=labels,
-        y=values,
-        texttemplate='%{y:.2f}',
+        y=values_actual,
+        texttemplate=[f'{y:.2f}' if pd.notna(y) else '' for y in values_actual], # Oculta texto si es NaN
         textposition='outside',
         marker=dict(
-            color=values,
-            colorscale=color_scale,
-            line=dict(
-                color='black',
-                width=1.5
-            )
+            color=values_actual, # <--- Se usa values_actual para aplicar la escala
+            colorscale=color_scale, # <--- Aplica tu escala de colores
+            line=dict(color='black', width=1.5)
         ),
         textfont=dict(color='black')
     ))
+
+    # --- Trace 2: Año Pasado --- (Transparente con borde gris)
+    hay_valores_pasado = pd.Series(values_pasado).notna().any()
+
+    if hay_valores_pasado:
+        fig.add_trace(go.Bar(
+            name='Menorca 2025', # Etiqueta para la leyenda
+            x=labels,
+            y=values_pasado, # Plotly ignora los valores 'nan'
+            texttemplate=[f'{y:.2f}' if pd.notna(y) else '' for y in values_pasado], # Oculta texto si es NaN
+            textposition='outside',
+            marker=dict(
+                color='rgba(0,0,0,0)',  # <--- Transparente
+                line=dict(color='darkgrey', width=1.5) # <--- Borde gris
+            ),
+            textfont=dict(color='darkgrey') # <--- El texto también en gris para que se vea
+        ))
     
-    range_max = max(values) * 1.15 if values else 1
+    # Calcular el rango máximo de forma segura, ignorando NaNs
+    all_values = [v for v in values_actual if pd.notna(v)] + \
+                 [v for v in values_pasado if pd.notna(v)]
+    
+    # Asegurarse de que el rango no esté vacío y tenga un default
+    range_max = max(all_values) * 1.15 if all_values else 5 # Default a 5 si no hay datos
 
     fig.update_layout(
         title=title,
         yaxis_title='Mean Score',
         template="plotly_white",
+        barmode='group', # <-- Clave para agrupar las barras
         yaxis=dict(
-            range=[1, range_max]
+            range=[0, range_max] # Rango desde 0 hasta el máximo + 15%
         ),
         xaxis=dict(
             tickfont=dict(color='black'),
             tickangle=-45
-        )
+        ),
+        legend_title_text='Periodo'
     )
     
     st.plotly_chart(fig, use_container_width=True)
+# <--- FIN DE LA MODIFICACIÓN ---
 
 def metric(value, label) -> None:
     st.metric(value=value, label=label)
@@ -424,53 +459,76 @@ for i in range(3):
 
 general_means: list[float] = [round(x / 3, 2) for x in general_means]
 
+
+# <--- AÑADIDO --- Helper para calcular medias de forma segura ---
+# Obtener los sets de columnas UNA SOLA VEZ para eficiencia
+cols_pasado = set(df_past.columns)
+
+def safe_mean(df_to_check, field):
+    """Calcula la media si el campo existe, si no, devuelve nan."""
+    # Usamos .columns.values porque 'in' es más rápido en un set/list que en un Index
+    if field in df_to_check.columns.values:
+        return float(df_to_check[field].dropna().astype(float).mean())
+    return float("nan") # Devuelve NaN si el campo no existe
+
 #===================================Vamos con Breathe===================================
 
 #------------------------------Saquemos las medias-------------------------------------
 means_breathe: dict = {}
+means_breathe_pasado: dict = {} # <--- AÑADIDO
 labels_breathe = labels["Breathe"]
 for category in fields["Breathe"].keys():
 
     means_breathe[category] = []
+    means_breathe_pasado[category] = [] # <--- AÑADIDO
     for field in fields["Breathe"][category]:
-        mean_breathe: float = float(df[field].dropna().astype(float).mean())
-        means_breathe[category].append(mean_breathe)
+        # Calcula la media del año actual (siempre debe existir según 'fields')
+        means_breathe[category].append(safe_mean(df, field))
+        
+        # Calcula la media del año pasado (dará NaN si el campo no existe)
+        means_breathe_pasado[category].append(safe_mean(df_past, field)) # <--- AÑADIDO
 
 #==================================Vamos con Focus==================================
 
 #------------------------------Saquemos las medias-------------------------------------
 means_focus: dict = {}
+means_focus_pasado: dict = {} # <--- AÑADIDO
 labels_focus = labels["Focus"]
 for category in fields["Focus"].keys():
 
     means_focus[category] = []
+    means_focus_pasado[category] = [] # <--- AÑADIDO
     for field in fields["Focus"][category]:
-        mean_focus: float = float(df[field].dropna().astype(float).mean())
-        means_focus[category].append(mean_focus)
+        means_focus[category].append(safe_mean(df, field))
+        means_focus_pasado[category].append(safe_mean(df_past, field)) # <--- AÑADIDO
 
 #=================================Vamos con Grow==================================
 
 #------------------------------Saquemos las medias-------------------------------------
 means_grow: dict = {}
+means_grow_pasado: dict = {} # <--- AÑADIDO
 labels_grow = labels["Grow"]
 for category in fields["Grow"].keys():
 
     means_grow[category] = []
+    means_grow_pasado[category] = [] # <--- AÑADIDO
     for field in fields["Grow"][category]:
-        mean_grow: float = float(df[field].dropna().astype(float).mean())
-        means_grow[category].append(mean_grow)
+        means_grow[category].append(safe_mean(df, field))
+        means_grow_pasado[category].append(safe_mean(df_past, field)) # <--- AÑADIDO
 
 #===========================General================================================
 
 #--------------------------------las mediaas-----------------------------------------
 means_general: dict = {}
+means_general_pasado: dict = {} # <--- AÑADIDO
 labels_general = labels["General"]
 for category in fields["General"].keys():
 
     means_general[category] = []
+    means_general_pasado[category] = [] # <--- AÑADIDO
     for field in fields["General"][category]:
-        mean_general: float = float(df[field].dropna().astype(float).mean())
-        means_general[category].append(mean_general)
+        means_general[category].append(safe_mean(df, field))
+        means_general_pasado[category].append(safe_mean(df_past, field)) # <--- AÑADIDO
 
 #--------------------------------------------------------------------------------------------
 
@@ -483,11 +541,31 @@ for i in range(3):
     with cols[i]:
         st.metric(value=general_means[i], label=general_labels[i])
 
+# <--- MODIFICADO --- Bucle de gráficos "General"
 for category in fields["General"].keys():
-    ordered_pairs_general = sorted(zip(means_general[category], labels_general[category]), reverse=True)
-    values_graph_general = [value for value, label in ordered_pairs_general]
-    labels_graph_general = [label for value, label in ordered_pairs_general]
-    barras(values=values_graph_general, labels=labels_graph_general, title=f"All: {category}")
+    # Zip de las TRES listas para ordenar todo junto
+    ordered_tuples_general = sorted(
+        zip(
+            means_general[category],
+            means_general_pasado[category], # <--- AÑADIDO
+            labels_general[category]
+        ),
+        key=lambda x: -1 if pd.isna(x[0]) else x[0], # Ordena por media actual (manejando NaNs)
+        reverse=True
+    )
+    
+    # Descomprimir las listas ya ordenadas
+    values_graph_general = [v_act for v_act, v_pas, lab in ordered_tuples_general]
+    values_graph_general_pasado = [v_pas for v_act, v_pas, lab in ordered_tuples_general] # <--- AÑADIDO
+    labels_graph_general = [lab for v_act, v_pas, lab in ordered_tuples_general]
+
+    # Llamar a la nueva función barras
+    barras(
+        values_actual=values_graph_general,
+        labels=labels_graph_general,
+        values_pasado=values_graph_general_pasado, # <--- AÑADIDO
+        title=f"All: {category}"
+    )
 
 st.markdown(body="---")
 
@@ -499,11 +577,28 @@ for i in range(3):
     with cols[i]:
         st.metric(value=general_means_per_phase["Breathe"][i], label=general_labels[i], delta=round(general_means_per_phase["Breathe"][i] - general_means[i], 2))
 
+# <--- MODIFICADO --- Bucle de gráficos "Breathe"
 for category in fields["Breathe"].keys():
-    ordered_pairs_breathe = sorted(zip(means_breathe[category], labels_breathe[category]), reverse=True)
-    values_graph_breathe = [value for value, label in ordered_pairs_breathe]
-    labels_graph_breathe = [label for value, label in ordered_pairs_breathe]
-    barras(values=values_graph_breathe, labels=labels_graph_breathe, title=f"Breathe: {category}")
+    ordered_tuples_breathe = sorted(
+        zip(
+            means_breathe[category],
+            means_breathe_pasado[category], # <--- AÑADIDO
+            labels_breathe[category]
+        ), 
+        key=lambda x: -1 if pd.isna(x[0]) else x[0],
+        reverse=True
+    )
+    
+    values_graph_breathe = [v_act for v_act, v_pas, lab in ordered_tuples_breathe]
+    values_graph_breathe_pasado = [v_pas for v_act, v_pas, lab in ordered_tuples_breathe] # <--- AÑADIDO
+    labels_graph_breathe = [lab for v_act, v_pas, lab in ordered_tuples_breathe]
+    
+    barras(
+        values_actual=values_graph_breathe,
+        labels=labels_graph_breathe,
+        values_pasado=values_graph_breathe_pasado, # <--- AÑADIDO
+        title=f"Breathe: {category}"
+    )
 
 st.markdown(body="---")
 
@@ -514,11 +609,28 @@ for i in range(3):
     with cols[i]:
         st.metric(value=general_means_per_phase["Focus"][i], label=general_labels[i], delta=round(general_means_per_phase["Focus"][i] - general_means[i], 2))
 
+# <--- MODIFICADO --- Bucle de gráficos "Focus"
 for category in fields["Focus"].keys():
-    ordered_pairs_focus = sorted(zip(means_focus[category], labels_focus[category]), reverse=True)
-    values_graph_focus = [value for value, label in ordered_pairs_focus]
-    labels_graph_focus = [label for value, label in ordered_pairs_focus]
-    barras(values=values_graph_focus, labels=labels_graph_focus, title=f"Focus: {category}")
+    ordered_tuples_focus = sorted(
+        zip(
+            means_focus[category],
+            means_focus_pasado[category], # <--- AÑADIDO
+            labels_focus[category]
+        ), 
+        key=lambda x: -1 if pd.isna(x[0]) else x[0],
+        reverse=True
+    )
+
+    values_graph_focus = [v_act for v_act, v_pas, lab in ordered_tuples_focus]
+    values_graph_focus_pasado = [v_pas for v_act, v_pas, lab in ordered_tuples_focus] # <--- AÑADIDO
+    labels_graph_focus = [lab for v_act, v_pas, lab in ordered_tuples_focus]
+    
+    barras(
+        values_actual=values_graph_focus,
+        labels=labels_graph_focus,
+        values_pasado=values_graph_focus_pasado, # <--- AÑADIDO
+        title=f"Focus: {category}"
+    )
 
 st.markdown(body="---")
 
@@ -529,10 +641,25 @@ for i in range(3):
     with cols[i]:
         st.metric(value=general_means_per_phase["Grow"][i], label=general_labels[i], delta=round(general_means_per_phase["Grow"][i] - general_means[i], 2))
 
+# <--- MODIFICADO --- Bucle de gráficos "Grow"
 for category in fields["Grow"].keys():
-    ordered_pairs_grow = sorted(zip(means_grow[category], labels_grow[category]), reverse=True)
-    values_graph_grow = [value for value, label in ordered_pairs_grow]
-    labels_graph_grow = [label for value, label in ordered_pairs_grow]
-    barras(values=values_graph_grow, labels=labels_graph_grow, title=f"Grow: {category}")
+    ordered_tuples_grow = sorted(
+        zip(
+            means_grow[category],
+            means_grow_pasado[category], # <--- AÑADIDO
+            labels_grow[category]
+        ), 
+        key=lambda x: -1 if pd.isna(x[0]) else x[0],
+        reverse=True
+    )
+    
+    values_graph_grow = [v_act for v_act, v_pas, lab in ordered_tuples_grow]
+    values_graph_grow_pasado = [v_pas for v_act, v_pas, lab in ordered_tuples_grow] # <--- AÑADIDO
+    labels_graph_grow = [lab for v_act, v_pas, lab in ordered_tuples_grow]
 
-st.markdown(body="---")
+    barras(
+        values_actual=values_graph_grow,
+        labels=labels_graph_grow,
+        values_pasado=values_graph_grow_pasado, # <--- AÑADIDO
+        title=f"Grow: {category}"
+    )
