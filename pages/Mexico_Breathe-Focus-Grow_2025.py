@@ -234,7 +234,7 @@ fields: dict = {
             "Grow | Journaling",
             "Grow | Human Pitch",
         ],
-        "Networking": [
+        "Investment": [
             "Grow | Demo day"
         ]
     }
