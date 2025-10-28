@@ -256,9 +256,10 @@ text-align: center;
 
 #vamos a darle la vuelta a risk 
 df_em = df_em[df_em["Startup"].isin(startup_founders.keys())]
-df_em = df_em[df_em[risk_reward_fields["risk_scores"]] != 0]
-df_em = df_em[df_em[risk_reward_fields["reward_scores"]] != 0]
 df_em[risk_reward_fields["risk_scores"]] = 5 - df_em[risk_reward_fields["risk_scores"]]
+df_em[risk_reward_fields["risk_scores"]] = df_em[risk_reward_fields["risk_scores"]].replace(0, np.nan)
+df_em[risk_reward_fields["reward_scores"]] = df_em[risk_reward_fields["reward_scores"]].replace(0, np.nan)
+df_em[risk_reward_fields["risk_scores"]] = df_em[risk_reward_fields["risk_scores"]].replace("No", np.nan)
 
 #vamosa calcular un par de medias
 
