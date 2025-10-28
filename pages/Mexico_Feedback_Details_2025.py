@@ -148,9 +148,6 @@ df_team = df_team.map(fix_cell)
 df_em = df_em.map(fix_cell)
 df_olbi = df_olbi.map(fix_cell)
 
-df_em[risk_reward_fields["reward_scores"]] = df_em[risk_reward_fields["reward_scores"]].replace(0, np.nan)
-df_em[risk_reward_fields["risk_scores"]] = df_em[risk_reward_fields["risk_scores"]].replace(0, np.nan)
-
 #-------------------------------------------------Por ahora quito a Sean (quitar de general tambien)
 condition: bool = (df_em["EM_Name"].str.startswith("Sean"))
 df_em = df_em[~condition]
@@ -375,6 +372,9 @@ if WIDGET_KEY not in st.session_state:
 
 def update_state_and_url():
     st.query_params["startup"] = st.session_state[WIDGET_KEY]
+
+df_em[risk_reward_fields["reward_scores"]] = df_em[risk_reward_fields["reward_scores"]].replace(0, np.nan)
+df_em[risk_reward_fields["risk_scores"]] = df_em[risk_reward_fields["risk_scores"]].replace(0, np.nan)
 
 #----------------------------A partir de aqui dropdown de startup--------------------------
 
