@@ -452,6 +452,39 @@ barras(
     n_pasado=n_graph_founder_pasado
 )
 
+with st.expander(label="Improvement ideas from founders"):
+    if not df_startup["Improvement ideas"].empty:
+
+        comments_founders = df_startup[["Name", "Improvement ideas"]].dropna(subset=["Improvement ideas"])
+        for index, row in comments_founders.iterrows():
+            name = row["Name"]
+            comment = row["Improvement ideas"]
+            
+            with st.expander(label=f"Improvement ideas from {name}"):
+                st.markdown(body=comment)
+
+with st.expander(label="Most positive aspect from founders"):
+    if not df_startup["Most positive aspect"].empty:
+
+        comments_founders = df_startup[["Name", "Most positive aspect"]].dropna(subset=["Most positive aspect"])
+        for index, row in comments_founders.iterrows():
+            name = row["Name"]
+            comment = row["Most positive aspect"]
+            
+            with st.expander(label=f"Most positive aspect from {name}"):
+                st.markdown(body=comment)
+
+with st.expander(label="Top 3 outcomes from founders"):
+    if not df_startup["Top 3 outcomes"].empty:
+
+        comments_founders = df_startup[["Name", "Top 3 outcomes"]].dropna(subset=["Top 3 outcomes"])
+        for index, row in comments_founders.iterrows():
+            name = row["Name"]
+            comment = row["Top 3 outcomes"]
+            
+            with st.expander(label=f"Top 3 outcomes from {name}"):
+                st.markdown(body=comment)
+
 st.markdown(body="---") #==============================================================================
 
 st.markdown(body="<h1 style='text-align: center;'>EM's</h1>", unsafe_allow_html=True)
@@ -482,6 +515,39 @@ barras(
     n_pasado=n_graph_em_pasado
 )
 
+with st.expander(label="Comments from EMs"):
+    if not df_em["Comments"].empty:
+
+        comments_founders = df_em[["Name", "Comments"]].dropna(subset=["Comments"])
+        for index, row in comments_founders.iterrows():
+            name = row["Name"]
+            comment = row["Comments"]
+            
+            with st.expander(label=f"Comments from {name}"):
+                st.markdown(body=comment)
+
+with st.expander(label="Improvement ideas from EMs"):
+    if not df_em["Improvement ideas"].empty:
+
+        comments_founders = df_em[["Name", "Improvement ideas"]].dropna(subset=["Improvement ideas"])
+        for index, row in comments_founders.iterrows():
+            name = row["Name"]
+            comment = row["Improvement ideas"]
+            
+            with st.expander(label=f"Improvement ideas from {name}"):
+                st.markdown(body=comment)
+
+with st.expander(label="Top3 1:1's from EMs"):
+    if not df_em["EM's Fb | Top3 1:1's"].empty:
+
+        comments_founders = df_em[["Name", "EM's Fb | Top3 1:1's"]].dropna(subset=["EM's Fb | Top3 1:1's"])
+        for index, row in comments_founders.iterrows():
+            name = row["Name"]
+            comment = row["EM's Fb | Top3 1:1's"]
+            
+            with st.expander(label=f"Top3 1:1's from {name}"):
+                st.markdown(body=comment)
+
 st.markdown(body="---") #======================================================================================0
 
 st.markdown(body="<h1 style='text-align: center;'>VC's</h1>", unsafe_allow_html=True)
@@ -511,5 +577,38 @@ barras(
     n_actual=n_graph_vc,
     n_pasado=n_graph_vc_pasado
 )
+
+with st.expander(label="Comments from VCs"):
+    if not df_vc["Comments"].empty:
+
+        comments_founders = df_vc[["Name", "Comments"]].dropna(subset=["Comments"])
+        for index, row in comments_founders.iterrows():
+            name = row["Name"]
+            comment = row["Comments"]
+            
+            with st.expander(label=f"Comments from {name}"):
+                st.markdown(body=comment)
+
+with st.expander(label="Improvement ideas from VCs"):
+    if not df_vc["Improvement ideas"].empty:
+
+        comments_founders = df_vc[["Name", "Improvement ideas"]].dropna(subset=["Improvement ideas"])
+        for index, row in comments_founders.iterrows():
+            name = row["Name"]
+            comment = row["Improvement ideas"]
+            
+            with st.expander(label=f"Improvement ideas from {name}"):
+                st.markdown(body=comment)
+
+with st.expander(label="Investment interest from VCs"):
+    if not df_vc["Investment Interest"].empty:
+
+        comments_founders = df_vc[["Name", "Investment Interest"]].dropna(subset=["Investment Interest"])
+        for index, row in comments_founders.iterrows():
+            name = row["Name"]
+            comment = row["Investment Interest"]
+            
+            with st.expander(label=f"Investment interest from {name}"):
+                st.markdown(body=comment)
 
 st.markdown(body="---")
