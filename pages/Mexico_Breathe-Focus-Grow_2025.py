@@ -340,6 +340,22 @@ labels: dict = {
     }
 }
 
+comment_fields = {
+    "Breathe": [
+        "Breathe | Comments",
+        "Breathe | Improvement ideas"
+    ],
+    "Focus": [
+        "Focus | Comments",
+        "Focus | Improvement ideas",
+        "Focus | Top 3 1:1's"
+    ],
+    "Grow": [
+        "Grow | Comments",
+        "Grow | Improvement Ideas"
+    ]
+}
+
 # Voy a intentar quedarme con los campos de menorca 2025 que coinciden con los de este año
 
 
@@ -644,6 +660,28 @@ for category in fields["Breathe"].keys():
         n_pasado=n_graph_breathe_pasado
     )
 
+with st.expander(label="Comentarios de Breathe"):
+    if not df[comment_fields["Breathe"][0]].empty:
+
+        comments_breathe = df[["Name", comment_fields["Breathe"][0]]].dropna(subset=[comment_fields["Breathe"][0]])
+        for index, row in comments_breathe.iterrows():
+            name = row["Name"]
+            comment = row[comment_fields["Breathe"][0]]
+            
+            with st.expander(label=f"Comment from {name}"):
+                st.markdown(body=comment)
+
+with st.expander(label="Improvement ideas de Breathe"):
+    if not df[comment_fields["Breathe"][1]].empty:
+
+        comments_breathe = df[["Name", comment_fields["Breathe"][1]]].dropna(subset=[comment_fields["Breathe"][1]])
+        for index, row in comments_breathe.iterrows():
+            name = row["Name"]
+            comment = row[comment_fields["Breathe"][1]]
+            
+            with st.expander(label=f"Improvement idea from {name}"):
+                st.markdown(body=comment)
+
 st.markdown(body="---")
 
 st.markdown(body="<h1 style='text-align: center;'>Focus</h1>", unsafe_allow_html=True)
@@ -682,6 +720,39 @@ for category in fields["Focus"].keys():
         n_pasado=n_graph_focus_pasado
     )
 
+with st.expander(label="Comentarios de Focus"):
+    if not df[comment_fields["Focus"][0]].empty:
+
+        comments_focus = df[["Name", comment_fields["Focus"][0]]].dropna(subset=[comment_fields["Focus"][0]])
+        for index, row in comments_focus.iterrows():
+            name = row["Name"]
+            comment = row[comment_fields["Focus"][0]]
+            
+            with st.expander(label=f"Comment from {name}"):
+                st.markdown(body=comment)
+
+with st.expander(label="Improvement ideas de Focus"):
+    if not df[comment_fields["Focus"][1]].empty:
+
+        comments_focus = df[["Name", comment_fields["Focus"][1]]].dropna(subset=[comment_fields["Focus"][1]])
+        for index, row in comments_focus.iterrows():
+            name = row["Name"]
+            comment = row[comment_fields["Focus"][1]]
+            
+            with st.expander(label=f"Improvement idea from {name}"):
+                st.markdown(body=comment)
+            
+with st.expander(label="Top 3 1:1's de Focus"):
+    if not df[comment_fields["Focus"][2]].empty:
+
+        comments_focus = df[["Name", comment_fields["Focus"][2]]].dropna(subset=[comment_fields["Focus"][2]])
+        for index, row in comments_focus.iterrows():
+            name = row["Name"]
+            comment = row[comment_fields["Focus"][2]]
+            
+            with st.expander(label=f"Top 3 1:1's from {name}"):
+                st.markdown(body=comment)
+
 st.markdown(body="---")
 
 st.markdown(body="<h1 style='text-align: center;'>Grow</h1>", unsafe_allow_html=True)
@@ -719,3 +790,25 @@ for category in fields["Grow"].keys():
         n_actual=n_graph_grow,
         n_pasado=n_graph_grow_pasado
     )
+
+with st.expander(label="Comentarios de Grow"):
+    if not df[comment_fields["Grow"][0]].empty:
+
+        comments_grow = df[["Name", comment_fields["Grow"][0]]].dropna(subset=[comment_fields["Grow"][0]])
+        for index, row in comments_grow.iterrows():
+            name = row["Name"]
+            comment = row[comment_fields["Grow"][0]]
+            
+            with st.expander(label=f"Comment from {name}"):
+                st.markdown(body=comment)
+
+with st.expander(label="Improvement ideas de Grow"):
+    if not df[comment_fields["Grow"][1]].empty:
+
+        comments_grow = df[["Name", comment_fields["Grow"][1]]].dropna(subset=[comment_fields["Grow"][1]])
+        for index, row in comments_grow.iterrows():
+            name = row["Name"]
+            comment = row[comment_fields["Grow"][1]]
+            
+            with st.expander(label=f"Improvement ideas from {name}"):
+                st.markdown(body=comment)
