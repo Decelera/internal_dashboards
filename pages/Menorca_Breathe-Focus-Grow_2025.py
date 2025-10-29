@@ -347,6 +347,22 @@ labels: dict = {
     }
 }
 
+comment_fields = {
+    "Breathe": [
+        "Breathe | Comments",
+        "Breathe | Improvement ideas"
+    ],
+    "Focus": [
+        "Focus | Comments",
+        "Focus | Improvement ideas",
+        "Focus | Top 3 1:1's"
+    ],
+    "Grow": [
+        "Grow | Comments",
+        "Grow | Improvement Ideas"
+    ]
+}
+
 phases = ["Breathe", "Focus", "Grow"]
 categories_to_merge = ["Talks", "Well-being", "Networking", "Investment"]
 
@@ -482,6 +498,17 @@ for category in fields["Breathe"].keys():
     labels_graph_breathe = [label for value, label in ordered_pairs_breathe]
     barras(values=values_graph_breathe, labels=labels_graph_breathe, title=f"Breathe: {category}")
 
+with st.expander(label="Comentarios de Breathe"):
+    if not df[comment_fields["Breathe"][0]].empty:
+
+        comments_breathe = df[["Name", comment_fields["Breathe"][0]]].dropna(subset=[comment_fields["Breathe"][0]])
+        for index, row in comments_breathe.iterrows():
+            name = row["Name"]
+            comment = row[comment_fields["Breathe"][0]]
+            
+            with st.expander(label=f"Comment from {name}"):
+                st.markdown(body=comment)
+
 st.markdown(body="---")
 
 st.markdown(body="<h1 style='text-align: center;'>Focus</h1>", unsafe_allow_html=True)
@@ -492,6 +519,17 @@ for category in fields["Focus"].keys():
     labels_graph_focus = [label for value, label in ordered_pairs_focus]
     barras(values=values_graph_focus, labels=labels_graph_focus, title=f"Focus: {category}")
 
+with st.expander(label="Comentarios de Focus"):
+    if not df[comment_fields["Focus"][0]].empty:
+
+        comments_focus = df[["Name", comment_fields["Focus"][0]]].dropna(subset=[comment_fields["Focus"][0]])
+        for index, row in comments_focus.iterrows():
+            name = row["Name"]
+            comment = row[comment_fields["Focus"][0]]
+            
+            with st.expander(label=f"Comment from {name}"):
+                st.markdown(body=comment)
+
 st.markdown(body="---")
 
 st.markdown(body="<h1 style='text-align: center;'>Grow</h1>", unsafe_allow_html=True)
@@ -501,5 +539,17 @@ for category in fields["Grow"].keys():
     values_graph_grow = [value for value, label in ordered_pairs_grow]
     labels_graph_grow = [label for value, label in ordered_pairs_grow]
     barras(values=values_graph_grow, labels=labels_graph_grow, title=f"Grow: {category}")
+
+with st.expander(label="Comentarios de Grow"):
+    if not df[comment_fields["Grow"][0]].empty:
+
+        comments_grow = df[["Name", comment_fields["Grow"][0]]].dropna(subset=[comment_fields["Grow"][0]])
+        for index, row in comments_grow.iterrows():
+            name = row["Name"]
+            comment = row[comment_fields["Grow"][0]]
+            
+            with st.expander(label=f"Comment from {name}"):
+                st.markdown(body=comment)
+
 
 st.markdown(body="---")
