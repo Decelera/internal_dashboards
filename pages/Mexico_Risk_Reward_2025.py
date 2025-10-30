@@ -180,7 +180,7 @@ try:
 
     df_team = pd.DataFrame(data_team)
     df_em = pd.DataFrame(data_em)
-except Exception as {e}:
+except Exception as e:
     st.warning(f"Error al cargar los datos de Airtable (Error: {e})")
     df_team = pd.DataFrame()
     df_em = pd.DataFrame()
