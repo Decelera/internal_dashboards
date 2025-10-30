@@ -499,7 +499,7 @@ def barras(values_actual, labels, values_pasado, title, n_actual, n_pasado) -> N
             tickfont=dict(color='black'),
             tickangle=-45
         ),
-        legend_title_text='Periodo'
+        legend_title_text='Programa'
     )
     
     st.plotly_chart(fig, use_container_width=True)
