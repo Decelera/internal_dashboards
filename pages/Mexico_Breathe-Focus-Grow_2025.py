@@ -11,6 +11,8 @@ PROGRAM_YEAR = "2025"
 PROGRAM_NAME = "Mexico 2025" #Este campo tiene que estar en formato "Localizacion Año", por ejemplo "Mexico 2025", sin tildes y con la primera en mayúscula
 PAST_PROGRAM_NAME = "Menorca 2025"
 
+#EN PRINCIPIO, SOLO MODIFICANDO ESTAS VARIABLES EL DASHBOARD DEBERIA FUNCIONAR CORRECTAMENTE MIENTRAS SE MANTENGAN LOS CAMPOS
+
 
 #===============================================================CONFIGURACION DE LA PAGINA================================================
 #=========================================================================================================================================
@@ -167,14 +169,22 @@ table_id = st.secrets["airtable_program"]["table_id"]
 api = Api(api_key)
 
 #DataFrame del programa actual
-records = api.table(base_id, table_id).all(view=PROGRAM_NAME)
-data = [record["fields"] for record in records]
-df = pd.DataFrame(data)
+try:
+    records = api.table(base_id, table_id).all(view=PROGRAM_NAME)
+    data = [record["fields"] for record in records]
+    df = pd.DataFrame(data)
+except Exception as e:
+    st.warning(f"No se pudieron cargar los datos del programa actual (Error: {e})")
+    df = pd.DataFrame()
 
 #DataFrame del programa pasado
-records_past = api.table(base_id, table_id).all(view=PAST_PROGRAM_NAME)
-data_past = [record["fields"] for record in records_past]
-df_past = pd.DataFrame(data_past)
+try:
+    records_past = api.table(base_id, table_id).all(view=PAST_PROGRAM_NAME)
+    data_past = [record["fields"] for record in records_past]
+    df_past = pd.DataFrame(data_past)
+except Exception as e:
+    st.warning(f"No se pudieron cargar los datos del programa pasado (Error: {e})")
+    df_past = pd.DataFrame()
 
 #Arreglamos valores nulos
 def fix_cell(val):
