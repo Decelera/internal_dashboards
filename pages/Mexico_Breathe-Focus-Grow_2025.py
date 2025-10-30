@@ -4,15 +4,22 @@ import pandas as pd
 from pyairtable import Api
 import plotly.graph_objects as go
 
+#===============================================================CONFIGURACION DEL PROGRAMA===============================================
+#=========================================================================================================================================
+
+PROGRAM_YEAR = "2025"
+PROGRAM_NAME = "Mexico 2025" #Este campo tiene que estar en formato "Localizacion Año", por ejemplo "Mexico 2025", sin tildes y con la primera en mayúscula
+PAST_PROGRAM_NAME = "Menorca 2025"
+
+
+#===============================================================CONFIGURACION DE LA PAGINA================================================
+#=========================================================================================================================================
 # Page configuration
 st.set_page_config(
     page_title="Mexico - Program - Agenda",
     page_icon="https://images.squarespace-cdn.com/content/v1/67811e8fe702fd5553c65249/c5500619-9712-4b9b-83ee-a697212735ae/Disen%CC%83o+sin+ti%CC%81tulo+%2840%29.png",
     layout="wide"
 )
-
-if "selected_year" not in st.session_state:
-    st.session_state.selected_year = "2025"
 
 st.markdown(body="""
 <style>
@@ -38,7 +45,7 @@ st.markdown(body="""
 <div class="outer-container">
 <div class="container">
     <img class="logo-img" src="https://images.squarespace-cdn.com/content/v1/67811e8fe702fd5553c65249/c5500619-9712-4b9b-83ee-a697212735ae/Disen%CC%83o+sin+ti%CC%81tulo+%2840%29.png">
-    <h1 class="title-text">Decelera Program<br>Breathe - Focus - Grow</h1>
+    <h1 class="title-text">Mexico 2025<br>Breathe - Focus - Grow</h1>
 </div>
 </div>
 """, unsafe_allow_html=True)
@@ -70,6 +77,12 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
+#==========================================================CONFIGURACION DEL SIDEBAR=====================================================
+#========================================================================================================================================
+
+if "selected_year" not in st.session_state:
+    st.session_state.selected_year = PROGRAM_YEAR
 
 # Hide default Streamlit navigation elements
 st.markdown("""
@@ -142,19 +155,28 @@ with st.sidebar:
     if st.button("Breathe-Focus-Grow", key="mn_prog_agenda", use_container_width=True):
         st.switch_page(f"pages/Menorca_Breathe-Focus-Grow_{st.session_state.selected_year}.py")
 
+
+#===========================================================CONFIGURACION DE LOS DATOS DE AIRTABLE======================================
+#=======================================================================================================================================
+
+
 api_key = st.secrets["airtable_program"]["api_key"]
 base_id = st.secrets["airtable_program"]["base_id"]
 table_id = st.secrets["airtable_program"]["table_id"]
 
 api = Api(api_key)
-records = api.table(base_id, table_id).all(view="Breathe-Focus-Grow")
+
+#DataFrame del programa actual
+records = api.table(base_id, table_id).all(view=PROGRAM_NAME)
 data = [record["fields"] for record in records]
 df = pd.DataFrame(data)
 
-records_past = api.table(base_id, table_id).all(view='Menorca 2025')
+#DataFrame del programa pasado
+records_past = api.table(base_id, table_id).all(view=PAST_PROGRAM_NAME)
 data_past = [record["fields"] for record in records_past]
 df_past = pd.DataFrame(data_past)
 
+#Arreglamos valores nulos
 def fix_cell(val):
     if isinstance(val, dict) and "specialValue" in val:
         return float("nan")
@@ -162,8 +184,13 @@ def fix_cell(val):
 
 df = df.map(func=fix_cell)
 df_past = df_past.map(func=fix_cell)
-#=========================CONFIG========================================
 
+
+#===========================================================CONFIGURACION DE LOS CAMPOS===============================================
+#======================================================================================================================================
+
+
+#Campos de Breathe Focus Grow
 fields: dict = {
     "Breathe": {
         "Talks": [
@@ -243,6 +270,7 @@ fields: dict = {
     }
 }
 
+#Campos generales
 general_fields: dict = {
     "Breathe": [
         "Breathe | Satisfaction",
@@ -261,6 +289,7 @@ general_fields: dict = {
     ]
 }
 
+#Etiquetas de Breathe Focus Grow
 labels: dict = {
     "Breathe": {
         "Talks": [
@@ -340,6 +369,14 @@ labels: dict = {
     }
 }
 
+#Etiquetas de los campos generales
+general_labels: list = [
+    "Overall experience",
+    "Wellbeing dynamics",
+    "Information and coordination"
+]
+
+#Campos de comentarios
 comment_fields = {
     "Breathe": [
         "Breathe | Comments",
@@ -356,23 +393,15 @@ comment_fields = {
     ]
 }
 
-# Voy a intentar quedarme con los campos de menorca 2025 que coinciden con los de este año
 
-
-general_labels: list = [
-    "Overall experience",
-    "Wellbeing dynamics",
-    "Information and coordination"
-]
-
-phases = ["Breathe", "Focus", "Grow"]
+#Construimos los campos y las etiquetas para una review de las tres fases juntas (a lo que llamamos General)
 categories_to_merge = ["Talks", "Well-being", "Networking", "Investment"]
 
 if "General" not in fields:
     fields["General"] = {}
 for category in categories_to_merge:
     all_items = []
-    for phase in phases:
+    for phase in fields.keys():
         all_items.extend(fields[phase].get(category, []))
     fields["General"][category] = all_items
 
@@ -380,59 +409,65 @@ if "General" not in labels:
     labels["General"] = {}
 for category in categories_to_merge:
     all_items = []
-    for phase in phases:
+    for phase in fields.keys():
         all_items.extend(labels[phase].get(category, []))
     labels["General"][category] = all_items
 
+
+#=================================================================CONFIGURACION DE LAS FUNCIONES====================================================================
+#===================================================================================================================================================================
+
+
+#Escala de color Decelera
 color_scale=[
     [0.0, '#FFB950'],
     [0.5, '#FAF3DC'],
     [1.0, '#1FD0EF']
 ]
 
-# <--- MODIFICADO --- He actualizado la función 'barras' para la comparativa con los colores solicitados
 def barras(values_actual, labels, values_pasado, title, n_actual, n_pasado) -> None:
     """
     Genera un gráfico de barras comparativo (actual vs. pasado).
     'values_pasado' debe tener la misma longitud que 'labels' y 'values_actual',
     usando float("nan") para los campos que no coinciden.
     """
+
     fig = go.Figure()
     
-    # --- Trace 1: Año Actual --- (Aplica la escala de colores original)
+    #Programa actual (con escala de colores)
     fig.add_trace(go.Bar(
-        name='Mexico 2025', # Etiqueta para la leyenda
+        name=PROGRAM_NAME,
         x=labels,
         y=values_actual,
         customdata=n_actual,
         hovertemplate='Muestra: %{customdata}',
-        texttemplate=[f'{y:.2f}' if pd.notna(y) else '' for y in values_actual], # Oculta texto si es NaN
+        texttemplate=[f'{y:.2f}' if pd.notna(y) else '' for y in values_actual],
         textposition='outside',
         marker=dict(
-            color=values_actual, # <--- Se usa values_actual para aplicar la escala
-            colorscale=color_scale, # <--- Aplica tu escala de colores
+            color=values_actual,
+            colorscale=color_scale,
             line=dict(color='black', width=1.5)
         ),
         textfont=dict(color='black')
     ))
 
-    # --- Trace 2: Año Pasado --- (Transparente con borde gris)
+    #Programa anterior (transparente, que llame menos la atención)
     hay_valores_pasado = pd.Series(values_pasado).notna().any()
 
     if hay_valores_pasado:
         fig.add_trace(go.Bar(
-            name='Menorca 2025', # Etiqueta para la leyenda
+            name=PAST_PROGRAM_NAME,
             x=labels,
             y=values_pasado,
             customdata=n_pasado,
             hovertemplate='Muestra: %{customdata}',
-            texttemplate=[f'{y:.2f}' if pd.notna(y) else '' for y in values_pasado], # Oculta texto si es NaN
+            texttemplate=[f'{y:.2f}' if pd.notna(y) else '' for y in values_pasado],
             textposition='outside',
             marker=dict(
-                color='rgba(0,0,0,0)',  # <--- Transparente
-                line=dict(color='darkgrey', width=1.5) # <--- Borde gris
+                color='rgba(0,0,0,0)',
+                line=dict(color='darkgrey', width=1.5)
             ),
-            textfont=dict(color='darkgrey') # <--- El texto también en gris para que se vea
+            textfont=dict(color='darkgrey')
         ))
     
     # Calcular el rango máximo de forma segura, ignorando NaNs
@@ -440,15 +475,15 @@ def barras(values_actual, labels, values_pasado, title, n_actual, n_pasado) -> N
                  [v for v in values_pasado if pd.notna(v)]
     
     # Asegurarse de que el rango no esté vacío y tenga un default
-    range_max = max(all_values) * 1.15 if all_values else 5 # Default a 5 si no hay datos
+    range_max = max(all_values) * 1.15 if all_values else 5
 
     fig.update_layout(
         title=title,
         yaxis_title='Mean Score',
         template="plotly_white",
-        barmode='group', # <-- Clave para agrupar las barras
+        barmode='group',
         yaxis=dict(
-            range=[0, range_max] # Rango desde 0 hasta el máximo + 15%
+            range=[1, range_max]
         ),
         xaxis=dict(
             tickfont=dict(color='black'),
@@ -458,127 +493,157 @@ def barras(values_actual, labels, values_pasado, title, n_actual, n_pasado) -> N
     )
     
     st.plotly_chart(fig, use_container_width=True)
-# <--- FIN DE LA MODIFICACIÓN ---
 
-def metric(value, label) -> None:
-    st.metric(value=value, label=label)
+#Funcion para calcular una media de forma segura
+def safe_mean(df_to_check, field):
+    """Calcula la media si el campo existe, si no, devuelve nan."""
+
+    if field in df_to_check.columns.tolist():
+        return float(df_to_check[field].dropna().astype(float).mean())
+
+    return float("nan") # Devuelve NaN si el campo no existe
+
+#Funcion para calcular un conteo de forma segura
+def safe_count(df_to_check, field) -> int:
+    """Calcula el conteo si el campo existe, si no, devuelve 0."""
+
+    if not df_to_check.empty and field in df_to_check.columns.tolist():
+        return int(df_to_check[field].dropna().count())
+
+    return 0
+
+
+#===========================================================CALCULOS DE LAS METRICAS==============================================================================
+#=================================================================================================================================================================
+
 
 #medias de satisfaction, wellbeing y organization
-
 general_means_per_phase: dict[str, list[float]] = {}
 for phase in general_fields.keys():
     general_means_per_phase[phase] = []
     for field in general_fields[phase]:
-        mean: float = round(float(df[field].dropna().astype(float).mean()), 2)
+        mean: float = round(safe_mean(df, field), 2)
         general_means_per_phase[phase].append(mean)
 
 general_means: list = [0.0, 0.0, 0.0]
 for i in range(3):
     for phase in general_means_per_phase.keys():
-        general_means[i] += round(general_means_per_phase[phase][i], 2)
+        if general_means_per_phase[phase][i]:
+            general_means[i] += round(general_means_per_phase[phase][i], 2)
 
 general_means: list[float] = [round(x / 3, 2) for x in general_means]
-
-
-# <--- AÑADIDO --- Helper para calcular medias de forma segura ---
-# Obtener los sets de columnas UNA SOLA VEZ para eficiencia
-cols_pasado = set(df_past.columns)
-
-def safe_mean(df_to_check, field):
-    """Calcula la media si el campo existe, si no, devuelve nan."""
-    # Usamos .columns.values porque 'in' es más rápido en un set/list que en un Index
-    if field in df_to_check.columns.values:
-        return float(df_to_check[field].dropna().astype(float).mean())
-    return float("nan") # Devuelve NaN si el campo no existe
-
-def safe_count(df_to_check, field) -> int:
-    if not df_to_check.empty and field in df_to_check.columns:
-        return int(df_to_check[field].dropna().count())
-    return 0
 
 #===================================Vamos con Breathe===================================
 
 #------------------------------Saquemos las medias-------------------------------------
+
+#En estos diccionarios guardaremos las medias (en listas normales) y las organizamos por categoria
 means_breathe: dict = {}
-means_breathe_pasado: dict = {} # <--- AÑADIDO
+means_breathe_pasado: dict = {}
 n_breathe: dict = {}
 n_breathe_pasado: dict = {}
-labels_breathe = labels["Breathe"]
+
 for category in fields["Breathe"].keys():
 
+    #definimos las listas que vamos a ir rellenando
     means_breathe[category] = []
     means_breathe_pasado[category] = []
     n_breathe[category] = []
     n_breathe_pasado[category] = []
+
     for field in fields["Breathe"][category]:
-        # Calcula la media del año actual (siempre debe existir según 'fields')
+        # Calcula la media del año actual y del año pasado (la del pasado dara nan si no existe, pero la funcion de barras lo ignora)
         means_breathe[category].append(safe_mean(df, field))
-        
-        # Calcula la media del año pasado (dará NaN si el campo no existe)
-        means_breathe_pasado[category].append(safe_mean(df_past, field)) # <--- AÑADIDO
+        means_breathe_pasado[category].append(safe_mean(df_past, field))
+
         n_breathe[category].append(safe_count(df, field))
         n_breathe_pasado[category].append(safe_count(df_past, field))
+
 #==================================Vamos con Focus==================================
 
 #------------------------------Saquemos las medias-------------------------------------
+
+#En estos diccionarios guardaremos las medias (en listas normales) y las organizamos por categoria
 means_focus: dict = {}
-means_focus_pasado: dict = {} # <--- AÑADIDO
+means_focus_pasado: dict = {}
 n_focus: dict = {}
 n_focus_pasado: dict = {}
-labels_focus = labels["Focus"]
+
 for category in fields["Focus"].keys():
 
+    #definimos las listas que vamos a ir rellenando
     means_focus[category] = []
-    means_focus_pasado[category] = [] # <--- AÑADIDO
+    means_focus_pasado[category] = []
     n_focus[category] = []
     n_focus_pasado[category] = []
+
     for field in fields["Focus"][category]:
+
+        # Calcula la media del año actual y del año pasado (la del pasado dara nan si no existe, pero la funcion de barras lo ignora)
         means_focus[category].append(safe_mean(df, field))
-        means_focus_pasado[category].append(safe_mean(df_past, field)) # <--- AÑADIDO
+        means_focus_pasado[category].append(safe_mean(df_past, field))
+
         n_focus[category].append(safe_count(df, field))
         n_focus_pasado[category].append(safe_count(df_past, field))
 
 #=================================Vamos con Grow==================================
 
 #------------------------------Saquemos las medias-------------------------------------
+
+#En estos diccionarios guardaremos las medias (en listas normales) y las organizamos por categoria
 means_grow: dict = {}
-means_grow_pasado: dict = {} # <--- AÑADIDO
+means_grow_pasado: dict = {}
 n_grow: dict = {}
 n_grow_pasado: dict = {}
-labels_grow = labels["Grow"]
-for category in fields["Grow"].keys():
 
+for category in fields["Grow"].keys():
+    
+    #definimos las listas que vamos a ir rellenando
     means_grow[category] = []
-    means_grow_pasado[category] = [] # <--- AÑADIDO
+    means_grow_pasado[category] = []
     n_grow[category] = []
     n_grow_pasado[category] = []
+
     for field in fields["Grow"][category]:
+
+        # Calcula la media del año actual y del año pasado (la del pasado dara nan si no existe, pero la funcion de barras lo ignora)
         means_grow[category].append(safe_mean(df, field))
-        means_grow_pasado[category].append(safe_mean(df_past, field)) # <--- AÑADIDO
+        means_grow_pasado[category].append(safe_mean(df_past, field))
+
         n_grow[category].append(safe_count(df, field))
         n_grow_pasado[category].append(safe_count(df_past, field))
 
 #===========================General================================================
 
 #--------------------------------las mediaas-----------------------------------------
+
+#En estos diccionarios guardaremos las medias (en listas normales) y las organizamos por categoria
 means_general: dict = {}
-means_general_pasado: dict = {} # <--- AÑADIDO
+means_general_pasado: dict = {}
 n_general: dict = {}
 n_general_pasado: dict = {}
-labels_general = labels["General"]
+
 for category in fields["General"].keys():
 
+    #En estos diccionarios guardaremos las medias (en listas normales) y las organizamos por categoria
     means_general[category] = []
-    means_general_pasado[category] = [] # <--- AÑADIDO
+    means_general_pasado[category] = [] 
     n_general[category] = []
     n_general_pasado[category] = []
+
     for field in fields["General"][category]:
+
+        # Calcula la media del año actual y del año pasado (la del pasado dara nan si no existe, pero la funcion de barras lo ignora)
         means_general[category].append(safe_mean(df, field))
-        means_general_pasado[category].append(safe_mean(df_past, field)) # <--- AÑADIDO
+        means_general_pasado[category].append(safe_mean(df_past, field))
+
         n_general[category].append(safe_count(df, field))
         n_general_pasado[category].append(safe_count(df_past, field))
 
-#--------------------------------------------------------------------------------------------
+#==========================================================================VAMOS A REPRESENTAR LOS DATOS QUE HEMOS CALCULADO=========================================
+#====================================================================================================================================================================
+
+#=======================Vamos con General========================
 
 st.markdown(body="Here you will find the average score for each event in the program, divided by Talks, Well-being and Networking:\n1. General: all events per category\n2. Breathe - Focus - Grow: all events too, but also divided by the phases")
 
@@ -589,39 +654,41 @@ for i in range(3):
     with cols[i]:
         st.metric(value=general_means[i], label=general_labels[i])
 
-# <--- MODIFICADO --- Bucle de gráficos "General"
+#Comprimimos los datos para que al ordenar por la media actual, no se pierda el orden de las categorías
 for category in fields["General"].keys():
     # Zip de las TRES listas para ordenar todo junto
     ordered_tuples_general = sorted(
         zip(
             means_general[category],
-            means_general_pasado[category], # <--- AÑADIDO
-            labels_general[category],
+            means_general_pasado[category],
+            labels["General"][category],
             n_general[category],
             n_general_pasado[category]
         ),
-        key=lambda x: -1 if pd.isna(x[0]) else x[0], # Ordena por media actual (manejando NaNs)
+        key=lambda x: -1 if pd.isna(x[0]) else x[0], # Ordena por media actual (manejando nan's)
         reverse=True
     )
     
     # Descomprimir las listas ya ordenadas
     values_graph_general = [v_act for v_act, v_pas, lab, n_act, n_pas in ordered_tuples_general]
-    values_graph_general_pasado = [v_pas for v_act, v_pas, lab, n_act, n_pas in ordered_tuples_general] # <--- AÑADIDO
+    values_graph_general_pasado = [v_pas for v_act, v_pas, lab, n_act, n_pas in ordered_tuples_general]
     labels_graph_general = [lab for v_act, v_pas, lab, n_act, n_pas in ordered_tuples_general]
     n_graph_general = [n_act for v_act, v_pas, lab, n_act, n_pas in ordered_tuples_general]
     n_graph_general_pasado = [n_pas for v_act, v_pas, lab, n_act, n_pas in ordered_tuples_general]
 
-    # Llamar a la nueva función barras
+    # Llamamos a la función barras, que ya lo tenemos todo
     barras(
         values_actual=values_graph_general,
         labels=labels_graph_general,
-        values_pasado=values_graph_general_pasado, # <--- AÑADIDO
+        values_pasado=values_graph_general_pasado,
         title=f"All: {category}",
         n_actual=n_graph_general,
         n_pasado=n_graph_general_pasado
     )
 
 st.markdown(body="---")
+
+#======================Vamos con Breathe========================
 
 st.markdown(body="<h1 style='text-align: center;'>Breathe</h1>", unsafe_allow_html=True)
 
@@ -631,13 +698,13 @@ for i in range(3):
     with cols[i]:
         st.metric(value=general_means_per_phase["Breathe"][i], label=general_labels[i], delta=round(general_means_per_phase["Breathe"][i] - general_means[i], 2))
 
-# <--- MODIFICADO --- Bucle de gráficos "Breathe"
+#Comprimimos los datos para que al ordenar por la media actual, no se pierda el orden de las categorías
 for category in fields["Breathe"].keys():
     ordered_tuples_breathe = sorted(
         zip(
             means_breathe[category],
-            means_breathe_pasado[category], # <--- AÑADIDO
-            labels_breathe[category],
+            means_breathe_pasado[category],
+            labels["Breathe"][category],
             n_breathe[category],
             n_breathe_pasado[category]
         ), 
@@ -645,23 +712,27 @@ for category in fields["Breathe"].keys():
         reverse=True
     )
     
+    # Descomprimir las listas ya ordenadas
     values_graph_breathe = [v_act for v_act, v_pas, lab, n_act, n_pas in ordered_tuples_breathe]
-    values_graph_breathe_pasado = [v_pas for v_act, v_pas, lab, n_act, n_pas in ordered_tuples_breathe] # <--- AÑADIDO
+    values_graph_breathe_pasado = [v_pas for v_act, v_pas, lab, n_act, n_pas in ordered_tuples_breathe]
     n_graph_breathe = [n_act for v_act, v_pas, lab, n_act, n_pas in ordered_tuples_breathe]
     n_graph_breathe_pasado = [n_pas for v_act, v_pas, lab, n_act, n_pas in ordered_tuples_breathe]
     labels_graph_breathe = [lab for v_act, v_pas, lab, n_act, n_pas in ordered_tuples_breathe]
     
+    # Llamamos a la función barras, que ya lo tenemos todo
     barras(
         values_actual=values_graph_breathe,
         labels=labels_graph_breathe,
-        values_pasado=values_graph_breathe_pasado, # <--- AÑADIDO
+        values_pasado=values_graph_breathe_pasado,
         title=f"Breathe: {category}",
         n_actual=n_graph_breathe,
         n_pasado=n_graph_breathe_pasado
     )
 
+#Ahora hay que poner los campos de los comentarios
 with st.expander(label="Comentarios de Breathe"):
-    if not df[comment_fields["Breathe"][0]].empty:
+
+    if comment_fields["Breathe"][0] in df.columns.tolist() and "Name" in df.columns.tolist() and not df[comment_fields["Breathe"][0]].empty:
 
         comments_breathe = df[["Name", comment_fields["Breathe"][0]]].dropna(subset=[comment_fields["Breathe"][0]])
         for index, row in comments_breathe.iterrows():
@@ -672,7 +743,7 @@ with st.expander(label="Comentarios de Breathe"):
                 st.markdown(body=comment)
 
 with st.expander(label="Improvement ideas de Breathe"):
-    if not df[comment_fields["Breathe"][1]].empty:
+    if comment_fields["Breathe"][1] in df.columns.tolist() and "Name" in df.columns.tolist() and not df[comment_fields["Breathe"][1]].empty:
 
         comments_breathe = df[["Name", comment_fields["Breathe"][1]]].dropna(subset=[comment_fields["Breathe"][1]])
         for index, row in comments_breathe.iterrows():
@@ -684,6 +755,8 @@ with st.expander(label="Improvement ideas de Breathe"):
 
 st.markdown(body="---")
 
+#======================Vamos con Focus=========================
+
 st.markdown(body="<h1 style='text-align: center;'>Focus</h1>", unsafe_allow_html=True)
 
 cols = st.columns(3)
@@ -691,13 +764,13 @@ for i in range(3):
     with cols[i]:
         st.metric(value=general_means_per_phase["Focus"][i], label=general_labels[i], delta=round(general_means_per_phase["Focus"][i] - general_means[i], 2))
 
-# <--- MODIFICADO --- Bucle de gráficos "Focus"
+#Comprimimos los datos para que al ordenar por la media actual, no se pierda el orden de las categorías
 for category in fields["Focus"].keys():
     ordered_tuples_focus = sorted(
         zip(
             means_focus[category],
-            means_focus_pasado[category], # <--- AÑADIDO
-            labels_focus[category],
+            means_focus_pasado[category],
+            labels["Focus"][category],
             n_focus[category],
             n_focus_pasado[category]
         ), 
@@ -705,8 +778,9 @@ for category in fields["Focus"].keys():
         reverse=True
     )
 
+    # Descomprimir las listas ya ordenadas
     values_graph_focus = [v_act for v_act, v_pas, lab, n_act, n_pas in ordered_tuples_focus]
-    values_graph_focus_pasado = [v_pas for v_act, v_pas, lab, n_act, n_pas in ordered_tuples_focus] # <--- AÑADIDO
+    values_graph_focus_pasado = [v_pas for v_act, v_pas, lab, n_act, n_pas in ordered_tuples_focus]
     labels_graph_focus = [lab for v_act, v_pas, lab, n_act, n_pas in ordered_tuples_focus]
     n_graph_focus = [n_act for v_act, v_pas, lab, n_act, n_pas in ordered_tuples_focus]
     n_graph_focus_pasado = [n_pas for v_act, v_pas, lab, n_act, n_pas in ordered_tuples_focus]
@@ -714,14 +788,14 @@ for category in fields["Focus"].keys():
     barras(
         values_actual=values_graph_focus,
         labels=labels_graph_focus,
-        values_pasado=values_graph_focus_pasado, # <--- AÑADIDO
+        values_pasado=values_graph_focus_pasado,
         title=f"Focus: {category}",
         n_actual=n_graph_focus,
         n_pasado=n_graph_focus_pasado
     )
 
 with st.expander(label="Comentarios de Focus"):
-    if not df[comment_fields["Focus"][0]].empty:
+    if comment_fields["Focus"][0] in df.columns.tolist() and "Name" in df.columns.tolist() and not df[comment_fields["Focus"][0]].empty:
 
         comments_focus = df[["Name", comment_fields["Focus"][0]]].dropna(subset=[comment_fields["Focus"][0]])
         for index, row in comments_focus.iterrows():
@@ -732,7 +806,7 @@ with st.expander(label="Comentarios de Focus"):
                 st.markdown(body=comment)
 
 with st.expander(label="Improvement ideas de Focus"):
-    if not df[comment_fields["Focus"][1]].empty:
+    if comment_fields["Focus"][1] in df.columns.tolist() and "Name" in df.columns.tolist() and not df[comment_fields["Focus"][1]].empty:
 
         comments_focus = df[["Name", comment_fields["Focus"][1]]].dropna(subset=[comment_fields["Focus"][1]])
         for index, row in comments_focus.iterrows():
@@ -743,7 +817,7 @@ with st.expander(label="Improvement ideas de Focus"):
                 st.markdown(body=comment)
             
 with st.expander(label="Top 3 1:1's de Focus"):
-    if not df[comment_fields["Focus"][2]].empty:
+    if comment_fields["Focus"][2] in df.columns.tolist() and "Name" in df.columns.tolist() and not df[comment_fields["Focus"][2]].empty:
 
         comments_focus = df[["Name", comment_fields["Focus"][2]]].dropna(subset=[comment_fields["Focus"][2]])
         for index, row in comments_focus.iterrows():
@@ -755,6 +829,8 @@ with st.expander(label="Top 3 1:1's de Focus"):
 
 st.markdown(body="---")
 
+#======================Vamos con Grow=========================
+
 st.markdown(body="<h1 style='text-align: center;'>Grow</h1>", unsafe_allow_html=True)
 
 cols = st.columns(3)
@@ -762,13 +838,13 @@ for i in range(3):
     with cols[i]:
         st.metric(value=general_means_per_phase["Grow"][i], label=general_labels[i], delta=round(general_means_per_phase["Grow"][i] - general_means[i], 2))
 
-# <--- MODIFICADO --- Bucle de gráficos "Grow"
+#Comprimimos los datos para que al ordenar por la media actual, no se pierda el orden de las categorías
 for category in fields["Grow"].keys():
     ordered_tuples_grow = sorted(
         zip(
             means_grow[category],
-            means_grow_pasado[category], # <--- AÑADIDO
-            labels_grow[category],
+            means_grow_pasado[category],
+            labels["Grow"][category],
             n_grow[category],
             n_grow_pasado[category]
         ), 
@@ -777,7 +853,7 @@ for category in fields["Grow"].keys():
     )
     
     values_graph_grow = [v_act for v_act, v_pas, lab, n_act, n_pas in ordered_tuples_grow]
-    values_graph_grow_pasado = [v_pas for v_act, v_pas, lab, n_act, n_pas in ordered_tuples_grow] # <--- AÑADIDO
+    values_graph_grow_pasado = [v_pas for v_act, v_pas, lab, n_act, n_pas in ordered_tuples_grow]
     labels_graph_grow = [lab for v_act, v_pas, lab, n_act, n_pas in ordered_tuples_grow]
     n_graph_grow = [n_act for v_act, v_pas, lab, n_act, n_pas in ordered_tuples_grow]
     n_graph_grow_pasado = [n_pas for v_act, v_pas, lab, n_act, n_pas in ordered_tuples_grow]
@@ -785,14 +861,14 @@ for category in fields["Grow"].keys():
     barras(
         values_actual=values_graph_grow,
         labels=labels_graph_grow,
-        values_pasado=values_graph_grow_pasado, # <--- AÑADIDO
+        values_pasado=values_graph_grow_pasado,
         title=f"Grow: {category}",
         n_actual=n_graph_grow,
         n_pasado=n_graph_grow_pasado
     )
 
 with st.expander(label="Comentarios de Grow"):
-    if not df[comment_fields["Grow"][0]].empty:
+    if comment_fields["Grow"][0] in df.columns.tolist() and "Name" in df.columns.tolist() and not df[comment_fields["Grow"][0]].empty:
 
         comments_grow = df[["Name", comment_fields["Grow"][0]]].dropna(subset=[comment_fields["Grow"][0]])
         for index, row in comments_grow.iterrows():
@@ -803,7 +879,7 @@ with st.expander(label="Comentarios de Grow"):
                 st.markdown(body=comment)
 
 with st.expander(label="Improvement ideas de Grow"):
-    if not df[comment_fields["Grow"][1]].empty:
+    if comment_fields["Grow"][1] in df.columns.tolist() and "Name" in df.columns.tolist() and not df[comment_fields["Grow"][1]].empty:
 
         comments_grow = df[["Name", comment_fields["Grow"][1]]].dropna(subset=[comment_fields["Grow"][1]])
         for index, row in comments_grow.iterrows():
