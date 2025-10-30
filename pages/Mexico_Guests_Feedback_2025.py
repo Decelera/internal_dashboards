@@ -243,7 +243,7 @@ def barras(values_actual, labels, values_pasado, title, n_actual, n_pasado) -> N
         fig.add_trace(go.Bar(
             name='Menorca 2025',
             x=labels,
-            y=values_pasado,
+            y=values_pasado, #plotly ignora los nan, asi que palante
             customdata=n_pasado,
             hovertemplate='Muestra: %{customdata}<extra></extra>',
             texttemplate=[f'{y:.2f}' if pd.notna(y) else '' for y in values_pasado],
