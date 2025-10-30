@@ -508,7 +508,7 @@ def barras(values_actual, labels, values_pasado, title, n_actual, n_pasado) -> N
 def safe_mean(df_to_check, field):
     """Calcula la media si el campo existe, si no, devuelve nan."""
 
-    if field in df_to_check.columns.tolist():
+    if not df_to_check.empty and field in df_to_check.columns.tolist():
         return float(df_to_check[field].dropna().astype(float).mean())
 
     return float("nan") # Devuelve NaN si el campo no existe
