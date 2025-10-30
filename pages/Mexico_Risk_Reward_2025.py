@@ -160,26 +160,30 @@ def grouped_means(df):
 #=======================================================DATOS DE AIRTABLE======================================================
 #===============================================================================================================================
 
-        
-api_key = st.secrets["airtable_mexico_investment"]["api_key"]
-base_id = st.secrets["airtable_mexico_investment"]["base_id"]
+try: 
+    api_key = st.secrets["airtable_mexico_investment"]["api_key"]
+    base_id = st.secrets["airtable_mexico_investment"]["base_id"]
 
-table_id_team = st.secrets["airtable_mexico_investment"]["table_id_team"]
-table_id_em = st.secrets["airtable_mexico_investment"]["table_id_em"]
+    table_id_team = st.secrets["airtable_mexico_investment"]["table_id_team"]
+    table_id_em = st.secrets["airtable_mexico_investment"]["table_id_em"]
 
-api = Api(api_key)
-table_em = api.table(base_id, table_id_em)
-table_team = api.table(base_id, table_id_team)
+    api = Api(api_key)
+    table_em = api.table(base_id, table_id_em)
+    table_team = api.table(base_id, table_id_team)
 
 
-records_team = table_team.all(view=PROGRAM_NAME)
-records_em = table_em.all(view=PROGRAM_NAME)
+    records_team = table_team.all(view=PROGRAM_NAME)
+    records_em = table_em.all(view=PROGRAM_NAME)
 
-data_team = [record['fields'] for record in records_team]
-data_em = [record['fields'] for record in records_em]
+    data_team = [record['fields'] for record in records_team]
+    data_em = [record['fields'] for record in records_em]
 
-df_team = pd.DataFrame(data_team)
-df_em = pd.DataFrame(data_em)
+    df_team = pd.DataFrame(data_team)
+    df_em = pd.DataFrame(data_em)
+except Exception as {e}:
+    st.warning(f"Error al cargar los datos de Airtable (Error: {e})")
+    df_team = pd.DataFrame()
+    df_em = pd.DataFrame()
 
 def fix_cell(val):
     if isinstance(val, dict) and "specialValue" in val:
