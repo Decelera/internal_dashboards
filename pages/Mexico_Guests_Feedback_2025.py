@@ -121,7 +121,7 @@ table_id = st.secrets["airtable_program"]["table_id"]
 api = Api(api_key)
 
 # Carga de datos actuales
-records = api.table(base_id, table_id).all(view="Guests Feedback")
+records = api.table(base_id, table_id).all(view="Mexico 2025")
 data = [record["fields"] for record in records]
 df = pd.DataFrame(data)
 
