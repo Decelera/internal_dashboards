@@ -739,6 +739,57 @@ for category in fields["Breathe"].keys():
         n_pasado=n_graph_breathe_pasado
     )
 
+with st.expander(label="**Resumen de las ideas principales**"):
+    st.markdown("""
+    #### Comentarios Generales
+    ---
+
+    #### Experiencia y propósito
+    Los founders valoraron profundamente el enfoque **humano, introspectivo y transformador** de la fase. Mencionaron la facilidad con la que pudieron **abrirse, pedir ayuda y conectar genuinamente** con otros emprendedores.  
+    Destacaron la **estructura del programa**, el **human pitch**, las **1:1s**, las **workstations**, y las **actividades de meditación y yoga**, que facilitaron el proceso de reconexión personal y claridad de propósito.  
+    Muchos afirmaron que lograron **salir del modo operativo diario**, ganar perspectiva, y **reenfocarse en lo esencial** tanto a nivel personal como empresarial.  
+
+    #### Aprendizaje y conexión
+    El intercambio entre founders, EMs y equipo Decelera fue señalado como una de las mayores fortalezas. Los participantes mencionaron haber recibido **feedback valioso, nuevas ideas, y aprendizajes aplicables** a su startup.  
+    Las conversaciones honestas y los espacios de reflexión permitieron **reconectar con el propósito, entender mejor sus desafíos y fortalecer la visión global de sus proyectos**.  
+
+    #### Organización y dinámica
+    La **transición de actividades**, el orden del contenido y el ambiente general fueron altamente valorados. El inicio en viernes ayudó a “desconectar” más fácilmente, generando el estado mental ideal para aprovechar las siguientes fases.
+
+    ---
+
+    #### Ideas de Mejora
+    ---
+
+    #### Ritmo y carga de actividades
+    - Reducir ligeramente el **volumen de contenido en la primera fase** para permitir más desconexión.  
+    - Dejar **espacios entre sesiones (10-15 min)** o una hora diaria libre para procesar aprendizajes, descansar o atender asuntos urgentes.  
+    - Algunas actividades se sintieron **aceleradas o encadenadas**, dificultando mantener la concentración al final del día.  
+    - Incluir momentos de **“no hacer nada”** a mitad del día, cuando aún hay energía para reflexionar.
+
+    #### Estructura y contenido
+    - Dedicar más tiempo a las **1:1s** y permitir llenar el feedback al momento.  
+    - Ofrecer dinámicas específicas para **perfiles técnicos (CTOs)** y ejercicios por rol.  
+    - Profundizar en **sesiones prácticas** y ejemplos reales que conecten los conceptos con la operación diaria.  
+    - Ampliar ligeramente la duración de la fase o permitir más tiempo de interacción con los EMs.
+
+    #### Logística y herramientas
+    - Mejorar la **precisión de ubicaciones en la app** y añadir una forma sencilla de **conectar entre founders y EMs** durante los espacios de networking.  
+    - Incluir opciones de **agenda compartida o recordatorios automáticos**.  
+    - Aprovechar el entorno con **alguna actividad al aire libre o cultural**, para integrar mejor la experiencia con el lugar.
+
+    #### Clima y confianza
+    - Dejar las encuestas **sin nombres** para promover feedback más honesto.  
+    - Mantener el espíritu actual, ya que la mayoría coincidió en que **la experiencia fue casi perfecta** y que la esencia de Decelera debe preservarse.
+
+    ---s
+
+    #### Síntesis
+    > Esta fase logró un impacto profundo en los founders, permitiéndoles reconectar consigo mismos y con el propósito de sus startups.  
+    > Las sugerencias se centran en **reducir la intensidad, ampliar el tiempo de reflexión y mantener el equilibrio entre acción, pausa y conexión humana.**
+    """, unsafe_allow_html=True)
+
+
 #Ahora hay que poner los campos de los comentarios
 with st.expander(label="Comentarios de Breathe"):
 
@@ -803,6 +854,62 @@ for category in fields["Focus"].keys():
         n_actual=n_graph_focus,
         n_pasado=n_graph_focus_pasado
     )
+
+with st.expander(label="**Resumen ideas principales**"):
+    st.markdown("""
+    #### Comentarios Generales
+    ---
+
+    #### Conexión y propósito
+    Los founders destacaron esta fase como **profundamente transformadora**. Las conversaciones, 1:1s y actividades generaron **reflexión, claridad y alineación entre propósito personal y visión de empresa**.  
+    Se valoró el ambiente de apertura, vulnerabilidad y confianza, que permitió cuestionarse, replantear estrategias y conectar emocionalmente con otros founders.  
+    El **enfoque humano y consciente** de Decelera ayudó a frenar el ritmo, reconectarse con uno mismo y **redescubrir la motivación y dirección** del negocio.
+
+    #### Aprendizaje y dinámicas
+    Las **1:1s** fueron consideradas el elemento más valioso: aportaron feedback real, perspectivas distintas y herramientas aplicables.  
+    Los participantes mencionaron también el **valor de los talks**, las **Founder Arenas**, las **visitas como Kiin Beh**, el **Demo Day** y las **actividades de mindfulness y yoga**.  
+    Se resaltó la calidad de los EMs (especialmente Sean, Sofia, Shadi y Rui), las conversaciones tácticas y la combinación entre inspiración y acción práctica.  
+    Muchos coincidieron en que esta fase fue el momento donde “**ocurrió la verdadera transformación**”.
+
+    #### Impacto y resultados
+    Los founders salieron con **más foco, energía renovada y claridad estratégica**. Algunos mencionaron haber replanteado su modelo de negocio o redirigido esfuerzos de equipo tras los aprendizajes.  
+    Las actividades fuera del hotel y los espacios con la comunidad (como la visita a la escuela) fueron percibidos como experiencias significativas que reforzaron el sentido de propósito y compromiso con el impacto.
+
+    ---
+
+    #### Ideas de Mejora
+    ---
+
+    #### Ritmo y tiempo
+    - Añadir **pequeños espacios libres (30-45 min)** durante el día para procesar aprendizajes, descansar o atender pendientes.  
+    - Incluir **más tiempo para las 1:1s** (20 min fueron insuficientes para abordar temas complejos).  
+    - Reducir la carga informativa o intercalar pausas para asimilar el contenido.  
+    - Ampliar el **tiempo de journaling o reflexión estructurada** después de actividades intensas.  
+    - Mantener una jornada más equilibrada, evitando sensación de cansancio acumulado.
+
+    #### Preparación y contexto
+    - Dar a los **EMs más contexto previo sobre cada startup** para aprovechar mejor las 1:1s.  
+    - Enviar **información preparatoria antes del evento** para que founders lleguen con objetivos claros.  
+    - Mejorar la **coordinación y claridad en actividades prácticas** (por ejemplo, el cooking contest o dinámicas de equipo).
+
+    #### Contenido y enfoque
+    - Introducir charlas o espacios sobre temas personales como **impacto del emprendimiento en la familia o equilibrio personal**.  
+    - Repetir actividades comparativas como el **Workstation inicial y final** para medir evolución.  
+    - Incluir más **actividades fuera del hotel** y experiencias culturales que fortalezcan la conexión con el entorno.  
+    - Facilitar **networking guiado o por categorías** para founders menos extrovertidos.
+
+    #### Logística y comunicación
+    - Mejorar **audio, micrófonos y transporte**, y avisar con antelación que el programa requiere dedicación completa.  
+    - Permitir grabar las **1:1s** para revisar aprendizajes.  
+    - Aumentar la claridad sobre ubicaciones y tiempos en la app.
+
+    ---
+
+    #### Síntesis
+    > Esta fase consolidó el impacto de Decelera como un programa que une profundidad humana con enfoque estratégico.  
+    > Las mejoras propuestas apuntan a **optimizar el ritmo, ampliar el tiempo de reflexión y fortalecer la preparación de los EMs y logística**, sin perder la esencia de conexión, propósito y aprendizaje colectivo.
+    """, unsafe_allow_html=True)
+
 
 with st.expander(label="Comentarios de Focus"):
     if comment_fields["Focus"][0] in df.columns.tolist() and "Name" in df.columns.tolist() and not df[comment_fields["Focus"][0]].empty:
@@ -876,6 +983,63 @@ for category in fields["Grow"].keys():
         n_actual=n_graph_grow,
         n_pasado=n_graph_grow_pasado
     )
+
+with st.expander(label="**Resumen ideas principales**"):
+    st.markdown("""
+    #### Comentarios Generales
+    ---
+
+    #### Experiencia general
+    La **fase Grow** fue percibida como el cierre perfecto del proceso. Los founders destacaron el equilibrio entre **inspiración y ejecución**, la claridad estratégica alcanzada y la energía positiva del **Demo Day**.  
+    Muchos mencionaron haber consolidado su propósito, estructurado sus próximos pasos y definido estrategias de crecimiento claras.  
+    La **metodología** y el flujo entre fases fueron considerados coherentes, ayudando a mantener foco y aprovechar aprendizajes previos.
+
+    #### Aprendizaje y conexión
+    Los participantes resaltaron la **profundidad de las conversaciones** y el impacto de los **mentores** —especialmente Evaristo, Carolina, Varis y Sean— por su capacidad de guiar desde la experiencia y la reflexión.  
+    Las **1:1s, Founder Arenas, talks y dinámicas de mindfulness** fueron muy valoradas por su aporte tanto personal como profesional.  
+    Actividades como la visita a **Kiin Beh**, el **Castle Contest** y el **Demo Day** reforzaron la conexión emocional y el sentido de propósito.  
+    Se destacó también el ambiente de colaboración y vulnerabilidad, que facilitó un aprendizaje compartido genuino.
+
+    #### Impacto personal y profesional
+    Esta fase ayudó a los founders a **convertir introspección en acción**, clarificando estrategias de expansión, posicionamiento y alianzas.  
+    Varios mencionaron que salieron **más centrados, conscientes y alineados** con su visión de empresa. Algunos incluso tomaron decisiones clave, como cerrar o reestructurar sus startups, con serenidad y propósito.  
+    La experiencia con los VCs fue relevante, y el programa logró **conectar crecimiento humano con crecimiento empresarial**.
+
+    ---
+
+    #### Ideas de Mejora
+    ---
+
+    #### Ritmo y estructura
+    - Ajustar el calendario para dejar **más tiempo de preparación y descanso** entre actividades.  
+    - Ampliar **espacios de reflexión o feedback posterior** a cada sesión para aterrizar aprendizajes.  
+    - Mantener la energía del final equilibrando inspiración y ejecución; algunos sintieron el viernes un poco lento o con mucho contenido acumulado.  
+    - Incluir **momentos de journaling estructurados** o espacios para escribir el plan de acción final.
+
+    #### Contenido y enfoque
+    - Añadir **más sesiones tácticas** sobre escalabilidad, legalidad internacional, compensaciones y alineación con inversionistas.  
+    - Repetir o ampliar talleres con **Carolina, Varis o Beth**, especialmente sobre pitching y storytelling.  
+    - Crear un bloque final para **descubrir oportunidades de colaboración entre startups** del mismo batch.  
+    - Incluir una charla sobre **cuándo y cómo escalar** responsablemente, no solo cómo crecer.
+
+    #### Inversionistas y networking
+    - Mejorar la **interacción con VCs y ángeles**, ofreciendo más espacios 1:1 o dinámicas guiadas.  
+    - Incorporar **mentorías específicas con inversionistas**, y dar visibilidad en la app de su disponibilidad y permanencia.  
+    - Permitir que los pitches sean en el **idioma nativo (español)** cuando todos los asistentes lo compartan, para maximizar la claridad y confianza.  
+    - Incluir más **early-stage investors** para generar tracción e interés temprano.
+
+    #### Logística y comunicación
+    - Avisar con claridad que el programa es **full time**, para que los founders puedan planificar y desconectarse totalmente.  
+    - Mejorar la **coordinación en dinámicas prácticas** (como el cooking contest) y el seguimiento en app.  
+    - Añadir una **actividad final de meditación o ejercicio** el último día para cerrar con calma y energía.
+
+    ---
+
+    #### Síntesis
+    > La fase Grow consolidó todo el proceso de Decelera, transformando la reflexión en acción y la claridad en estrategia.  
+    > Las mejoras sugeridas se enfocan en **refinar el ritmo, fortalecer la interacción con inversionistas y ampliar el enfoque táctico y colaborativo**, manteniendo la esencia humana y estratégica del programa.
+    """, unsafe_allow_html=True)
+
 
 with st.expander(label="Comentarios de Grow"):
     if comment_fields["Grow"][0] in df.columns.tolist() and "Name" in df.columns.tolist() and not df[comment_fields["Grow"][0]].empty:
