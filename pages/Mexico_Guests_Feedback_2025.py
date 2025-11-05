@@ -4,15 +4,25 @@ import pandas as pd
 from pyairtable import Api
 import plotly.graph_objects as go
 
-# Page configuration
+
+#========================================PROGRAM CONFIGURATION=================================
+#==============================================================================================
+
+PROGRAM_YEAR = "2025"
+PROGRAM_NAME = "Mexico 2025"
+PAST_PROGRAM_NAME = "Menorca 2025"
+
+#======================================PAGE CONFIGURATION=======================================
+#===============================================================================================
+
+if "selected_year" not in st.session_state:
+    st.session_state.selected_year = PROGRAM_YEAR
+
 st.set_page_config(
     page_title="Mexico - Program - Agenda",
     page_icon="https://images.squarespace-cdn.com/content/v1/67811e8fe702fd5553c65249/c5500619-9712-4b9b-83ee-a697212735ae/Disen%CC%83o+sin+ti%CC%81tulo+%2840%29.png",
     layout="wide"
 )
-
-if "selected_year" not in st.session_state:
-    st.session_state.selected_year = "2025"
 
 st.markdown(body="""
 <style>
@@ -43,7 +53,6 @@ st.markdown(body="""
 </div>
 """, unsafe_allow_html=True)
 
-# Hide default Streamlit navigation elements
 st.markdown("""
     <style>
         [data-testid="stSidebarNav"] {
@@ -52,7 +61,9 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Custom hierarchical navigation
+#========================================SIDEBAR CONFIGURATION=====================================
+#==================================================================================================
+
 with st.sidebar:
     # Home button at the top
     if st.button("🏠 Home", key="home_btn", use_container_width=True):
@@ -114,6 +125,15 @@ with st.sidebar:
     if st.button("Breathe-Focus-Grow", key="mn_prog_agenda", use_container_width=True):
         st.switch_page(f"pages/Menorca_Breathe-Focus-Grow_{st.session_state.selected_year}.py")
 
+
+#====================================AIRTABLE CONFIGURATION=======================================
+#=================================================================================================
+
+def fix_cell(val):
+    if isinstance(val, dict) and "specialValue" in val:
+        return float("nan")
+    return val
+
 api_key = st.secrets["airtable_program"]["api_key"]
 base_id = st.secrets["airtable_program"]["base_id"]
 table_id = st.secrets["airtable_program"]["table_id"]
@@ -121,18 +141,19 @@ table_id = st.secrets["airtable_program"]["table_id"]
 api = Api(api_key)
 
 # Carga de datos actuales
-records = api.table(base_id, table_id).all(view="Mexico 2025")
-data = [record["fields"] for record in records]
-df = pd.DataFrame(data)
 
-def fix_cell(val):
-    if isinstance(val, dict) and "specialValue" in val:
-        return float("nan")
-    return val
+try:
+    records = api.table(base_id, table_id).all(view=PROGRAM_NAME)
+    data = [record["fields"] for record in records]
+    df = pd.DataFrame(data)
+    df = df.map(func=fix_cell)
+except Exception as e:
+    st.warning(f"No se pudieron cargar los datos de este año. (Error: {e})")
+    df = pd.DataFrame()
 
 # Carga segura de datos pasados
 try:
-    records_past = api.table(base_id, table_id).all(view="Menorca 2025") 
+    records_past = api.table(base_id, table_id).all(view=PAST_PROGRAM_NAME) 
     data_past = [record["fields"] for record in records_past]
     df_past = pd.DataFrame(data_past)
     df_past = df_past.map(func=fix_cell)
@@ -141,9 +162,10 @@ except Exception as e:
     st.warning(f"No se pudieron cargar los datos comparativos del año pasado. Se mostrará solo el año actual. (Error: {e})")
     df_past = pd.DataFrame()
 
-df = df.map(func=fix_cell)
 
-#=========================CONFIG========================================
+#============================================FIELDS CONFIGURATION==========================================
+#==========================================================================================================
+
 
 fields = {
     "Founders": [
@@ -211,13 +233,16 @@ labels = {
     ]
 }
 
+#=============================================FUNCTION CONFIGURATION========================================
+#===========================================================================================================
+
 color_scale=[
     [0.0, '#FFB950'],
     [0.5, '#FAF3DC'],
     [1.0, '#1FD0EF']
 ]
 
-# --- Función 'barras' comparativa y robusta ---
+#funcion para ir representando las barras con comparacion con el año pasado
 def barras(values_actual, labels, values_pasado, title, n_actual, n_pasado) -> None:
     fig = go.Figure()
     
@@ -281,13 +306,14 @@ def barras(values_actual, labels, values_pasado, title, n_actual, n_pasado) -> N
 def metric(value, label) -> None:
     st.metric(value=value, label=label)
 
-# --- Función 'safe_mean' ---
+#funcion para calcular la media segura
 def safe_mean(df_to_check, field):
     if not df_to_check.empty and field in df_to_check.columns:
         if not df_to_check[field].dropna().empty:
             return float(df_to_check[field].dropna().astype(float).mean())
     return float("nan")
 
+#calculo seguro de los nps
 def calculate_nps(df, field):
     if df.empty or field not in df.columns:
         return float("nan") 
@@ -307,6 +333,24 @@ def calculate_nps(df, field):
         else:
             pass
     return (n_prom - n_detr) / len(scores) * 100
+
+#Para filtrar correctamente por la etiqueta de invitado
+def safe_check_guest_type(x, type_name):
+    if isinstance(x, list):
+        return type_name in x
+    if isinstance(x, str):
+        return x == type_name
+    return False
+
+#Funcion segura para contar cuantos datos hay
+def safe_count(df_to_check, field):
+    if not df_to_check.empty and field in df_to_check.columns:
+        return int(df_to_check[field].dropna().count())
+    return float("nan")
+
+
+#=======================================NORMAILZACION (ESTO EN EL FUTURO NO HARA FALTA)====================
+#==========================================================================================================
 
 # Apply normalization manually to avoid type issues
 fields_to_normalize: list[str] = [
@@ -335,29 +379,23 @@ for field in fields_to_normalize:
     if not df_past.empty and field in df_past.columns:
         df_past[field] = df_past[field].apply(safe_normalize)
 
-# --- Helper seguro para filtrar 'Guest_type' ---
-def safe_check_guest_type(x, type_name):
-    if isinstance(x, list):
-        return type_name in x
-    if isinstance(x, str):
-        return x == type_name
-    return False
 
-# FUncion segura para contar el numero de datos de cada metrica
-def safe_count(df_to_check, field):
-    if not df_to_check.empty and field in df_to_check.columns:
-        return int(df_to_check[field].dropna().count())
-    return float("nan")
+#=============================================CALCULEMOS LAS COSILLAS=============================
+#===========================================================================================================
 
 #===================================Vamos con Founders===================================
 
 #------------------------------Saquemos las medias-------------------------------------
-# --- Filtro robusto (acepta listas o strings) ---
-df_startup = df[df["Guest_type"].apply(safe_check_guest_type, type_name="Startup")]
+#Filtro robusto
+if not df.empty and "Guest_type" in df.columns.tolist():
+    df_startup = df[df["Guest_type"].apply(safe_check_guest_type, type_name="Startup")]
+else:
+    df_startup = pd.DataFrame()
 
-df_startup_past = pd.DataFrame()
-if not df_past.empty and "Guest_type" in df_past.columns:
+if not df_past.empty and "Guest_type" in df.columns.tolist():
     df_startup_past = df_past[df_past["Guest_type"].apply(safe_check_guest_type, type_name="Startup")]
+else:
+    df_startup_past = pd.DataFrame()
 
 nps_startup_startup = calculate_nps(df=df_startup, field="Recommendation to Startups")
 
@@ -368,21 +406,27 @@ n_founder_pasado: list = []
 
 labels_startup = labels["Founders"]
 for field in fields["Founders"]:
-    means_founder.append(safe_mean(df_startup, field))
-    means_founder_pasado.append(safe_mean(df_startup_past, field))
+    if field in df_startup.columns.tolist():
+        means_founder.append(safe_mean(df_startup, field))
+        n_founder.append(safe_count(df_startup, field))
 
-    n_founder.append(safe_count(df_startup, field))
-    n_founder_pasado.append(safe_count(df_startup_past, field))
+    if field in df_startup_past.columns.tolist():
+        means_founder_pasado.append(safe_mean(df_startup_past, field))
+        n_founder_pasado.append(safe_count(df_startup_past, field))
 
 #==================================Vamos con EMs==================================
 
 #------------------------------Saquemos las medias-------------------------------------
 # --- Filtro robusto (acepta listas o strings) ---
-df_em = df[df["Guest_type"].apply(safe_check_guest_type, type_name="EM")]
+if not df.empty and "Guest_type" in df.columns.tolist():
+    df_em = df[df["Guest_type"].apply(safe_check_guest_type, type_name="EM")]
+else:
+    df_em = pd.DataFrame()
 
-df_em_past = pd.DataFrame()
 if not df_past.empty and "Guest_type" in df_past.columns:
     df_em_past = df_past[df_past["Guest_type"].apply(safe_check_guest_type, type_name="EM")]
+else:
+    df_em_past = pd.DataFrame()
 
 nps_em_startup = calculate_nps(df=df_em, field="Recommendation to Startups")
 nps_em_em = calculate_nps(df=df_em, field="EM's Fb | Recommendation to EM")
@@ -394,21 +438,28 @@ n_em_pasado: list = []
 
 labels_em = labels["EMs"]
 for field in fields["EMs"]:
-    means_em.append(safe_mean(df_em, field))
-    means_em_pasado.append(safe_mean(df_em_past, field))
+    if field in df_em.columns.tolist():
+        means_em.append(safe_mean(df_em, field))
+        n_em.append(safe_count(df_em, field))
 
-    n_em.append(safe_count(df_em, field))
-    n_em_pasado.append(safe_count(df_em_past, field))
+    if field in df_em_past.columns.tolist():
+        means_em_pasado.append(safe_mean(df_em_past, field))
+        n_em_pasado.append(safe_count(df_em_past, field))
+
 
 #=================================Vamos con VCs==================================
 
 #------------------------------Saquemos las medias-------------------------------------
 # --- Filtro robusto (acepta listas o strings) ---
-df_vc = df[df["Guest_type"].apply(safe_check_guest_type, type_name="VC")]
+if not df.empty and "Guest_type" in df.columns.tolist():
+    df_vc = df[df["Guest_type"].apply(safe_check_guest_type, type_name="VC")]
+else:
+    df_vc = pd.DataFrame()
 
-df_vc_past = pd.DataFrame()
-if not df_past.empty and "Guest_type" in df_past.columns:
+if not df_past.empty and "Guest_type" in df_past.columns.tolist():
     df_vc_past = df_past[df_past["Guest_type"].apply(safe_check_guest_type, type_name="VC")]
+else:
+    df_vc_past = pd.DataFrame()
 
 nps_vc_startup = calculate_nps(df=df_vc, field="Recommendation to Startups")
 nps_vc_vc = calculate_nps(df=df_vc, field="VC's | Recommendation to vc")
@@ -420,11 +471,14 @@ n_vc: list = []
 n_vc_pasado: list = []
 
 for field in fields["VCs"]:
-    means_vc.append(safe_mean(df_vc, field))
-    means_vc_pasado.append(safe_mean(df_vc_past, field))
+    if field in df_vc.columns.tolist():
+        means_vc.append(safe_mean(df_vc, field))
+        n_vc.append(safe_count(df_vc, field))
 
-    n_vc.append(safe_count(df_vc, field))
-    n_vc_pasado.append(safe_count(df_vc_past, field))
+    if field in df_vc_past.columns.tolist():
+        means_vc_pasado.append(safe_mean(df_vc_past, field))
+        n_vc_pasado.append(safe_count(df_vc_past, field))
+        
 #--------------------------------------------------------------------------------------------
 st.markdown(body="Here you will find the feedback submitted by founders, experience makers and VC's about the program")
 
@@ -453,7 +507,7 @@ barras(
 )
 
 with st.expander(label="Improvement ideas from founders"):
-    if not df_startup["Improvement ideas"].empty:
+    if not df_startup.empty and "Improvement ideas" in df_startup.columns.tolist():
 
         comments_founders = df_startup[["Name", "Improvement ideas"]].dropna(subset=["Improvement ideas"])
         for index, row in comments_founders.iterrows():
@@ -464,7 +518,7 @@ with st.expander(label="Improvement ideas from founders"):
                 st.markdown(body=comment)
 
 with st.expander(label="Most positive aspect from founders"):
-    if not df_startup["Most positive aspect"].empty:
+    if not df_startup.empty and "Most positive aspect" in df_startup.columns.tolist():
 
         comments_founders = df_startup[["Name", "Most positive aspect"]].dropna(subset=["Most positive aspect"])
         for index, row in comments_founders.iterrows():
@@ -475,7 +529,7 @@ with st.expander(label="Most positive aspect from founders"):
                 st.markdown(body=comment)
 
 with st.expander(label="Top 3 outcomes from founders"):
-    if not df_startup["Top 3 outcomes"].empty:
+    if not df_startup.empty and "Top 3 outcomes" in df_startup.columns.tolist():
 
         comments_founders = df_startup[["Name", "Top 3 outcomes"]].dropna(subset=["Top 3 outcomes"])
         for index, row in comments_founders.iterrows():
@@ -516,7 +570,7 @@ barras(
 )
 
 with st.expander(label="Comments from EMs"):
-    if not df_em["Comments"].empty:
+    if not df_em.empty and "Comments" in df_em.columns.tolist():
 
         comments_founders = df_em[["Name", "Comments"]].dropna(subset=["Comments"])
         for index, row in comments_founders.iterrows():
@@ -527,7 +581,7 @@ with st.expander(label="Comments from EMs"):
                 st.markdown(body=comment)
 
 with st.expander(label="Improvement ideas from EMs"):
-    if not df_em["Improvement ideas"].empty:
+    if not df_em.empty and "Improvement ideas" in df_em.columns.tolist():
 
         comments_founders = df_em[["Name", "Improvement ideas"]].dropna(subset=["Improvement ideas"])
         for index, row in comments_founders.iterrows():
@@ -538,7 +592,7 @@ with st.expander(label="Improvement ideas from EMs"):
                 st.markdown(body=comment)
 
 with st.expander(label="Top3 1:1's from EMs"):
-    if not df_em["EM's Fb | Top3 1:1's"].empty:
+    if not df_em.empty and "EM's Fb | Top3 1:1's" in df_em.columns.tolist():
 
         comments_founders = df_em[["Name", "EM's Fb | Top3 1:1's"]].dropna(subset=["EM's Fb | Top3 1:1's"])
         for index, row in comments_founders.iterrows():
@@ -579,7 +633,7 @@ barras(
 )
 
 with st.expander(label="Comments from VCs"):
-    if not df_vc["Comments"].empty:
+    if not df_vc.empty and "Comments" in df_vc.columns.tolist():
 
         comments_founders = df_vc[["Name", "Comments"]].dropna(subset=["Comments"])
         for index, row in comments_founders.iterrows():
@@ -590,7 +644,7 @@ with st.expander(label="Comments from VCs"):
                 st.markdown(body=comment)
 
 with st.expander(label="Improvement ideas from VCs"):
-    if not df_vc["Improvement ideas"].empty:
+    if not df_vc.empty and "Improvement ideas" in df_vc.columns.tolist():
 
         comments_founders = df_vc[["Name", "Improvement ideas"]].dropna(subset=["Improvement ideas"])
         for index, row in comments_founders.iterrows():
@@ -601,7 +655,7 @@ with st.expander(label="Improvement ideas from VCs"):
                 st.markdown(body=comment)
 
 with st.expander(label="Investment interest from VCs"):
-    if not df_vc["Investment Interest"].empty:
+    if not df_vc.empty and "Investment Interest" in df_vc.columns.tolist():
 
         comments_founders = df_vc[["Name", "Investment Interest"]].dropna(subset=["Investment Interest"])
         for index, row in comments_founders.iterrows():
