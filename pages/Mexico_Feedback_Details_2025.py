@@ -570,7 +570,21 @@ with st.container(border=True):
     df_em_startup_em = df_em_startup[df_em_startup["EM_Name"] == experience_maker]
     
     if experience_maker != "---":
-        st.markdown(body="----Risk----")
+        st.markdown(
+        """
+            <span style='
+                background-color:#1fd0ef;
+                color:white;
+                padding:6px 12px;
+                border-radius:20px;
+                font-weight:600;
+                font-size:14px;
+            '>
+            Risk
+            </span>
+            """,
+            unsafe_allow_html=True
+        )
     for i, field in enumerate(fields_risk):
         if not df_em_startup_em[risk_reward_fields["risk_flags"][i]].empty:
             flag = df_em_startup_em[risk_reward_fields["risk_flags"][i]].item()
@@ -598,7 +612,21 @@ with st.container(border=True):
             """, unsafe_allow_html=True)
 
     if experience_maker != "---":
-        st.markdown(body="----Reward----")
+        st.markdown(
+        """
+            <span style='
+                background-color:#1fd0ef;
+                color:white;
+                padding:6px 12px;
+                border-radius:20px;
+                font-weight:600;
+                font-size:14px;
+            '>
+            Reward
+            </span>
+            """,
+            unsafe_allow_html=True
+        )
     for i, field in enumerate(fields_reward):
         if not df_em_startup_em[risk_reward_fields["reward_flags"][i]].empty:
             flag = df_em_startup_em[risk_reward_fields["reward_flags"][i]].item()
@@ -684,16 +712,6 @@ with st.container(border=True):
 with st.container(border=True):
     founders = startup_founders[startup]
     founders_clean = [founder.replace(" ", "").lower() for founder in startup_founders[startup]]
-
-    df_team["Openness"] = (
-        df_team["Workstations | Openness (Individual)"].dropna().astype(float).mean() +
-        df_team["Paellas contest | Openness (Individual)"].dropna().astype(float).mean()
-    ) / 2
-
-    df_team["Purpose"] = (
-        df_team["Workstations | Purpose (Individual)"].dropna().astype(float).mean() +
-        df_team["1:1's | Purpose (Individual)"].dropna().astype(float).mean()
-    ) / 2
 
     cols = st.columns(len(founders))
     openness_cols = ["Workstations | Openness (Individual)", "Paellas contest | Openness (Individual)"]
