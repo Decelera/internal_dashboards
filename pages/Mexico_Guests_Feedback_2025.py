@@ -501,6 +501,33 @@ barras(
     n_pasado=n_graph_founder_pasado
 )
 
+with st.expander("**Resumen de las ideas principales**"):
+    st.markdown("""
+    #### Experiencia transformadora y humana
+    Decelera es percibido como una experiencia única por su enfoque en el bienestar, la introspección y el crecimiento personal, combinando aceleración empresarial con humanidad y propósito.
+
+    #### Comunidad y conexiones
+    Se valoró la calidad humana de founders, mentores e inversionistas, así como la autenticidad y profundidad de las conversaciones. La comunidad y el apoyo mutuo fueron grandes diferenciadores.
+
+    #### Espacios de reflexión
+    Se sugiere crear pequeños bloques diarios (~30 min) para procesar aprendizajes, descansar y asimilar ideas, además de incluir momentos de journaling o pausas durante el día.
+
+    #### Áreas de mejora
+    - Mejorar la selección de inversionistas, priorizando a quienes estén activos y listos para invertir.  
+    - Ampliar networking y 1:1s, dejando más espacio libre para conectar de forma orgánica.  
+    - Añadir sesiones tácticas sobre temas legales, fundraising y estructura internacional.  
+    - Mejorar app, tiempos y materiales (por ejemplo, el cuaderno).
+
+    #### Enfoque regional y diversidad
+    Incluir contenidos adaptados a ecosistemas como LATAM y fomentar mayor diversidad (más fundadoras mujeres y startups en distintas etapas).
+
+    #### Síntesis
+    > Decelera es un programa profundamente humano y transformador.  
+    > Las sugerencias apuntan a refinar la logística, fortalecer la comunidad y ampliar el impacto práctico más allá del retiro.
+    """, unsafe_allow_html=True)
+
+
+
 with st.expander(label="Improvement ideas from founders"):
     if not df_startup.empty and "Improvement ideas" in df_startup.columns.tolist():
 
@@ -564,6 +591,60 @@ barras(
     n_pasado=n_graph_em_pasado
 )
 
+with st.expander(label="**Resumen de las ideas principales**"):
+    st.markdown("""
+    #### Comentarios Positivos
+    ---
+
+    #### Calidad del programa y participantes
+    Alta calidad de founders y startups, con gran disposición para aprender, conectar y compartir. Los mentores destacaron el **mejor nivel respecto al año anterior** y la **diversidad de perfiles**. La combinación de founders, EMs, VCs y el equipo generó un ambiente inspirador y colaborativo.
+
+    #### Experiencia y equipo
+    El **equipo de Decelera** fue ampliamente reconocido por su energía, propósito y profesionalismo. Se destacó la **organización impecable, la logística, y la atención al detalle**, además del ambiente humano y cercano que se mantuvo durante todo el evento.
+
+    #### Conexión y momentos informales
+    Los momentos fuera de las sesiones formales —comidas, cenas y actividades sociales— fueron percibidos como los más valiosos para **crear vínculos auténticos y conversaciones profundas** entre startups, mentores e inversionistas.
+
+    #### Actividades destacadas
+    El **Founder’s Arena**, las **sesiones 1:1**, el **yoga y la meditación matinal**, y la **claridad del programa** fueron considerados puntos fuertes. También se valoró el **balance entre actividades** y la **mejora en la calidad del contenido y del hotel** respecto a años previos.
+
+    #### Reflexiones sobre el acompañamiento a startups
+    Varios mentores resaltaron la necesidad de que los founders cuenten con **guías estructuradas y marcos operativos** para aterrizar estrategias de expansión, internacionalización y alineación interna. Decelera fue vista como una plataforma ideal para catalizar ese tipo de crecimiento sostenible.
+
+    ---
+
+    #### Ideas de Mejora
+    ---
+
+    #### Estructura y tiempos
+    - **Agenda demasiado cargada**, con poco tiempo para descansos o interacción orgánica.  
+    - **1:1s muy intensos**; sugerencia de dividirlos en más jornadas o dejar espacio para completar feedback.  
+    - Solicitud de **bloques abiertos o menos estructurados** para conversaciones más naturales.  
+    - **Evitar solapamiento de charlas** o sesiones demasiado teóricas.
+
+    #### Preparación y logística
+    - Entregar con anticipación la **agenda de 1:1s y materiales (pitch deck, one-pager)**.  
+    - Mejorar el **uso de la app**, añadiendo opción de sincronizar con calendarios personales.  
+    - Revisar temas logísticos como **traslados y tiempos de espera**.
+
+    #### Networking y comunidad
+    - Más **espacios para conectar entre EMs e inversionistas**, no solo con startups.  
+    - Incluir dinámicas para que **mentores inversores puedan conocer a todos los founders**, aunque sea brevemente.  
+    - **Fortalecer el seguimiento post-retreat** con grupos o check-ins de progreso.
+
+    #### Contenido y enfoque
+    - Separar founders **primerizos de repetidores** para adaptar mejor las sesiones.  
+    - Promover **workshops prácticos** sobre estrategia de mercado y crecimiento.  
+    - En las charlas, fomentar **contenido más accionable** y menos centrado en la historia del ponente.
+
+    ---
+
+    #### Síntesis
+    > Decelera sigue consolidándose como una experiencia de alto valor humano y profesional.  
+    > Las mejoras se centran en **ajustar tiempos, fortalecer la preparación y logística, y ofrecer más espacios orgánicos y prácticos de conexión y aprendizaje.**
+    """, unsafe_allow_html=True)
+
+
 with st.expander(label="Comments from EMs"):
     if not df_em.empty and "Comments" in df_em.columns.tolist():
 
@@ -626,6 +707,42 @@ barras(
     n_actual=n_graph_vc,
     n_pasado=n_graph_vc_pasado
 )
+
+with st.expander(label="**Resumen de las ideas principales**"):
+    st.markdown("""
+    #### Comentarios Generales
+    ---
+
+    #### Experiencia y ambiente
+    El evento fue percibido como **auténtico, bien diseñado y de alto valor humano**. Los inversionistas destacaron la **energía positiva, la calidad de los founders y startups**, y el formato más **personal y cercano**, que facilita la conexión real y el entendimiento del propósito detrás de cada proyecto.  
+    Varios comentaron que el programa **inspira confianza y transparencia**, lo que permite conversaciones más profundas y colaboraciones potenciales. Algunos incluso ya están **en conversaciones con startups** que conocieron durante el evento.
+
+    ---
+
+    #### Ideas de Mejora
+    ---
+
+    #### Agenda y planificación
+    - Compartir la **agenda y horarios con mayor anticipación** para que los inversionistas puedan organizar su tiempo y participar más activamente.  
+    - Incluir un **día opcional previo o posterior** para que los inversores puedan conectar con los founders antes o después del programa principal.  
+    - Después del **Demo Day**, crear un **espacio de 1:1s** para profundizar conversaciones sobre oportunidades específicas.
+
+    #### Networking y relación con startups
+    - Aumentar la **profundidad de las sesiones de networking** entre inversionistas y startups, ya que algunos percibieron menos interacción que en ediciones previas.  
+    - Fortalecer también las conexiones **entre los mismos inversionistas**, generando dinámicas colaborativas o de intercambio de criterios.
+
+    #### Herramientas y logística
+    - Hacer más completa la **información de las startups en la app**, incluyendo detalles de contacto y tracción.  
+    - Agregar **links directos a perfiles** desde la aplicación para facilitar el seguimiento.  
+    - Mejorar la **organización del transporte para inversionistas**, buscando opciones más cómodas o coordinadas.
+
+    ---
+
+    #### Síntesis
+    > Los inversionistas valoran el enfoque humano, la calidad del ecosistema y el formato íntimo del programa.  
+    > Las sugerencias se centran en **anticipar información clave, mejorar las herramientas de conexión y ampliar el tiempo de interacción con los founders.**
+    """, unsafe_allow_html=True)
+
 
 with st.expander(label="Comments from VCs"):
     if not df_vc.empty and "Comments" in df_vc.columns.tolist():
