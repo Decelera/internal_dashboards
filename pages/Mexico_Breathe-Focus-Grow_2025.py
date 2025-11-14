@@ -238,7 +238,8 @@ fields: dict = {
             "Talk by Vincent Speranza",
             "Talk by Victor Noguera",
             "Talk by Jose V. Fernandez",
-            "Talk by Sven Huber"
+            "Talk by Sven Huber",
+            "Focus | Shadi Yazdan's talk (Day 7)"
         ],
         "Well-being": [
             "Focus | Mindfulness (Day 3)",
