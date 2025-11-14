@@ -338,7 +338,8 @@ labels: dict = {
             "Talk by Vincent Speranza",
             "Talk by Victor Noguera",
             "Talk by Jose V. Fernandez",
-            "Talk by Sven Huber"
+            "Talk by Sven Huber",
+            "Talk by Shadi Yazdan"
         ],
         "Well-being": [
             "Mindfulness (focus)",
