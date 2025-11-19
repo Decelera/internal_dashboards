@@ -215,7 +215,7 @@ startup_founders = {
     "BondUp": ["Michelle Schintzer"],
     "Jelt": ["Sergio Ramirez"],
     "Moabits SL": ["Alejandro Ortiz", "David Santibanez", "Juan Martin Pawluszek"],
-    "Ximple": ["Daniel Sujo", "Joao Ramos"],
+    "Ximple": ["Daniel Sujo", "Joao Ramos", "Clarissa Morrisson"],
     "Kuri": ["Ludwig Pucha Cofrep"],
     "CROMODATA": ["Juan Pablo  Merea Otermin", "Keila Barral Masri", "Matias  Karlsson"],
     "Ternadia": ["Angel Sanchez", "Raul Merino"],
