@@ -61,7 +61,7 @@ pip install -r requirements.txt
 2. Recommended size: 300-500px width
 3. Supported formats: PNG (recommended), JPG, SVG
 
-**Exact path:** `/Users/alejandroperez/Desktop/Joint Dashboard/.streamlit/static/decelera_logo.png`
+**Exact path:** `/.streamlit/static/decelera_logo.png`
 
 The logo will appear at the top of the landing page next to the title.
 
@@ -71,7 +71,7 @@ The logo will appear at the top of the landing page next to the title.
 2. Recommended size: 32x32px or 64x64px
 3. Format: PNG (recommended for transparency)
 
-**Exact path:** `/Users/alejandroperez/Desktop/Joint Dashboard/.streamlit/static/favicon.png`
+**Exact path:** `.streamlit/static/favicon.png`
 
 The favicon will appear in the browser tab for all pages of the dashboard.
 
