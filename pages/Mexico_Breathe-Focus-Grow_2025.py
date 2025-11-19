@@ -239,7 +239,8 @@ fields: dict = {
             "Talk by Victor Noguera",
             "Talk by Jose V. Fernandez",
             "Talk by Sven Huber",
-            "Focus | Shadi Yazdan's talk (Day 7)"
+            "Focus | Shadi Yazdan's talk (Day 7)",
+            "Focus | Rui Fernandes' talk (Day 4)"
         ],
         "Well-being": [
             "Focus | Mindfulness (Day 3)",
@@ -339,7 +340,8 @@ labels: dict = {
             "Talk by Victor Noguera",
             "Talk by Jose V. Fernandez",
             "Talk by Sven Huber",
-            "Talk by Shadi Yazdan"
+            "Talk by Shadi Yazdan",
+            "Talk by Rui Fernandez"
         ],
         "Well-being": [
             "Mindfulness (focus)",
