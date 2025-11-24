@@ -66,15 +66,19 @@ with st.sidebar:
     
     # Year selection in sidebar
     st.markdown(f"&nbsp;&nbsp;&nbsp;&nbsp;**{st.session_state.selected_year}**")
+
+    # Outliers section
+    if st.button("Outliers", key="mx_outliers", use_container_width=True):
+        st.switch_page(f"pages/Mexico_Outliers_{st.session_state.selected_year}.py")
     
     # Investment section (Title 4)
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Investment**")
     
     # Investment pages (Title 5)
-    if st.button("Risk-Reward", key="mx_inv_general", use_container_width=True):
+    if st.button("Risk-Reward Matrix", key="mx_inv_general", use_container_width=True):
         st.switch_page(f"pages/Mexico_Risk_Reward_{st.session_state.selected_year}.py")
     
-    if st.button("Feedback details", key="mx_inv_startup", use_container_width=True):
+    if st.button("Individual, Team and Business DD", key="mx_inv_startup", use_container_width=True):
         st.switch_page(f"pages/Mexico_Feedback_Details_{st.session_state.selected_year}.py")
     
     # Program section (Title 4)
@@ -99,10 +103,10 @@ with st.sidebar:
     st.markdown("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Investment**")
     
     # Investment pages (Title 5)
-    if st.button("Risk-Reward", key="mn_inv_general", use_container_width=True):
+    if st.button("Risk-Reward Matrix", key="mn_inv_general", use_container_width=True):
         st.switch_page(f"pages/Menorca_Risk_Reward_{st.session_state.selected_year}.py")
     
-    if st.button("Feedback details", key="mn_inv_startup", use_container_width=True):
+    if st.button("Individual, Team and Business DD", key="mn_inv_startup", use_container_width=True):
         st.switch_page(f"pages/Menorca_Feedback_Details_{st.session_state.selected_year}.py")
     
     # Program section (Title 4)
