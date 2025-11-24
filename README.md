@@ -97,7 +97,7 @@ db_password = st.secrets["database"]["password"]
 ## Running the Dashboard
 
 ```bash
-cd "/Users/alejandroperez/Desktop/Joint Dashboard"
+cd "/Joint Dashboard"
 streamlit run Home.py
 ```
 
