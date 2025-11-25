@@ -512,31 +512,47 @@ if not df.empty:
     st.write("### Top 10 Startups by Signals")
     
     # Signal scoring explanation
-    st.info("**Signal Scoring:** 🟢 Green = 3 points | 🟡 Yellow = 2 points | 🔴 Red = 1 point | Maximum score: 21 points")
+    st.info("**Signal Scoring:** Score is calculated by summing avg_d1 through avg_d7 (7 pillars). Colors: 🟢 Green | 🟡 Yellow | 🔴 Red")
     
-    # Find Signals field
-    signals_cols = [col for col in df.columns if 'signal' in col.lower()]
-    if not signals_cols:
-        signals_cols = [col for col in df.columns if col in ['Signals', 'Signal', 'signals']]
+    # Signal pillar names
+    signal_names = [
+        "Founder Inevitability",
+        "Founder Insight", 
+        "Market Timing",
+        "Product Edge",
+        "PMF/Early Pull",
+        "Narrative/Momentum",
+        "Thesis Fit"
+    ]
     
-    if signals_cols:
-        signals_col = signals_cols[0]
-        
-        # Parse signals and calculate scores
+    # Check if avg_d columns exist
+    avg_cols = [f'avg_d{i}' for i in range(1, 8)]
+    color_cols = [f'color_d{i}' for i in range(1, 8)]
+    
+    has_avg_cols = all(col in df.columns for col in avg_cols)
+    has_color_cols = all(col in df.columns for col in color_cols)
+    
+    if has_avg_cols and has_color_cols:
+        # Calculate scores for all startups
         startup_scores = []
         
         for idx, row in df.iterrows():
-            signals_text = row.get(signals_col, "")
+            # Calculate total score from avg_d1 to avg_d7
+            scores = []
+            for avg_col in avg_cols:
+                val = row.get(avg_col)
+                if pd.notna(val):
+                    try:
+                        scores.append(float(val))
+                    except:
+                        scores.append(0)
+                else:
+                    scores.append(0)
             
-            if pd.notna(signals_text) and str(signals_text).strip():
-                # Count emojis in the signals text
-                green_count = str(signals_text).count('🟢')
-                yellow_count = str(signals_text).count('🟡')
-                red_count = str(signals_text).count('🔴')
-                
-                # Calculate total score (Green=3, Yellow=2, Red=1)
-                total_score = (green_count * 3) + (yellow_count * 2) + (red_count * 1)
-                
+            total_score = sum(scores)
+            
+            # Only include if there's a score
+            if total_score > 0:
                 # Get startup info
                 startup_name_cols = [col for col in df.columns if 'startup' in col.lower() and 'name' in col.lower()]
                 if not startup_name_cols:
@@ -562,6 +578,15 @@ if not df.empty:
                 location_patterns = ["PH1_Constitution_Location", "Constitution_Location", "Location", "location"]
                 location = get_field_value(row, location_patterns, "N/A")
                 
+                # Get colors for display
+                colors = []
+                for color_col in color_cols:
+                    color = row.get(color_col, "")
+                    if pd.notna(color):
+                        colors.append(str(color).strip())
+                    else:
+                        colors.append("")
+                
                 startup_scores.append({
                     'name': startup_name,
                     'founder': founder_name,
@@ -569,11 +594,9 @@ if not df.empty:
                     'business_model': business_model,
                     'stage': stage,
                     'location': location,
-                    'signals': signals_text,
                     'score': total_score,
-                    'green': green_count,
-                    'yellow': yellow_count,
-                    'red': red_count
+                    'individual_scores': scores,
+                    'colors': colors
                 })
         
         # Sort by score and get top 10
@@ -589,7 +612,7 @@ if not df.empty:
                     with col_header1:
                         st.markdown(f"### #{i} - {startup['name']}")
                     with col_header2:
-                        st.markdown(f"### Score: {startup['score']}/21")
+                        st.markdown(f"### Score: {startup['score']:.1f}")
                     
                     # Startup details
                     col1, col2 = st.columns(2)
@@ -602,15 +625,28 @@ if not df.empty:
                     with col2:
                         st.markdown(f"**📊 Stage:** {startup['stage']}")
                         st.markdown(f"**📍 Location:** {startup['location']}")
-                        st.markdown(f"**🎯 Signals:** {startup['green']} 🟢 | {startup['yellow']} 🟡 | {startup['red']} 🔴")
                     
-                    # Display full signals breakdown
+                    # Display full signals breakdown with colors
                     with st.expander("📊 View Signal Details"):
-                        st.markdown(startup['signals'])
+                        signals_display = []
+                        for j, (name, score, color) in enumerate(zip(signal_names, startup['individual_scores'], startup['colors'])):
+                            # Convert color to emoji
+                            if color.lower() == 'green':
+                                emoji = '🟢'
+                            elif color.lower() == 'yellow':
+                                emoji = '🟡'
+                            elif color.lower() == 'red':
+                                emoji = '🔴'
+                            else:
+                                emoji = '⚪'  # Default if no color
+                            
+                            signals_display.append(f"**{name}:** {emoji} (Score: {score:.1f})")
+                        
+                        st.markdown(" | ".join(signals_display))
         else:
             st.info("No startups with signal data found.")
     else:
-        st.warning("Signals field not found in data.")
+        st.warning("Signal scoring columns not found in data. Expected: avg_d1 to avg_d7 and color_d1 to color_d7")
     
     st.markdown("---")
     
