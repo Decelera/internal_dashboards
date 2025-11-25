@@ -170,19 +170,19 @@ st.markdown("---")
 
 @st.cache_data(ttl=300)  # Cache for 5 minutes
 def load_dealflow_data():
-    """Load dealflow data from Airtable"""
+    """Load dealflow data from Airtable using a specific view"""
     try:
-        # You can configure which Airtable source to use here
-        # Options: "airtable_mexico_investment" or create a new "airtable_dealflow" in secrets
-        api_key = st.secrets["airtable_mexico_investment"]["api_key"]
-        base_id = st.secrets["airtable_mexico_investment"]["base_id"]
-        table_id_team = st.secrets["airtable_mexico_investment"]["table_id_team"]
+        # Load configuration from Streamlit secrets
+        api_key = st.secrets["airtable_fast_tracks"]["api_key"]
+        base_id = st.secrets["airtable_fast_tracks"]["base_id"]
+        table_id = st.secrets["airtable_fast_tracks"]["table_id"]
+        view_id = st.secrets["airtable_fast_tracks"]["view_id"]
         
         api = Api(api_key)
-        table = api.table(base_id, table_id_team)
+        table = api.table(base_id, table_id)
         
-        # Fetch all records - you can specify a view if needed
-        records = table.all()  # or use view="Fast-tracks" if you create one
+        # Fetch records from the specific view
+        records = table.all(view=view_id)
         
         # Extract fields
         data = [record['fields'] for record in records]
@@ -191,6 +191,12 @@ def load_dealflow_data():
         return df
     except Exception as e:
         st.error(f"Error loading data from Airtable: {e}")
+        st.info("Make sure to configure the following in your .streamlit/secrets.toml:\n\n"
+                "[airtable_fast_tracks]\n"
+                'api_key = "your_api_key"\n'
+                'base_id = "your_base_id"\n'
+                'table_id = "your_table_id"\n'
+                'view_id = "your_view_id"')
         return pd.DataFrame()
 
 # Load data
@@ -231,38 +237,11 @@ def get_field_value(row, field_patterns, default="N/A"):
 # =============================================================================
 
 if not df.empty:
-    col1, col2, col3, col4 = st.columns(4)
-    
-    with col1:
-        total_startups = len(df)
-        st.metric(label="Total Startups", value=total_startups)
+    col1, col2, col3 = st.columns([1, 2, 1])
     
     with col2:
-        # Count unique stages if available
-        stage_cols = [col for col in df.columns if 'stage' in col.lower()]
-        if stage_cols:
-            unique_stages = df[stage_cols[0]].nunique()
-            st.metric(label="Stages", value=unique_stages)
-        else:
-            st.metric(label="Stages", value="-")
-    
-    with col3:
-        # Count unique locations
-        location_cols = [col for col in df.columns if 'constitution_location' in col.lower() or 'location' in col.lower()]
-        if location_cols:
-            unique_locations = df[location_cols[0]].nunique()
-            st.metric(label="Locations", value=unique_locations)
-        else:
-            st.metric(label="Locations", value="-")
-    
-    with col4:
-        # Count unique business models
-        bm_cols = [col for col in df.columns if 'business_model' in col.lower()]
-        if bm_cols:
-            unique_bm = df[bm_cols[0]].nunique()
-            st.metric(label="Business Models", value=unique_bm)
-        else:
-            st.metric(label="Business Models", value="-")
+        total_startups = len(df)
+        st.metric(label="Total Startups in Dealflow", value=total_startups)
     
     st.markdown("---")
     
@@ -424,15 +403,21 @@ else:
     st.info("""
     **To configure this dashboard:**
     
-    1. Make sure your Airtable secrets are configured in `.streamlit/secrets.toml`
-    2. The following fields should be available in your Airtable table:
+    1. Add the following to your `.streamlit/secrets.toml`:
+    
+    ```toml
+    [airtable_fast_tracks]
+    api_key = "your_airtable_api_key"
+    base_id = "your_base_id"
+    table_id = "your_table_id"
+    view_id = "your_view_id"
+    ```
+    
+    2. Make sure the following fields are available in your Airtable view:
        - Startup name
-       - PH1_founder_name_$startup
-       - PH1_founder_surname_$startup
+       - PH1_founder_name_$startup and PH1_founder_surname_$startup
        - PH1_business_model_$startups
        - stage_$startup
        - PH1_Constitution_Location
-    
-    3. You can also create a specific view called "Fast-tracks" in Airtable
     """)
 
