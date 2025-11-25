@@ -617,12 +617,20 @@ if not df.empty:
                 deck_url = get_field_value(row, ["deck_URL", "Deck_URL", "deck_url"], "")
                 deck_startup = get_field_value(row, [f"deck_{startup_name}", "deck", "Deck"], "")
                 
-                # Get colors for display
+                # Get colors for display - extract from color_d1 to color_d7
                 colors = []
                 for color_col in color_cols:
-                    color = row.get(color_col)
-                    if pd.notna(color) and str(color).strip():
-                        colors.append(str(color).strip())
+                    color_val = row.get(color_col)
+                    if pd.notna(color_val):
+                        color_str = str(color_val).strip()
+                        # Handle list format if color is returned as a list
+                        if isinstance(color_val, list) and len(color_val) > 0:
+                            color_str = str(color_val[0]).strip()
+                        
+                        if color_str and color_str.lower() != 'nan':
+                            colors.append(color_str)
+                        else:
+                            colors.append("")
                     else:
                         colors.append("")
                 
@@ -675,10 +683,10 @@ if not df.empty:
                         
                         # Display deck links if available
                         deck_links = []
-                        if startup['deck_url'] and startup['deck_url'] != "N/A":
+                        if startup['deck_url'] and startup['deck_url'] not in ["N/A", "", " "]:
                             deck_links.append(f"[Deck URL]({startup['deck_url']})")
-                        if startup['deck_startup'] and startup['deck_startup'] != "N/A":
-                            deck_links.append(f"[Deck]({startup['deck_startup']})")
+                        if startup['deck_startup'] and startup['deck_startup'] not in ["N/A", "", " "]:
+                            deck_links.append(f"[Deck Attachment]({startup['deck_startup']})")
                         
                         if deck_links:
                             st.markdown(f"**📄 Deck:** {' | '.join(deck_links)}")
@@ -690,15 +698,20 @@ if not df.empty:
                         signals_display = []
                         for j, (name, score, color) in enumerate(zip(signal_names, startup['individual_scores'], startup['colors'])):
                             # Convert color to emoji - check for different formats
-                            color_str = str(color).strip().lower()
-                            if 'green' in color_str or color_str == 'g':
-                                emoji = '🟢'
-                            elif 'yellow' in color_str or color_str == 'y':
-                                emoji = '🟡'
-                            elif 'red' in color_str or color_str == 'r':
-                                emoji = '🔴'
+                            if color and str(color).strip():
+                                color_str = str(color).strip().lower()
+                                # More comprehensive color matching
+                                if 'green' in color_str or color_str == 'g' or color_str == '🟢':
+                                    emoji = '🟢'
+                                elif 'yellow' in color_str or color_str == 'y' or color_str == '🟡':
+                                    emoji = '🟡'
+                                elif 'red' in color_str or color_str == 'r' or color_str == '🔴':
+                                    emoji = '🔴'
+                                else:
+                                    # Show the actual value for debugging
+                                    emoji = f"⚪ ({color_str})"
                             else:
-                                emoji = '⚪'  # Default if no color
+                                emoji = '⚪ (no color data)'
                             
                             signals_display.append(f"**{name}:** {emoji} (Score: {score:.1f})")
                         
