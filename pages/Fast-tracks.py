@@ -486,32 +486,131 @@ if not df.empty:
                 pie_data.append(count)
         
         if pie_data:
-            col_chart1, col_chart2 = st.columns([2, 1])
-            
-            with col_chart1:
-                fig_references = go.Figure(data=[go.Pie(
-                    labels=pie_labels,
-                    values=pie_data,
-                    hole=0.4,
-                    marker=dict(colors=['#62CDEB', '#ACAFB9', '#5bb8d6', '#95a3a8', '#7fc9e0', '#8ab5c1', '#a3d5e8', '#c2e3f0'])
-                )])
-                fig_references.update_layout(
-                    showlegend=True,
-                    height=400,
-                    margin=dict(l=20, r=20, t=40, b=20)
-                )
-                st.plotly_chart(fig_references, use_container_width=True)
-            
-            with col_chart2:
-                st.write("**Summary:**")
-                for ref_source, count in sorted(reference_totals.items(), key=lambda x: x[1], reverse=True):
-                    if count > 0:
-                        percentage = (count / sum(reference_totals.values())) * 100
-                        st.write(f"**{ref_source}:** {count} ({percentage:.1f}%)")
+            fig_references = go.Figure(data=[go.Pie(
+                labels=pie_labels,
+                values=pie_data,
+                hole=0.4,
+                marker=dict(colors=['#62CDEB', '#ACAFB9', '#5bb8d6', '#95a3a8', '#7fc9e0', '#8ab5c1', '#a3d5e8', '#c2e3f0'])
+            )])
+            fig_references.update_layout(
+                showlegend=True,
+                height=400,
+                margin=dict(l=20, r=20, t=40, b=20)
+            )
+            st.plotly_chart(fig_references, use_container_width=True)
         else:
             st.info("No deal source data available yet.")
     else:
         st.warning("Reference field not found in data. Expected field: 'PH1_reference_$startups' or similar.")
+    
+    st.markdown("---")
+    
+    # =============================================================================
+    # TOP 10 STARTUPS BY SIGNALS
+    # =============================================================================
+    
+    st.write("### Top 10 Startups by Signals")
+    
+    # Signal scoring explanation
+    st.info("**Signal Scoring:** 🟢 Green = 3 points | 🟡 Yellow = 2 points | 🔴 Red = 1 point | Maximum score: 21 points")
+    
+    # Find Signals field
+    signals_cols = [col for col in df.columns if 'signal' in col.lower()]
+    if not signals_cols:
+        signals_cols = [col for col in df.columns if col in ['Signals', 'Signal', 'signals']]
+    
+    if signals_cols:
+        signals_col = signals_cols[0]
+        
+        # Parse signals and calculate scores
+        startup_scores = []
+        
+        for idx, row in df.iterrows():
+            signals_text = row.get(signals_col, "")
+            
+            if pd.notna(signals_text) and str(signals_text).strip():
+                # Count emojis in the signals text
+                green_count = str(signals_text).count('🟢')
+                yellow_count = str(signals_text).count('🟡')
+                red_count = str(signals_text).count('🔴')
+                
+                # Calculate total score (Green=3, Yellow=2, Red=1)
+                total_score = (green_count * 3) + (yellow_count * 2) + (red_count * 1)
+                
+                # Get startup info
+                startup_name_cols = [col for col in df.columns if 'startup' in col.lower() and 'name' in col.lower()]
+                if not startup_name_cols:
+                    startup_name_cols = [col for col in df.columns if col == 'Name' or col == 'Startup' or col == 'Company']
+                
+                startup_name = get_field_value(row, startup_name_cols, "Unknown Startup") if startup_name_cols else "Unknown Startup"
+                
+                # Get founder name
+                founder_name = get_founder_full_name(row, startup_name)
+                
+                # Get other fields
+                one_liner_cols = [col for col in df.columns if 'one' in col.lower() and 'liner' in col.lower()]
+                if not one_liner_cols:
+                    one_liner_cols = [col for col in df.columns if col in ['One liner', 'One_liner', 'OneLiner', 'Tagline']]
+                one_liner = get_field_value(row, one_liner_cols, "N/A") if one_liner_cols else "N/A"
+                
+                bm_patterns = [f"PH1_business_model_{startup_name}", "PH1_business_model", "Business Model", "business_model"]
+                business_model = get_field_value(row, bm_patterns, "N/A")
+                
+                stage_patterns = [f"stage_{startup_name}", "stage", "Stage"]
+                stage = get_field_value(row, stage_patterns, "N/A")
+                
+                location_patterns = ["PH1_Constitution_Location", "Constitution_Location", "Location", "location"]
+                location = get_field_value(row, location_patterns, "N/A")
+                
+                startup_scores.append({
+                    'name': startup_name,
+                    'founder': founder_name,
+                    'one_liner': one_liner,
+                    'business_model': business_model,
+                    'stage': stage,
+                    'location': location,
+                    'signals': signals_text,
+                    'score': total_score,
+                    'green': green_count,
+                    'yellow': yellow_count,
+                    'red': red_count
+                })
+        
+        # Sort by score and get top 10
+        startup_scores.sort(key=lambda x: x['score'], reverse=True)
+        top_10 = startup_scores[:10]
+        
+        if top_10:
+            # Display top 10 in a nice format
+            for i, startup in enumerate(top_10, 1):
+                with st.container(border=True):
+                    # Header with rank and name
+                    col_header1, col_header2 = st.columns([3, 1])
+                    with col_header1:
+                        st.markdown(f"### #{i} - {startup['name']}")
+                    with col_header2:
+                        st.markdown(f"### Score: {startup['score']}/21")
+                    
+                    # Startup details
+                    col1, col2 = st.columns(2)
+                    
+                    with col1:
+                        st.markdown(f"**👤 Founder:** {startup['founder']}")
+                        st.markdown(f"**💡 One Liner:** {startup['one_liner']}")
+                        st.markdown(f"**💼 Business Model:** {startup['business_model']}")
+                    
+                    with col2:
+                        st.markdown(f"**📊 Stage:** {startup['stage']}")
+                        st.markdown(f"**📍 Location:** {startup['location']}")
+                        st.markdown(f"**🎯 Signals:** {startup['green']} 🟢 | {startup['yellow']} 🟡 | {startup['red']} 🔴")
+                    
+                    # Display full signals breakdown
+                    with st.expander("📊 View Signal Details"):
+                        st.markdown(startup['signals'])
+        else:
+            st.info("No startups with signal data found.")
+    else:
+        st.warning("Signals field not found in data.")
     
     st.markdown("---")
     
