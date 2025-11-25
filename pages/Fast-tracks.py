@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 from pyairtable import Api
 import plotly.graph_objects as go
+from datetime import datetime, timedelta
 
 # Page configuration
 st.set_page_config(
@@ -246,53 +247,151 @@ if not df.empty:
     st.markdown("---")
     
     # =============================================================================
-    # FILTERS
+    # WEEKLY TRACKING TABLE
     # =============================================================================
     
-    st.write("### Filters")
+    st.write("### Weekly Dealflow Tracking")
     
-    filter_col1, filter_col2, filter_col3 = st.columns(3)
+    # Calculate weeks: last 2 weeks, current week, next 4 weeks (7 weeks total)
+    today = datetime.now()
+    current_week_start = today - timedelta(days=today.weekday())  # Monday of current week
     
-    with filter_col1:
-        # Stage filter
-        stage_cols = [col for col in df.columns if 'stage' in col.lower()]
-        if stage_cols:
-            stages = df[stage_cols[0]].dropna().unique().tolist()
-            selected_stages = st.multiselect("Filter by Stage", ["All"] + stages, default="All")
-        else:
-            selected_stages = ["All"]
+    weeks_data = []
+    for i in range(-2, 5):  # -2 (2 weeks ago) to 4 (4 weeks ahead)
+        week_start = current_week_start + timedelta(weeks=i)
+        week_end = week_start + timedelta(days=6)  # Sunday
+        
+        # Calculate week number
+        week_num = week_start.isocalendar()[1]
+        
+        # Filter data for this week based on "Date Sourced"
+        date_sourced_cols = [col for col in df.columns if 'date' in col.lower() and 'source' in col.lower()]
+        if not date_sourced_cols:
+            date_sourced_cols = [col for col in df.columns if col in ['Date Sourced', 'Date_Sourced', 'DateSourced']]
+        
+        contact_stage_cols = [col for col in df.columns if 'contact' in col.lower() and 'stage' in col.lower()]
+        if not contact_stage_cols:
+            contact_stage_cols = [col for col in df.columns if col in ['Contact_Stage', 'Contact Stage', 'ContactStage']]
+        
+        new_deals = 0
+        not_contacted = 0
+        no_response = 0
+        videocall_done = 0
+        videocall_pending = 0
+        pending_info = 0
+        
+        if date_sourced_cols and contact_stage_cols:
+            date_col = date_sourced_cols[0]
+            stage_col = contact_stage_cols[0]
+            
+            for idx, row in df.iterrows():
+                # Check if Date Sourced falls within this week
+                date_sourced = row.get(date_col)
+                if pd.notna(date_sourced):
+                    try:
+                        # Convert to datetime if it's a string
+                        if isinstance(date_sourced, str):
+                            sourced_date = pd.to_datetime(date_sourced)
+                        else:
+                            sourced_date = date_sourced
+                        
+                        # Check if date falls within this week
+                        if week_start.date() <= sourced_date.date() <= week_end.date():
+                            new_deals += 1
+                            
+                            # Count by contact stage
+                            stage = row.get(stage_col, "")
+                            if pd.notna(stage):
+                                stage_lower = str(stage).lower()
+                                if "not contacted" in stage_lower:
+                                    not_contacted += 1
+                                elif "no response" in stage_lower:
+                                    no_response += 1
+                                elif "videocall done" in stage_lower or "video call done" in stage_lower:
+                                    videocall_done += 1
+                                elif "videocall pending" in stage_lower or "video call pending" in stage_lower:
+                                    videocall_pending += 1
+                                elif "pending information" in stage_lower:
+                                    pending_info += 1
+                    except:
+                        pass
+        
+        weeks_data.append({
+            "Week": f"Week {week_num}",
+            "Start": week_start.strftime("%d/%m/%Y"),
+            "End": week_end.strftime("%d/%m/%Y"),
+            "New Deals": new_deals,
+            "Not contacted": not_contacted,
+            "No Response": no_response,
+            "Calls Done": videocall_done,
+            "Calls Pending": videocall_pending,
+            "Pending Info": pending_info
+        })
     
-    with filter_col2:
-        # Location filter
-        location_cols = [col for col in df.columns if 'constitution_location' in col.lower() or 'location' in col.lower()]
-        if location_cols:
-            locations = df[location_cols[0]].dropna().unique().tolist()
-            selected_locations = st.multiselect("Filter by Location", ["All"] + locations, default="All")
-        else:
-            selected_locations = ["All"]
+    # Create DataFrame and display as table
+    weeks_df = pd.DataFrame(weeks_data)
     
-    with filter_col3:
-        # Business Model filter
-        bm_cols = [col for col in df.columns if 'business_model' in col.lower()]
-        if bm_cols:
-            business_models = df[bm_cols[0]].dropna().unique().tolist()
-            selected_bm = st.multiselect("Filter by Business Model", ["All"] + business_models, default="All")
-        else:
-            selected_bm = ["All"]
+    # Add totals row
+    totals = {
+        "Week": "Totals",
+        "Start": "",
+        "End": "",
+        "New Deals": weeks_df["New Deals"].sum(),
+        "Not contacted": weeks_df["Not contacted"].sum(),
+        "No Response": weeks_df["No Response"].sum(),
+        "Calls Done": weeks_df["Calls Done"].sum(),
+        "Calls Pending": weeks_df["Calls Pending"].sum(),
+        "Pending Info": weeks_df["Pending Info"].sum()
+    }
+    weeks_df = pd.concat([weeks_df, pd.DataFrame([totals])], ignore_index=True)
     
-    # Apply filters
-    filtered_df = df.copy()
+    # Style the table
+    st.markdown("""
+        <style>
+        .weekly-table {
+            font-size: 14px;
+        }
+        .weekly-table th {
+            background-color: #62CDEB;
+            color: white;
+            font-weight: bold;
+            padding: 10px;
+            text-align: center;
+        }
+        .weekly-table td {
+            padding: 8px;
+            text-align: center;
+        }
+        .weekly-table tr:last-child {
+            background-color: #1e3a5f;
+            color: white;
+            font-weight: bold;
+        }
+        </style>
+    """, unsafe_allow_html=True)
     
-    if "All" not in selected_stages and stage_cols:
-        filtered_df = filtered_df[filtered_df[stage_cols[0]].isin(selected_stages)]
-    
-    if "All" not in selected_locations and location_cols:
-        filtered_df = filtered_df[filtered_df[location_cols[0]].isin(selected_locations)]
-    
-    if "All" not in selected_bm and bm_cols:
-        filtered_df = filtered_df[filtered_df[bm_cols[0]].isin(selected_bm)]
+    # Display the table
+    st.dataframe(
+        weeks_df,
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            "Week": st.column_config.TextColumn("Week", width="small"),
+            "Start": st.column_config.TextColumn("Start", width="small"),
+            "End": st.column_config.TextColumn("End", width="small"),
+            "New Deals": st.column_config.NumberColumn("New Deals", width="small"),
+            "Not contacted": st.column_config.NumberColumn("Not contacted", width="small"),
+            "No Response": st.column_config.NumberColumn("No Response", width="small"),
+            "Calls Done": st.column_config.NumberColumn("Calls Done", width="small"),
+            "Calls Pending": st.column_config.NumberColumn("Calls Pending", width="small"),
+            "Pending Info": st.column_config.NumberColumn("Pending Info", width="small"),
+        }
+    )
     
     st.markdown("---")
+    
+    # Use full dataframe (no filters)
+    filtered_df = df.copy()
     
     # =============================================================================
     # STARTUP CARDS
