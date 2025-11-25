@@ -209,28 +209,48 @@ df = load_dealflow_data()
 
 def get_founder_full_name(row, startup_name):
     """Combine founder name and surname"""
-    # Try to get founder name and surname fields
-    # The field names might vary, so we'll try different patterns
+    # Try generic fields first (most common)
+    name = row.get("PH1_founder_name", "")
+    surname = row.get("PH1_founder_surname", "")
+    
+    if pd.notna(name) or pd.notna(surname):
+        first = str(name) if pd.notna(name) else ""
+        last = str(surname) if pd.notna(surname) else ""
+        full_name = f"{first} {last}".strip()
+        if full_name:
+            return full_name
+    
+    # Try startup-specific fields as fallback
     name_field = f"PH1_founder_name_{startup_name}"
     surname_field = f"PH1_founder_surname_{startup_name}"
     
     name = row.get(name_field, "")
     surname = row.get(surname_field, "")
     
-    if name or surname:
-        return f"{name} {surname}".strip()
+    if pd.notna(name) or pd.notna(surname):
+        first = str(name) if pd.notna(name) else ""
+        last = str(surname) if pd.notna(surname) else ""
+        full_name = f"{first} {last}".strip()
+        if full_name:
+            return full_name
     
-    # Fallback to generic fields if startup-specific ones don't exist
-    name = row.get("PH1_founder_name", "")
-    surname = row.get("PH1_founder_surname", "")
-    
-    return f"{name} {surname}".strip() if (name or surname) else "N/A"
+    return "N/A"
 
 def get_field_value(row, field_patterns, default="N/A"):
     """Try multiple field patterns and return the first non-empty value"""
     for pattern in field_patterns:
-        if pattern in row and pd.notna(row[pattern]) and str(row[pattern]).strip():
-            return row[pattern]
+        if pattern in row and pd.notna(row[pattern]):
+            value = row[pattern]
+            # Handle list values (e.g., ['Spain'] should become 'Spain')
+            if isinstance(value, list):
+                if len(value) > 0:
+                    return str(value[0])
+                else:
+                    continue
+            # Handle regular values
+            value_str = str(value).strip()
+            if value_str and value_str != 'nan':
+                return value_str
     return default
 
 # =============================================================================
@@ -511,9 +531,6 @@ if not df.empty:
     
     st.write("### Top 10 Startups by Signals")
     
-    # Signal scoring explanation
-    st.info("**Signal Scoring:** Score is calculated by summing avg_d1 through avg_d7 (7 pillars). Colors: 🟢 Green | 🟡 Yellow | 🔴 Red")
-    
     # Signal pillar names
     signal_names = [
         "Founder Inevitability",
@@ -581,8 +598,8 @@ if not df.empty:
                 # Get colors for display
                 colors = []
                 for color_col in color_cols:
-                    color = row.get(color_col, "")
-                    if pd.notna(color):
+                    color = row.get(color_col)
+                    if pd.notna(color) and str(color).strip():
                         colors.append(str(color).strip())
                     else:
                         colors.append("")
@@ -630,12 +647,13 @@ if not df.empty:
                     with st.expander("📊 View Signal Details"):
                         signals_display = []
                         for j, (name, score, color) in enumerate(zip(signal_names, startup['individual_scores'], startup['colors'])):
-                            # Convert color to emoji
-                            if color.lower() == 'green':
+                            # Convert color to emoji - check for different formats
+                            color_str = str(color).strip().lower()
+                            if 'green' in color_str or color_str == 'g':
                                 emoji = '🟢'
-                            elif color.lower() == 'yellow':
+                            elif 'yellow' in color_str or color_str == 'y':
                                 emoji = '🟡'
-                            elif color.lower() == 'red':
+                            elif 'red' in color_str or color_str == 'r':
                                 emoji = '🔴'
                             else:
                                 emoji = '⚪'  # Default if no color
