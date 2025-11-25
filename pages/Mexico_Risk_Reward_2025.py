@@ -85,6 +85,10 @@ with st.sidebar:
     if st.button("🏠 Home", key="home_btn", use_container_width=True):
         st.switch_page("Home.py")
     
+    # Fast-tracks button
+    if st.button("⚡ Fast-tracks", key="fast_tracks_btn", use_container_width=True):
+        st.switch_page("pages/Fast-tracks.py")
+    
     st.markdown("---")
     
     # Mexico (Title 1)
