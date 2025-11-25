@@ -256,6 +256,15 @@ if not df.empty:
     today = datetime.now()
     current_week_start = today - timedelta(days=today.weekday())  # Monday of current week
     
+    # Find required columns once
+    date_sourced_cols = [col for col in df.columns if 'date' in col.lower() and 'source' in col.lower()]
+    if not date_sourced_cols:
+        date_sourced_cols = [col for col in df.columns if col in ['Date Sourced', 'Date_Sourced', 'DateSourced']]
+    
+    contact_stage_cols = [col for col in df.columns if 'contact' in col.lower() and 'stage' in col.lower()]
+    if not contact_stage_cols:
+        contact_stage_cols = [col for col in df.columns if col in ['Contact_Stage', 'Contact Stage', 'ContactStage']]
+    
     weeks_data = []
     for i in range(-2, 5):  # -2 (2 weeks ago) to 4 (4 weeks ahead)
         week_start = current_week_start + timedelta(weeks=i)
@@ -263,15 +272,6 @@ if not df.empty:
         
         # Calculate week number
         week_num = week_start.isocalendar()[1]
-        
-        # Filter data for this week based on "Date Sourced"
-        date_sourced_cols = [col for col in df.columns if 'date' in col.lower() and 'source' in col.lower()]
-        if not date_sourced_cols:
-            date_sourced_cols = [col for col in df.columns if col in ['Date Sourced', 'Date_Sourced', 'DateSourced']]
-        
-        contact_stage_cols = [col for col in df.columns if 'contact' in col.lower() and 'stage' in col.lower()]
-        if not contact_stage_cols:
-            contact_stage_cols = [col for col in df.columns if col in ['Contact_Stage', 'Contact Stage', 'ContactStage']]
         
         new_deals = 0
         not_contacted = 0
@@ -387,6 +387,131 @@ if not df.empty:
             "Pending Info": st.column_config.NumberColumn("Pending Info", width="small"),
         }
     )
+    
+    st.markdown("---")
+    
+    # =============================================================================
+    # REFERENCE SOURCE TRACKING TABLE
+    # =============================================================================
+    
+    st.write("### Deal Sources by Week")
+    
+    # Find reference field
+    reference_cols = [col for col in df.columns if 'reference' in col.lower() and ('ph1' in col.lower() or 'startup' in col.lower())]
+    if not reference_cols:
+        reference_cols = [col for col in df.columns if col in ['PH1_reference', 'Reference', 'Source', 'Deal Source']]
+    
+    if reference_cols and date_sourced_cols:
+        reference_col = reference_cols[0]
+        date_col = date_sourced_cols[0]
+        
+        # Get all unique reference sources
+        all_references = df[reference_col].dropna().unique().tolist()
+        reference_sources = sorted([str(ref) for ref in all_references if str(ref).strip()])
+        
+        # Build weekly data by reference source
+        reference_weeks_data = []
+        reference_totals = {ref: 0 for ref in reference_sources}
+        
+        for i in range(-2, 5):  # -2 (2 weeks ago) to 4 (4 weeks ahead)
+            week_start = current_week_start + timedelta(weeks=i)
+            week_end = week_start + timedelta(days=6)  # Sunday
+            week_num = week_start.isocalendar()[1]
+            
+            week_row = {
+                "Week": f"Week {week_num}",
+                "Start": week_start.strftime("%d/%m/%Y"),
+                "End": week_end.strftime("%d/%m/%Y")
+            }
+            
+            # Count deals by reference source for this week
+            for ref_source in reference_sources:
+                count = 0
+                for idx, row in df.iterrows():
+                    date_sourced = row.get(date_col)
+                    reference = row.get(reference_col)
+                    
+                    if pd.notna(date_sourced) and pd.notna(reference):
+                        try:
+                            if isinstance(date_sourced, str):
+                                sourced_date = pd.to_datetime(date_sourced)
+                            else:
+                                sourced_date = date_sourced
+                            
+                            if week_start.date() <= sourced_date.date() <= week_end.date():
+                                if str(reference) == ref_source:
+                                    count += 1
+                                    reference_totals[ref_source] += 1
+                        except:
+                            pass
+                
+                week_row[ref_source] = count
+            
+            reference_weeks_data.append(week_row)
+        
+        # Create DataFrame
+        reference_weeks_df = pd.DataFrame(reference_weeks_data)
+        
+        # Add totals row
+        totals_row = {
+            "Week": "Totals",
+            "Start": "",
+            "End": ""
+        }
+        for ref_source in reference_sources:
+            totals_row[ref_source] = reference_totals[ref_source]
+        
+        reference_weeks_df = pd.concat([reference_weeks_df, pd.DataFrame([totals_row])], ignore_index=True)
+        
+        # Display the reference tracking table
+        st.dataframe(
+            reference_weeks_df,
+            use_container_width=True,
+            hide_index=True
+        )
+        
+        # =============================================================================
+        # PIE CHART - TOTAL DEAL SOURCES
+        # =============================================================================
+        
+        st.write("#### Total Deal Sources Distribution")
+        
+        # Create pie chart data from totals
+        pie_data = []
+        pie_labels = []
+        
+        for ref_source, count in reference_totals.items():
+            if count > 0:  # Only include sources with deals
+                pie_labels.append(ref_source)
+                pie_data.append(count)
+        
+        if pie_data:
+            col_chart1, col_chart2 = st.columns([2, 1])
+            
+            with col_chart1:
+                fig_references = go.Figure(data=[go.Pie(
+                    labels=pie_labels,
+                    values=pie_data,
+                    hole=0.4,
+                    marker=dict(colors=['#62CDEB', '#ACAFB9', '#5bb8d6', '#95a3a8', '#7fc9e0', '#8ab5c1', '#a3d5e8', '#c2e3f0'])
+                )])
+                fig_references.update_layout(
+                    showlegend=True,
+                    height=400,
+                    margin=dict(l=20, r=20, t=40, b=20)
+                )
+                st.plotly_chart(fig_references, use_container_width=True)
+            
+            with col_chart2:
+                st.write("**Summary:**")
+                for ref_source, count in sorted(reference_totals.items(), key=lambda x: x[1], reverse=True):
+                    if count > 0:
+                        percentage = (count / sum(reference_totals.values())) * 100
+                        st.write(f"**{ref_source}:** {count} ({percentage:.1f}%)")
+        else:
+            st.info("No deal source data available yet.")
+    else:
+        st.warning("Reference field not found in data. Expected field: 'PH1_reference_$startups' or similar.")
     
     st.markdown("---")
     
