@@ -577,8 +577,18 @@ if not df.empty:
                 
                 startup_name = get_field_value(row, startup_name_cols, "Unknown Startup") if startup_name_cols else "Unknown Startup"
                 
-                # Get founder name
-                founder_name = get_founder_full_name(row, startup_name)
+                # Get founder name using synced fields
+                founder_first = row.get(f"PH1_founder_name_{startup_name}", "")
+                founder_last = row.get(f"PH1_founder_surname_{startup_name}", "")
+                
+                if pd.notna(founder_first) or pd.notna(founder_last):
+                    first = str(founder_first) if pd.notna(founder_first) else ""
+                    last = str(founder_last) if pd.notna(founder_last) else ""
+                    founder_name = f"{first} {last}".strip()
+                    if not founder_name:
+                        founder_name = "N/A"
+                else:
+                    founder_name = "N/A"
                 
                 # Get other fields
                 one_liner_cols = [col for col in df.columns if 'one' in col.lower() and 'liner' in col.lower()]
@@ -594,6 +604,18 @@ if not df.empty:
                 
                 location_patterns = ["PH1_Constitution_Location", "Constitution_Location", "Location", "location"]
                 location = get_field_value(row, location_patterns, "N/A")
+                
+                # Get financial fields
+                round_size = get_field_value(row, ["Round_Size", "Round Size", "round_size"], "N/A")
+                
+                valuation_patterns = [f"PH1_current_valuation_{startup_name}", "PH1_current_valuation", "Current_Valuation", "Valuation"]
+                current_valuation = get_field_value(row, valuation_patterns, "N/A")
+                
+                stake = get_field_value(row, ["Stake_Formula", "Stake Formula", "stake_formula", "Stake"], "N/A")
+                
+                # Get deck URLs
+                deck_url = get_field_value(row, ["deck_URL", "Deck_URL", "deck_url"], "")
+                deck_startup = get_field_value(row, [f"deck_{startup_name}", "deck", "Deck"], "")
                 
                 # Get colors for display
                 colors = []
@@ -611,6 +633,11 @@ if not df.empty:
                     'business_model': business_model,
                     'stage': stage,
                     'location': location,
+                    'round_size': round_size,
+                    'current_valuation': current_valuation,
+                    'stake': stake,
+                    'deck_url': deck_url,
+                    'deck_startup': deck_startup,
                     'score': total_score,
                     'individual_scores': scores,
                     'colors': colors
@@ -638,10 +665,25 @@ if not df.empty:
                         st.markdown(f"**👤 Founder:** {startup['founder']}")
                         st.markdown(f"**💡 One Liner:** {startup['one_liner']}")
                         st.markdown(f"**💼 Business Model:** {startup['business_model']}")
-                    
-                    with col2:
                         st.markdown(f"**📊 Stage:** {startup['stage']}")
                         st.markdown(f"**📍 Location:** {startup['location']}")
+                    
+                    with col2:
+                        st.markdown(f"**💰 Round Size:** {startup['round_size']}")
+                        st.markdown(f"**📈 Current Valuation:** {startup['current_valuation']}")
+                        st.markdown(f"**🎯 Stake:** {startup['stake']}")
+                        
+                        # Display deck links if available
+                        deck_links = []
+                        if startup['deck_url'] and startup['deck_url'] != "N/A":
+                            deck_links.append(f"[Deck URL]({startup['deck_url']})")
+                        if startup['deck_startup'] and startup['deck_startup'] != "N/A":
+                            deck_links.append(f"[Deck]({startup['deck_startup']})")
+                        
+                        if deck_links:
+                            st.markdown(f"**📄 Deck:** {' | '.join(deck_links)}")
+                        else:
+                            st.markdown(f"**📄 Deck:** N/A")
                     
                     # Display full signals breakdown with colors
                     with st.expander("📊 View Signal Details"):
