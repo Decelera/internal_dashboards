@@ -286,12 +286,18 @@ if not df.empty:
         contact_stage_cols = [col for col in df.columns if col in ['Contact_Stage', 'Contact Stage', 'ContactStage']]
     
     weeks_data = []
+    current_week_index = None  # Track which row is the current week
+    
     for i in range(-2, 5):  # -2 (2 weeks ago) to 4 (4 weeks ahead)
         week_start = current_week_start + timedelta(weeks=i)
         week_end = week_start + timedelta(days=6)  # Sunday
         
         # Calculate week number
         week_num = week_start.isocalendar()[1]
+        
+        # Mark current week (when i == 0)
+        if i == 0:
+            current_week_index = len(weeks_data)
         
         new_deals = 0
         not_contacted = 0
@@ -336,8 +342,13 @@ if not df.empty:
                     except:
                         pass
         
+        # Add marker for current week
+        week_label = f"Week {week_num}"
+        if i == 0:
+            week_label = f"📍 Week {week_num} (Current)"
+        
         weeks_data.append({
-            "Week": f"Week {week_num}",
+            "Week": week_label,
             "Start": week_start.strftime("%d/%m/%Y"),
             "End": week_end.strftime("%d/%m/%Y"),
             "New Deals": new_deals,
@@ -390,9 +401,22 @@ if not df.empty:
         </style>
     """, unsafe_allow_html=True)
     
-    # Display the table
+    # Style the dataframe to highlight current week
+    def highlight_current_week(row):
+        """Apply highlighting to the current week row"""
+        if row.name == current_week_index:
+            return ['background-color: #62CDEB; color: white; font-weight: bold'] * len(row)
+        elif row.name == len(weeks_df) - 1:  # Totals row
+            return ['background-color: #1e3a5f; color: white; font-weight: bold'] * len(row)
+        else:
+            return [''] * len(row)
+    
+    # Apply styling
+    styled_df = weeks_df.style.apply(highlight_current_week, axis=1)
+    
+    # Display the styled table
     st.dataframe(
-        weeks_df,
+        styled_df,
         use_container_width=True,
         hide_index=True,
         column_config={
