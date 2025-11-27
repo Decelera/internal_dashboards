@@ -435,117 +435,90 @@ if not df.empty:
     st.markdown("---")
     
     # =============================================================================
-    # REFERENCE SOURCE TRACKING TABLE
+    # CURRENT WEEK REFERENCES
     # =============================================================================
     
-    st.write("### Deal Sources by Week")
+    st.write("### Who Referenced Deals This Week?")
     
-    # Find reference field
-    reference_cols = [col for col in df.columns if 'reference' in col.lower() and ('ph1' in col.lower() or 'startup' in col.lower())]
+    # Find reference fields
+    reference_cols = [col for col in df.columns if 'ph1_reference' in col.lower() and 'startup' in col.lower() and 'other' not in col.lower()]
+    reference_other_cols = [col for col in df.columns if 'ph1_reference_other' in col.lower() and 'startup' in col.lower()]
+    
     if not reference_cols:
-        reference_cols = [col for col in df.columns if col in ['PH1_reference', 'Reference', 'Source', 'Deal Source']]
+        reference_cols = [col for col in df.columns if col in ['PH1_reference', 'Reference']]
+    if not reference_other_cols:
+        reference_other_cols = [col for col in df.columns if col in ['PH1_reference_other', 'Reference Other']]
     
     if reference_cols and date_sourced_cols:
         reference_col = reference_cols[0]
+        reference_other_col = reference_other_cols[0] if reference_other_cols else None
         date_col = date_sourced_cols[0]
         
-        # Get all unique reference sources
-        all_references = df[reference_col].dropna().unique().tolist()
-        reference_sources = sorted([str(ref) for ref in all_references if str(ref).strip()])
+        # Get deals from current week only
+        current_week_references = {}
         
-        # Build weekly data by reference source
-        reference_weeks_data = []
-        reference_totals = {ref: 0 for ref in reference_sources}
-        
-        for i in range(-2, 5):  # -2 (2 weeks ago) to 4 (4 weeks ahead)
-            week_start = current_week_start + timedelta(weeks=i)
-            week_end = week_start + timedelta(days=6)  # Sunday
-            week_num = week_start.isocalendar()[1]
+        for idx, row in df.iterrows():
+            date_sourced = row.get(date_col)
             
-            week_row = {
-                "Week": f"Week {week_num}",
-                "Start": week_start.strftime("%d/%m/%Y"),
-                "End": week_end.strftime("%d/%m/%Y")
-            }
-            
-            # Count deals by reference source for this week
-            for ref_source in reference_sources:
-                count = 0
-                for idx, row in df.iterrows():
-                    date_sourced = row.get(date_col)
-                    reference = row.get(reference_col)
+            if pd.notna(date_sourced):
+                try:
+                    if isinstance(date_sourced, str):
+                        sourced_date = pd.to_datetime(date_sourced)
+                    else:
+                        sourced_date = date_sourced
                     
-                    if pd.notna(date_sourced) and pd.notna(reference):
-                        try:
-                            if isinstance(date_sourced, str):
-                                sourced_date = pd.to_datetime(date_sourced)
-                            else:
-                                sourced_date = date_sourced
+                    # Check if date falls within current week
+                    if current_week_start.date() <= sourced_date.date() <= (current_week_start + timedelta(days=6)).date():
+                        reference = row.get(reference_col)
+                        reference_other = row.get(reference_other_col) if reference_other_col else None
+                        
+                        # Get reference value
+                        ref_value = ""
+                        if pd.notna(reference):
+                            ref_value = str(reference).strip()
+                            # Handle list format
+                            if isinstance(reference, list) and len(reference) > 0:
+                                ref_value = str(reference[0]).strip()
+                        
+                        # Get additional reference details
+                        ref_other_value = ""
+                        if reference_other_col and pd.notna(reference_other):
+                            ref_other_value = str(reference_other).strip()
+                            if isinstance(reference_other, list) and len(reference_other) > 0:
+                                ref_other_value = str(reference_other[0]).strip()
+                        
+                        if ref_value:
+                            # Create full reference key
+                            full_ref = ref_value
+                            if ref_other_value:
+                                full_ref = f"{ref_value} ({ref_other_value})"
                             
-                            if week_start.date() <= sourced_date.date() <= week_end.date():
-                                if str(reference) == ref_source:
-                                    count += 1
-                                    reference_totals[ref_source] += 1
-                        except:
-                            pass
-                
-                week_row[ref_source] = count
+                            if full_ref not in current_week_references:
+                                current_week_references[full_ref] = 0
+                            current_week_references[full_ref] += 1
+                except:
+                    pass
+        
+        if current_week_references:
+            # Display as cards
+            st.write(f"**📍 Current Week:** {current_week_start.strftime('%d/%m/%Y')} - {(current_week_start + timedelta(days=6)).strftime('%d/%m/%Y')}")
+            st.write("")
             
-            reference_weeks_data.append(week_row)
-        
-        # Create DataFrame
-        reference_weeks_df = pd.DataFrame(reference_weeks_data)
-        
-        # Add totals row
-        totals_row = {
-            "Week": "Totals",
-            "Start": "",
-            "End": ""
-        }
-        for ref_source in reference_sources:
-            totals_row[ref_source] = reference_totals[ref_source]
-        
-        reference_weeks_df = pd.concat([reference_weeks_df, pd.DataFrame([totals_row])], ignore_index=True)
-        
-        # Display the reference tracking table
-        st.dataframe(
-            reference_weeks_df,
-            use_container_width=True,
-            hide_index=True
-        )
-        
-        # =============================================================================
-        # PIE CHART - TOTAL DEAL SOURCES
-        # =============================================================================
-        
-        st.write("#### Total Deal Sources Distribution")
-        
-        # Create pie chart data from totals
-        pie_data = []
-        pie_labels = []
-        
-        for ref_source, count in reference_totals.items():
-            if count > 0:  # Only include sources with deals
-                pie_labels.append(ref_source)
-                pie_data.append(count)
-        
-        if pie_data:
-            fig_references = go.Figure(data=[go.Pie(
-                labels=pie_labels,
-                values=pie_data,
-                hole=0.4,
-                marker=dict(colors=['#62CDEB', '#ACAFB9', '#5bb8d6', '#95a3a8', '#7fc9e0', '#8ab5c1', '#a3d5e8', '#c2e3f0'])
-            )])
-            fig_references.update_layout(
-                showlegend=True,
-                height=400,
-                margin=dict(l=20, r=20, t=40, b=20)
-            )
-            st.plotly_chart(fig_references, use_container_width=True)
+            # Sort by count
+            sorted_refs = sorted(current_week_references.items(), key=lambda x: x[1], reverse=True)
+            
+            # Display in columns
+            num_cols = 3
+            cols = st.columns(num_cols)
+            
+            for i, (ref_name, count) in enumerate(sorted_refs):
+                with cols[i % num_cols]:
+                    with st.container(border=True):
+                        st.metric(label=ref_name, value=f"{count} deal{'s' if count != 1 else ''}")
         else:
-            st.info("No deal source data available yet.")
+            st.info("No deals were referenced this week yet.")
     else:
-        st.warning("Reference field not found in data. Expected field: 'PH1_reference_$startups' or similar.")
+        st.warning("Reference fields not found in data. Expected: 'PH1_reference_$startups' and 'PH1_reference_other_$startups'")
     
     st.markdown("---")
     
