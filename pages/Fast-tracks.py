@@ -505,12 +505,31 @@ if not df.empty:
                     pass
         
         if current_week_references:
-            # Display as cards
-            st.write(f"**📍 Current Week:** {current_week_start.strftime('%d/%m/%Y')} - {(current_week_start + timedelta(days=6)).strftime('%d/%m/%Y')}")
+            # Calculate total
+            total_deals = sum(ref_data['count'] for ref_data in current_week_references.values())
+            
+            # Display header with total
+            col_header1, col_header2 = st.columns([2, 1])
+            with col_header1:
+                st.write(f"**📍 Current Week:** {current_week_start.strftime('%d/%m/%Y')} - {(current_week_start + timedelta(days=6)).strftime('%d/%m/%Y')}")
+            with col_header2:
+                st.write(f"**Total: {total_deals} deal{'s' if total_deals != 1 else ''}**")
+            
             st.write("")
             
             # Sort by count
             sorted_refs = sorted(current_week_references.items(), key=lambda x: x[1]['count'], reverse=True)
+            
+            # Add custom CSS for fixed height containers
+            st.markdown("""
+                <style>
+                .reference-card {
+                    min-height: 140px;
+                    display: flex;
+                    flex-direction: column;
+                }
+                </style>
+            """, unsafe_allow_html=True)
             
             # Display in columns
             num_cols = 3
@@ -526,8 +545,13 @@ if not df.empty:
                         # Show details as secondary info if present
                         if ref_data['details']:
                             details_list = sorted(list(ref_data['details']))
-                            details_text = ", ".join(details_list)
-                            st.caption(f"💡 {details_text}")
+                            st.caption("")  # Add spacing
+                            for detail in details_list:
+                                st.caption(f"• {detail}")
+                        else:
+                            # Add empty space to maintain alignment
+                            st.caption("")
+                            st.caption("")
         else:
             st.info("No deals were referenced this week yet.")
     else:
