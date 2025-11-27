@@ -455,6 +455,7 @@ if not df.empty:
         date_col = date_sourced_cols[0]
         
         # Get deals from current week only
+        # Store as dict with main reference as key and dict of details as value
         current_week_references = {}
         
         for idx, row in df.iterrows():
@@ -472,7 +473,7 @@ if not df.empty:
                         reference = row.get(reference_col)
                         reference_other = row.get(reference_other_col) if reference_other_col else None
                         
-                        # Get reference value
+                        # Get main reference value
                         ref_value = ""
                         if pd.notna(reference):
                             ref_value = str(reference).strip()
@@ -480,7 +481,7 @@ if not df.empty:
                             if isinstance(reference, list) and len(reference) > 0:
                                 ref_value = str(reference[0]).strip()
                         
-                        # Get additional reference details
+                        # Get additional reference details (optional)
                         ref_other_value = ""
                         if reference_other_col and pd.notna(reference_other):
                             ref_other_value = str(reference_other).strip()
@@ -488,14 +489,18 @@ if not df.empty:
                                 ref_other_value = str(reference_other[0]).strip()
                         
                         if ref_value:
-                            # Create full reference key
-                            full_ref = ref_value
-                            if ref_other_value:
-                                full_ref = f"{ref_value} ({ref_other_value})"
+                            # Use main reference as key
+                            if ref_value not in current_week_references:
+                                current_week_references[ref_value] = {
+                                    'count': 0,
+                                    'details': set()  # Store unique detail values
+                                }
                             
-                            if full_ref not in current_week_references:
-                                current_week_references[full_ref] = 0
-                            current_week_references[full_ref] += 1
+                            current_week_references[ref_value]['count'] += 1
+                            
+                            # Add detail if present
+                            if ref_other_value:
+                                current_week_references[ref_value]['details'].add(ref_other_value)
                 except:
                     pass
         
@@ -505,16 +510,24 @@ if not df.empty:
             st.write("")
             
             # Sort by count
-            sorted_refs = sorted(current_week_references.items(), key=lambda x: x[1], reverse=True)
+            sorted_refs = sorted(current_week_references.items(), key=lambda x: x[1]['count'], reverse=True)
             
             # Display in columns
             num_cols = 3
             cols = st.columns(num_cols)
             
-            for i, (ref_name, count) in enumerate(sorted_refs):
+            for i, (ref_name, ref_data) in enumerate(sorted_refs):
                 with cols[i % num_cols]:
                     with st.container(border=True):
+                        # Main reference as prominent metric
+                        count = ref_data['count']
                         st.metric(label=ref_name, value=f"{count} deal{'s' if count != 1 else ''}")
+                        
+                        # Show details as secondary info if present
+                        if ref_data['details']:
+                            details_list = sorted(list(ref_data['details']))
+                            details_text = ", ".join(details_list)
+                            st.caption(f"💡 {details_text}")
         else:
             st.info("No deals were referenced this week yet.")
     else:
