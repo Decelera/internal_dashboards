@@ -317,7 +317,6 @@ if not df.empty:
         
         new_deals = 0
         contacted = 0
-        not_contacted = 0
         no_response = 0
         videocall_done = 0
         videocall_pending = 0
@@ -414,9 +413,7 @@ if not df.empty:
                                     status_date_obj = status_date
                                 
                                 if week_start.date() <= status_date_obj.date() <= week_end.date():
-                                    if "not contacted" in stage_lower:
-                                        not_contacted += 1
-                                    elif "no response" in stage_lower:
+                                    if "no response" in stage_lower:
                                         no_response += 1
                                     elif "pending information" in stage_lower:
                                         pending_info += 1
@@ -434,7 +431,6 @@ if not df.empty:
             "End": week_end.strftime("%d/%m/%Y"),
             "New Deals": new_deals,
             "Contacted": contacted,
-            "Not contacted": not_contacted,
             "No Response": no_response,
             "Calls Done": videocall_done,
             "Calls Pending": videocall_pending,
@@ -451,7 +447,6 @@ if not df.empty:
         "End": "",
         "New Deals": weeks_df["New Deals"].sum(),
         "Contacted": weeks_df["Contacted"].sum(),
-        "Not contacted": weeks_df["Not contacted"].sum(),
         "No Response": weeks_df["No Response"].sum(),
         "Calls Done": weeks_df["Calls Done"].sum(),
         "Calls Pending": weeks_df["Calls Pending"].sum(),
@@ -508,7 +503,6 @@ if not df.empty:
             "End": st.column_config.TextColumn("End", width="small"),
             "New Deals": st.column_config.NumberColumn("New Deals", width="small"),
             "Contacted": st.column_config.NumberColumn("Contacted", width="small"),
-            "Not contacted": st.column_config.NumberColumn("Not contacted", width="small"),
             "No Response": st.column_config.NumberColumn("No Response", width="small"),
             "Calls Done": st.column_config.NumberColumn("Calls Done", width="small"),
             "Calls Pending": st.column_config.NumberColumn("Calls Pending", width="small"),
