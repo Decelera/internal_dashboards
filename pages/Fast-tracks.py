@@ -310,8 +310,13 @@ if not df.empty:
             date_col = date_sourced_cols[0]
             stage_col = contact_stage_cols[0]
             
+            # Look for a videocall date field (when the call actually happened)
+            videocall_date_cols = [col for col in df.columns if 'videocall' in col.lower() and 'date' in col.lower()]
+            if not videocall_date_cols:
+                videocall_date_cols = [col for col in df.columns if col in ['Videocall_Date', 'Videocall Date', 'Call_Date', 'Call Date']]
+            
             for idx, row in df.iterrows():
-                # Check if Date Sourced falls within this week
+                # Count New Deals based on Date Sourced
                 date_sourced = row.get(date_col)
                 if pd.notna(date_sourced):
                     try:
@@ -324,23 +329,62 @@ if not df.empty:
                         # Check if date falls within this week
                         if week_start.date() <= sourced_date.date() <= week_end.date():
                             new_deals += 1
+                    except:
+                        pass
+                
+                # For status columns: check if there's a date field for each status
+                # If videocall date exists, use it for call-related statuses
+                stage = row.get(stage_col, "")
+                if pd.notna(stage):
+                    stage_lower = str(stage).lower()
+                    
+                    # For videocall statuses, try to use videocall date if available
+                    if "videocall done" in stage_lower or "video call done" in stage_lower:
+                        if videocall_date_cols:
+                            call_date = row.get(videocall_date_cols[0])
+                            if pd.notna(call_date):
+                                try:
+                                    if isinstance(call_date, str):
+                                        call_date_obj = pd.to_datetime(call_date)
+                                    else:
+                                        call_date_obj = call_date
+                                    
+                                    if week_start.date() <= call_date_obj.date() <= week_end.date():
+                                        videocall_done += 1
+                                except:
+                                    pass
+                        else:
+                            # Fallback: count if deal was sourced this week
+                            if pd.notna(date_sourced):
+                                try:
+                                    if isinstance(date_sourced, str):
+                                        sourced_date = pd.to_datetime(date_sourced)
+                                    else:
+                                        sourced_date = date_sourced
+                                    if week_start.date() <= sourced_date.date() <= week_end.date():
+                                        videocall_done += 1
+                                except:
+                                    pass
+                    
+                    # For other statuses, only count if deal was sourced this week
+                    elif pd.notna(date_sourced):
+                        try:
+                            if isinstance(date_sourced, str):
+                                sourced_date = pd.to_datetime(date_sourced)
+                            else:
+                                sourced_date = date_sourced
                             
-                            # Count by contact stage
-                            stage = row.get(stage_col, "")
-                            if pd.notna(stage):
-                                stage_lower = str(stage).lower()
+                            if week_start.date() <= sourced_date.date() <= week_end.date():
                                 if "not contacted" in stage_lower:
                                     not_contacted += 1
                                 elif "no response" in stage_lower:
                                     no_response += 1
-                                elif "videocall done" in stage_lower or "video call done" in stage_lower:
-                                    videocall_done += 1
                                 elif "videocall pending" in stage_lower or "video call pending" in stage_lower:
                                     videocall_pending += 1
                                 elif "pending information" in stage_lower:
                                     pending_info += 1
-                    except:
-                        pass
+                        except:
+                            pass
         
         # Add marker for current week
         week_label = f"Week {week_num}"
