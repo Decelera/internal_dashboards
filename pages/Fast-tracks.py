@@ -203,6 +203,22 @@ def load_dealflow_data():
 # Load data
 df = load_dealflow_data()
 
+# Debug: Show available columns
+if not df.empty:
+    with st.expander("🔍 Debug: Available Columns in Data"):
+        st.write("**All columns:**")
+        founder_cols = [col for col in df.columns if 'founder' in col.lower() or 'name' in col.lower()]
+        if founder_cols:
+            st.write("**Columns containing 'founder' or 'name':**")
+            for col in founder_cols:
+                st.write(f"- `{col}`")
+        else:
+            st.write("No columns found containing 'founder' or 'name'")
+        
+        st.write("\n**All columns (alphabetically):**")
+        for col in sorted(df.columns):
+            st.write(f"- `{col}`")
+
 # =============================================================================
 # HELPER FUNCTIONS
 # =============================================================================
@@ -300,6 +316,7 @@ if not df.empty:
             current_week_index = len(weeks_data)
         
         new_deals = 0
+        contacted = 0
         not_contacted = 0
         no_response = 0
         videocall_done = 0
@@ -331,6 +348,23 @@ if not df.empty:
                             new_deals += 1
                     except:
                         pass
+                
+                # Count Contacted based on Date_First_Contact
+                if first_contact_date_cols:
+                    first_contact_date = row.get(first_contact_date_cols[0])
+                    if pd.notna(first_contact_date):
+                        try:
+                            # Convert to datetime if it's a string
+                            if isinstance(first_contact_date, str):
+                                contact_date_obj = pd.to_datetime(first_contact_date)
+                            else:
+                                contact_date_obj = first_contact_date
+                            
+                            # Check if date falls within this week
+                            if week_start.date() <= contact_date_obj.date() <= week_end.date():
+                                contacted += 1
+                        except:
+                            pass
                 
                 # For contact stage statuses: use Date_First_Contact for timing
                 stage = row.get(stage_col, "")
@@ -399,6 +433,7 @@ if not df.empty:
             "Start": week_start.strftime("%d/%m/%Y"),
             "End": week_end.strftime("%d/%m/%Y"),
             "New Deals": new_deals,
+            "Contacted": contacted,
             "Not contacted": not_contacted,
             "No Response": no_response,
             "Calls Done": videocall_done,
@@ -415,6 +450,7 @@ if not df.empty:
         "Start": "",
         "End": "",
         "New Deals": weeks_df["New Deals"].sum(),
+        "Contacted": weeks_df["Contacted"].sum(),
         "Not contacted": weeks_df["Not contacted"].sum(),
         "No Response": weeks_df["No Response"].sum(),
         "Calls Done": weeks_df["Calls Done"].sum(),
@@ -471,6 +507,7 @@ if not df.empty:
             "Start": st.column_config.TextColumn("Start", width="small"),
             "End": st.column_config.TextColumn("End", width="small"),
             "New Deals": st.column_config.NumberColumn("New Deals", width="small"),
+            "Contacted": st.column_config.NumberColumn("Contacted", width="small"),
             "Not contacted": st.column_config.NumberColumn("Not contacted", width="small"),
             "No Response": st.column_config.NumberColumn("No Response", width="small"),
             "Calls Done": st.column_config.NumberColumn("Calls Done", width="small"),
