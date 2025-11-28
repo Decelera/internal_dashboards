@@ -610,7 +610,7 @@ if not df.empty:
     # QUALIFIED STARTUPS TABLE
     # =============================================================================
     
-    st.write("### Qualified Startups")
+    st.write("### 🎯 Qualified Startups")
     
     # Find stage field - be more specific
     stage_field_cols = [col for col in df.columns if col == 'Stage' or col == 'stage']
@@ -621,11 +621,6 @@ if not df.empty:
     if stage_field_cols:
         stage_field = stage_field_cols[0]
         
-        # Debug: Show what stage values exist
-        unique_stages = df[stage_field].dropna().unique().tolist()
-        st.write(f"**Debug - Stage field used:** `{stage_field}`")
-        st.write(f"**Debug - Unique stage values found:** {unique_stages}")
-        
         # Filter for "Qualified" stage - try multiple matching strategies
         # First try exact match
         qualified_df = df[df[stage_field].astype(str).str.strip().str.lower() == 'qualified']
@@ -635,85 +630,93 @@ if not df.empty:
             qualified_df = df[df[stage_field].astype(str).str.lower().str.contains('qualified', na=False)]
         
         if not qualified_df.empty:
-            # Get startup name field
-            startup_name_cols = [col for col in df.columns if 'startup' in col.lower() and 'name' in col.lower()]
-            if not startup_name_cols:
-                startup_name_cols = [col for col in df.columns if col in ['Name', 'Startup', 'Company']]
+            st.write(f"**Total:** {len(qualified_df)} startups")
+            st.write("")
             
-            # Build table data
-            qualified_table_data = []
+            # Display in a 2-column grid with cards
+            num_cols = 2
+            rows = [qualified_df.iloc[i:i+num_cols] for i in range(0, len(qualified_df), num_cols)]
             
-            for idx, row in qualified_df.iterrows():
-                # Get startup name
-                startup_name = get_field_value(row, startup_name_cols, "Unknown Startup") if startup_name_cols else "Unknown Startup"
-                
-                # Get founder name
-                founder_first = row.get(f"PH1_founder_name_{startup_name}", "")
-                founder_last = row.get(f"PH1_founder_surname_{startup_name}", "")
-                
-                if pd.notna(founder_first) or pd.notna(founder_last):
-                    first = str(founder_first) if pd.notna(founder_first) else ""
-                    last = str(founder_last) if pd.notna(founder_last) else ""
-                    founder_name = f"{first} {last}".strip()
-                    if not founder_name:
-                        founder_name = "N/A"
-                else:
-                    founder_name = "N/A"
-                
-                # Get one liner
-                one_liner_cols = [col for col in df.columns if 'one' in col.lower() and 'liner' in col.lower()]
-                if not one_liner_cols:
-                    one_liner_cols = [col for col in df.columns if col in ['One liner', 'One_liner', 'OneLiner', 'Tagline']]
-                one_liner = get_field_value(row, one_liner_cols, "N/A") if one_liner_cols else "N/A"
-                
-                # Get business model
-                bm_patterns = [f"PH1_business_model_{startup_name}", "PH1_business_model", "Business Model", "business_model"]
-                business_model = get_field_value(row, bm_patterns, "N/A")
-                
-                # Get location
-                location_patterns = ["PH1_Constitution_Location", "Constitution_Location", "Location", "location"]
-                location = get_field_value(row, location_patterns, "N/A")
-                
-                # Get round size
-                round_size = get_field_value(row, ["Round_Size", "Round Size", "round_size"], "N/A")
-                
-                # Get valuation
-                valuation_patterns = [f"PH1_current_valuation_{startup_name}", "PH1_current_valuation", "Current_Valuation", "Valuation"]
-                current_valuation = get_field_value(row, valuation_patterns, "N/A")
-                
-                # Get stake
-                stake = get_field_value(row, ["Stake_Formula", "Stake Formula", "stake_formula", "Stake"], "N/A")
-                
-                qualified_table_data.append({
-                    "Startup": startup_name,
-                    "Founder": founder_name,
-                    "One Liner": one_liner,
-                    "Business Model": business_model,
-                    "Location": location,
-                    "Round Size": round_size,
-                    "Valuation": current_valuation,
-                    "Stake": stake
-                })
-            
-            # Create and display DataFrame
-            qualified_table_df = pd.DataFrame(qualified_table_data)
-            
-            st.write(f"**Total Qualified Startups:** {len(qualified_table_df)}")
-            st.dataframe(
-                qualified_table_df,
-                use_container_width=True,
-                hide_index=True,
-                column_config={
-                    "Startup": st.column_config.TextColumn("Startup", width="medium"),
-                    "Founder": st.column_config.TextColumn("Founder", width="medium"),
-                    "One Liner": st.column_config.TextColumn("One Liner", width="large"),
-                    "Business Model": st.column_config.TextColumn("Business Model", width="medium"),
-                    "Location": st.column_config.TextColumn("Location", width="small"),
-                    "Round Size": st.column_config.TextColumn("Round Size", width="small"),
-                    "Valuation": st.column_config.TextColumn("Valuation", width="small"),
-                    "Stake": st.column_config.TextColumn("Stake", width="small"),
-                }
-            )
+            for row_idx, row_data in enumerate(rows):
+                cols = st.columns(num_cols)
+                for col_idx, (_, startup_row) in enumerate(row_data.iterrows()):
+                    with cols[col_idx]:
+                        # Get startup name - look for Name field directly
+                        startup_name = "Unknown Startup"
+                        if 'Name' in startup_row:
+                            startup_name = str(startup_row['Name']) if pd.notna(startup_row['Name']) else "Unknown Startup"
+                        else:
+                            # Fallback to searching
+                            startup_name_cols = [col for col in df.columns if ('startup' in col.lower() and 'name' in col.lower()) or col == 'Name']
+                            if startup_name_cols:
+                                val = startup_row.get(startup_name_cols[0])
+                                if pd.notna(val):
+                                    startup_name = str(val)
+                        
+                        # Get founder name using helper function
+                        founder_name = get_founder_full_name(startup_row, startup_name)
+                        
+                        # Get one liner
+                        one_liner_cols = [col for col in df.columns if 'one' in col.lower() and 'liner' in col.lower()]
+                        one_liner = get_field_value(startup_row, one_liner_cols, "N/A") if one_liner_cols else "N/A"
+                        
+                        # Get business model
+                        bm_patterns = ["PH1_business_model", "Business Model", "business_model"]
+                        business_model = get_field_value(startup_row, bm_patterns, "N/A")
+                        
+                        # Get location
+                        location_patterns = ["PH1_Constitution_Location", "Constitution_Location", "Location", "location"]
+                        location = get_field_value(startup_row, location_patterns, "N/A")
+                        
+                        # Create card with main info
+                        with st.container(border=True):
+                            st.markdown(f"### 🚀 {startup_name}")
+                            st.markdown(f"**👤 Founder:** {founder_name}")
+                            if one_liner and one_liner != "N/A":
+                                st.markdown(f"*{one_liner}*")
+                            
+                            # Basic info in columns
+                            info_col1, info_col2 = st.columns(2)
+                            with info_col1:
+                                st.markdown(f"**💼 Business Model**  \n{business_model}")
+                            with info_col2:
+                                st.markdown(f"**📍 Location**  \n{location}")
+                            
+                            # Expandable details section
+                            with st.expander("📊 View Full Details"):
+                                # Get round size
+                                round_size = get_field_value(startup_row, ["Round_Size", "Round Size", "round_size"], "N/A")
+                                
+                                # Get valuation
+                                valuation_patterns = ["PH1_current_valuation", "Current_Valuation", "Valuation"]
+                                current_valuation = get_field_value(startup_row, valuation_patterns, "N/A")
+                                
+                                # Get stake
+                                stake = get_field_value(startup_row, ["Stake_Formula", "Stake Formula", "stake_formula", "Stake"], "N/A")
+                                
+                                # Get deck links
+                                deck_url = get_field_value(startup_row, ["deck_URL", "Deck_URL", "Deck URL"], "")
+                                deck_startup = get_field_value(startup_row, ["deck_$startup", "deck_startup", "Deck"], "")
+                                
+                                # Display financial info
+                                detail_col1, detail_col2 = st.columns(2)
+                                with detail_col1:
+                                    st.markdown(f"**💰 Round Size**  \n{round_size}")
+                                    st.markdown(f"**📈 Current Valuation**  \n{current_valuation}")
+                                with detail_col2:
+                                    st.markdown(f"**🎯 Stake**  \n{stake}")
+                                    
+                                    # Deck links
+                                    deck_links = []
+                                    if deck_url and deck_url not in ["N/A", "", " "]:
+                                        deck_links.append(f"[Deck URL]({deck_url})")
+                                    if deck_startup and deck_startup not in ["N/A", "", " "]:
+                                        deck_links.append(f"[Deck Attachment]({deck_startup})")
+                                    
+                                    if deck_links:
+                                        st.markdown(f"**📄 Deck**  \n{' | '.join(deck_links)}")
+                                    else:
+                                        st.markdown(f"**📄 Deck**  \nN/A")
         else:
             st.info("No startups with 'Qualified' stage found.")
     else:
