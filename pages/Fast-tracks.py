@@ -225,30 +225,46 @@ if not df.empty:
 
 def get_founder_full_name(row, startup_name):
     """Combine founder name and surname"""
-    # Try generic fields first (most common)
-    name = row.get("PH1_founder_name", "")
-    surname = row.get("PH1_founder_surname", "")
+    # List of possible name field patterns
+    name_patterns = [
+        "PH1_founder_name_$startup",
+        "PH1_founder_name",
+        f"PH1_founder_name_{startup_name}",
+        "founder_name"
+    ]
     
-    if pd.notna(name) or pd.notna(surname):
-        first = str(name) if pd.notna(name) else ""
-        last = str(surname) if pd.notna(surname) else ""
-        full_name = f"{first} {last}".strip()
-        if full_name:
-            return full_name
+    # List of possible surname field patterns (note: sur_name vs surname)
+    surname_patterns = [
+        "PH1_founder_sur_name_$startup",
+        "PH1_founder_surname_$startup",
+        "PH1_founder_sur_name",
+        "PH1_founder_surname",
+        f"PH1_founder_sur_name_{startup_name}",
+        f"PH1_founder_surname_{startup_name}",
+        "founder_surname",
+        "founder_sur_name"
+    ]
     
-    # Try startup-specific fields as fallback
-    name_field = f"PH1_founder_name_{startup_name}"
-    surname_field = f"PH1_founder_surname_{startup_name}"
+    # Try to find name
+    first_name = ""
+    for pattern in name_patterns:
+        value = row.get(pattern, "")
+        if pd.notna(value) and str(value).strip():
+            first_name = str(value).strip()
+            break
     
-    name = row.get(name_field, "")
-    surname = row.get(surname_field, "")
+    # Try to find surname
+    last_name = ""
+    for pattern in surname_patterns:
+        value = row.get(pattern, "")
+        if pd.notna(value) and str(value).strip():
+            last_name = str(value).strip()
+            break
     
-    if pd.notna(name) or pd.notna(surname):
-        first = str(name) if pd.notna(name) else ""
-        last = str(surname) if pd.notna(surname) else ""
-        full_name = f"{first} {last}".strip()
-        if full_name:
-            return full_name
+    # Combine if we found at least one part
+    if first_name or last_name:
+        full_name = f"{first_name} {last_name}".strip()
+        return full_name if full_name else "N/A"
     
     return "N/A"
 
