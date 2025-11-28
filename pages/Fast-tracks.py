@@ -687,16 +687,16 @@ if not df.empty:
                         with st.container(border=True):
                             st.markdown(f"### {startup_name}")
                             
+                            # Show founder name above one liner
+                            if founder_name and founder_name != "N/A":
+                                st.markdown(f"**👤 {founder_name}**")
+                            
                             # Show one liner if available
                             if one_liner and one_liner != "N/A":
                                 st.markdown(f"*{one_liner}*")
                             
-                            # Expandable details section - ALL info goes here
+                            # Expandable details section - ALL OTHER info goes here
                             with st.expander("📊 View Full Details"):
-                                # Show founder
-                                if founder_name and founder_name != "N/A":
-                                    st.markdown(f"**👤 Founder:** {founder_name}")
-                                    st.markdown("")
                                 
                                 # Show business model and location
                                 if (business_model and business_model != "N/A") or (location and location != "N/A"):
@@ -831,16 +831,16 @@ if not df.empty:
                         with st.container(border=True):
                             st.markdown(f"### {startup_name}")
                             
+                            # Show founder name above one liner
+                            if founder_name and founder_name != "N/A":
+                                st.markdown(f"**👤 {founder_name}**")
+                            
                             # Show one liner if available
                             if one_liner and one_liner != "N/A":
                                 st.markdown(f"*{one_liner}*")
                             
-                            # Expandable details section - ALL info goes here
+                            # Expandable details section - ALL OTHER info goes here
                             with st.expander("📊 View Full Details"):
-                                # Show founder
-                                if founder_name and founder_name != "N/A":
-                                    st.markdown(f"**👤 Founder:** {founder_name}")
-                                    st.markdown("")
                                 
                                 # Show business model, stage, and location
                                 if (business_model and business_model != "N/A") or (stage and stage != "N/A") or (location and location != "N/A"):
