@@ -600,6 +600,108 @@ if not df.empty:
             st.info("No deals were referenced this week yet.")
     else:
         st.warning("Reference fields not found in data. Expected: 'PH1_reference_$startups' and 'PH1_reference_other_$startups'")
+    
+    st.markdown("---")
+    
+    # =============================================================================
+    # QUALIFIED STARTUPS TABLE
+    # =============================================================================
+    
+    st.write("### Qualified Startups")
+    
+    # Find stage field
+    stage_field_cols = [col for col in df.columns if col.lower() == 'stage' or 'stage' in col.lower()]
+    
+    if stage_field_cols:
+        stage_field = stage_field_cols[0]
+        
+        # Filter for "Qualified" stage
+        qualified_df = df[df[stage_field].astype(str).str.lower().str.contains('qualified', na=False)]
+        
+        if not qualified_df.empty:
+            # Get startup name field
+            startup_name_cols = [col for col in df.columns if 'startup' in col.lower() and 'name' in col.lower()]
+            if not startup_name_cols:
+                startup_name_cols = [col for col in df.columns if col in ['Name', 'Startup', 'Company']]
+            
+            # Build table data
+            qualified_table_data = []
+            
+            for idx, row in qualified_df.iterrows():
+                # Get startup name
+                startup_name = get_field_value(row, startup_name_cols, "Unknown Startup") if startup_name_cols else "Unknown Startup"
+                
+                # Get founder name
+                founder_first = row.get(f"PH1_founder_name_{startup_name}", "")
+                founder_last = row.get(f"PH1_founder_surname_{startup_name}", "")
+                
+                if pd.notna(founder_first) or pd.notna(founder_last):
+                    first = str(founder_first) if pd.notna(founder_first) else ""
+                    last = str(founder_last) if pd.notna(founder_last) else ""
+                    founder_name = f"{first} {last}".strip()
+                    if not founder_name:
+                        founder_name = "N/A"
+                else:
+                    founder_name = "N/A"
+                
+                # Get one liner
+                one_liner_cols = [col for col in df.columns if 'one' in col.lower() and 'liner' in col.lower()]
+                if not one_liner_cols:
+                    one_liner_cols = [col for col in df.columns if col in ['One liner', 'One_liner', 'OneLiner', 'Tagline']]
+                one_liner = get_field_value(row, one_liner_cols, "N/A") if one_liner_cols else "N/A"
+                
+                # Get business model
+                bm_patterns = [f"PH1_business_model_{startup_name}", "PH1_business_model", "Business Model", "business_model"]
+                business_model = get_field_value(row, bm_patterns, "N/A")
+                
+                # Get location
+                location_patterns = ["PH1_Constitution_Location", "Constitution_Location", "Location", "location"]
+                location = get_field_value(row, location_patterns, "N/A")
+                
+                # Get round size
+                round_size = get_field_value(row, ["Round_Size", "Round Size", "round_size"], "N/A")
+                
+                # Get valuation
+                valuation_patterns = [f"PH1_current_valuation_{startup_name}", "PH1_current_valuation", "Current_Valuation", "Valuation"]
+                current_valuation = get_field_value(row, valuation_patterns, "N/A")
+                
+                # Get stake
+                stake = get_field_value(row, ["Stake_Formula", "Stake Formula", "stake_formula", "Stake"], "N/A")
+                
+                qualified_table_data.append({
+                    "Startup": startup_name,
+                    "Founder": founder_name,
+                    "One Liner": one_liner,
+                    "Business Model": business_model,
+                    "Location": location,
+                    "Round Size": round_size,
+                    "Valuation": current_valuation,
+                    "Stake": stake
+                })
+            
+            # Create and display DataFrame
+            qualified_table_df = pd.DataFrame(qualified_table_data)
+            
+            st.write(f"**Total Qualified Startups:** {len(qualified_table_df)}")
+            st.dataframe(
+                qualified_table_df,
+                use_container_width=True,
+                hide_index=True,
+                column_config={
+                    "Startup": st.column_config.TextColumn("Startup", width="medium"),
+                    "Founder": st.column_config.TextColumn("Founder", width="medium"),
+                    "One Liner": st.column_config.TextColumn("One Liner", width="large"),
+                    "Business Model": st.column_config.TextColumn("Business Model", width="medium"),
+                    "Location": st.column_config.TextColumn("Location", width="small"),
+                    "Round Size": st.column_config.TextColumn("Round Size", width="small"),
+                    "Valuation": st.column_config.TextColumn("Valuation", width="small"),
+                    "Stake": st.column_config.TextColumn("Stake", width="small"),
+                }
+            )
+        else:
+            st.info("No startups with 'Qualified' stage found.")
+    else:
+        st.warning("Stage field not found in data.")
 
 else:
     st.warning("No data available. Please check your Airtable configuration.")
