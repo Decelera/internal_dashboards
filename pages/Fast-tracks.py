@@ -310,10 +310,10 @@ if not df.empty:
             date_col = date_sourced_cols[0]
             stage_col = contact_stage_cols[0]
             
-            # Look for a videocall date field (when the call actually happened)
-            videocall_date_cols = [col for col in df.columns if 'videocall' in col.lower() and 'date' in col.lower()]
-            if not videocall_date_cols:
-                videocall_date_cols = [col for col in df.columns if col in ['Videocall_Date', 'Videocall Date', 'Call_Date', 'Call Date']]
+            # Look for Date_First_Contact field (when the contact/call happened)
+            first_contact_date_cols = [col for col in df.columns if 'first' in col.lower() and 'contact' in col.lower() and 'date' in col.lower()]
+            if not first_contact_date_cols:
+                first_contact_date_cols = [col for col in df.columns if col in ['Date_First_Contact', 'Date First Contact', 'First_Contact_Date', 'First Contact Date']]
             
             for idx, row in df.iterrows():
                 # Count New Deals based on Date Sourced
@@ -332,59 +332,62 @@ if not df.empty:
                     except:
                         pass
                 
-                # For status columns: check if there's a date field for each status
-                # If videocall date exists, use it for call-related statuses
+                # For contact stage statuses: use Date_First_Contact for timing
                 stage = row.get(stage_col, "")
                 if pd.notna(stage):
                     stage_lower = str(stage).lower()
                     
-                    # For videocall statuses, try to use videocall date if available
-                    if "videocall done" in stage_lower or "video call done" in stage_lower:
-                        if videocall_date_cols:
-                            call_date = row.get(videocall_date_cols[0])
-                            if pd.notna(call_date):
-                                try:
-                                    if isinstance(call_date, str):
-                                        call_date_obj = pd.to_datetime(call_date)
-                                    else:
-                                        call_date_obj = call_date
-                                    
-                                    if week_start.date() <= call_date_obj.date() <= week_end.date():
-                                        videocall_done += 1
-                                except:
-                                    pass
-                        else:
-                            # Fallback: count if deal was sourced this week
-                            if pd.notna(date_sourced):
-                                try:
-                                    if isinstance(date_sourced, str):
-                                        sourced_date = pd.to_datetime(date_sourced)
-                                    else:
-                                        sourced_date = date_sourced
-                                    if week_start.date() <= sourced_date.date() <= week_end.date():
-                                        videocall_done += 1
-                                except:
-                                    pass
+                    # Get the contact date for this status
+                    contact_date = None
+                    if first_contact_date_cols:
+                        contact_date = row.get(first_contact_date_cols[0])
                     
-                    # For other statuses, only count if deal was sourced this week
-                    elif pd.notna(date_sourced):
-                        try:
-                            if isinstance(date_sourced, str):
-                                sourced_date = pd.to_datetime(date_sourced)
-                            else:
-                                sourced_date = date_sourced
-                            
-                            if week_start.date() <= sourced_date.date() <= week_end.date():
-                                if "not contacted" in stage_lower:
-                                    not_contacted += 1
-                                elif "no response" in stage_lower:
-                                    no_response += 1
-                                elif "videocall pending" in stage_lower or "video call pending" in stage_lower:
+                    # For videocall statuses, use Date_First_Contact
+                    if "videocall done" in stage_lower or "video call done" in stage_lower:
+                        if pd.notna(contact_date):
+                            try:
+                                if isinstance(contact_date, str):
+                                    contact_date_obj = pd.to_datetime(contact_date)
+                                else:
+                                    contact_date_obj = contact_date
+                                
+                                if week_start.date() <= contact_date_obj.date() <= week_end.date():
+                                    videocall_done += 1
+                            except:
+                                pass
+                    
+                    elif "videocall pending" in stage_lower or "video call pending" in stage_lower:
+                        if pd.notna(contact_date):
+                            try:
+                                if isinstance(contact_date, str):
+                                    contact_date_obj = pd.to_datetime(contact_date)
+                                else:
+                                    contact_date_obj = contact_date
+                                
+                                if week_start.date() <= contact_date_obj.date() <= week_end.date():
                                     videocall_pending += 1
-                                elif "pending information" in stage_lower:
-                                    pending_info += 1
-                        except:
-                            pass
+                            except:
+                                pass
+                    
+                    # For other statuses, use Date_First_Contact if available, else Date Sourced
+                    else:
+                        status_date = contact_date if pd.notna(contact_date) else date_sourced
+                        if pd.notna(status_date):
+                            try:
+                                if isinstance(status_date, str):
+                                    status_date_obj = pd.to_datetime(status_date)
+                                else:
+                                    status_date_obj = status_date
+                                
+                                if week_start.date() <= status_date_obj.date() <= week_end.date():
+                                    if "not contacted" in stage_lower:
+                                        not_contacted += 1
+                                    elif "no response" in stage_lower:
+                                        no_response += 1
+                                    elif "pending information" in stage_lower:
+                                        pending_info += 1
+                            except:
+                                pass
         
         # Add marker for current week
         week_label = f"Week {week_num}"
