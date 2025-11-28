@@ -611,6 +611,8 @@ if not df.empty:
     # =============================================================================
     
     st.write("### 🎯 Qualified Startups")
+    st.caption("These startups have passed initial screening and can be used in VC meetings to exchange dealflow.")
+    st.write("")
     
     # Find stage field - be more specific
     stage_field_cols = [col for col in df.columns if col == 'Stage' or col == 'stage']
