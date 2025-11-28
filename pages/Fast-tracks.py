@@ -641,17 +641,17 @@ if not df.empty:
                 cols = st.columns(num_cols)
                 for col_idx, (_, startup_row) in enumerate(row_data.iterrows()):
                     with cols[col_idx]:
-                        # Get startup name - look for Name field directly
+                        # Get startup name - prioritize fields with "startup" and "name"
                         startup_name = "Unknown Startup"
-                        if 'Name' in startup_row:
-                            startup_name = str(startup_row['Name']) if pd.notna(startup_row['Name']) else "Unknown Startup"
-                        else:
-                            # Fallback to searching
-                            startup_name_cols = [col for col in df.columns if ('startup' in col.lower() and 'name' in col.lower()) or col == 'Name']
-                            if startup_name_cols:
-                                val = startup_row.get(startup_name_cols[0])
-                                if pd.notna(val):
-                                    startup_name = str(val)
+                        startup_name_cols = [col for col in df.columns if 'startup' in col.lower() and 'name' in col.lower()]
+                        if not startup_name_cols:
+                            # Fallback to standard name fields
+                            startup_name_cols = [col for col in df.columns if col in ['Startup', 'Company', 'Name']]
+                        
+                        if startup_name_cols:
+                            val = startup_row.get(startup_name_cols[0])
+                            if pd.notna(val):
+                                startup_name = str(val)
                         
                         # Get founder name using helper function
                         founder_name = get_founder_full_name(startup_row, startup_name)
@@ -671,16 +671,27 @@ if not df.empty:
                         # Create card with main info
                         with st.container(border=True):
                             st.markdown(f"### 🚀 {startup_name}")
-                            st.markdown(f"**👤 Founder:** {founder_name}")
+                            
+                            # Only show founder if not N/A
+                            if founder_name and founder_name != "N/A":
+                                st.markdown(f"**👤 Founder:** {founder_name}")
+                            
+                            # Show one liner if available
                             if one_liner and one_liner != "N/A":
                                 st.markdown(f"*{one_liner}*")
                             
-                            # Basic info in columns
-                            info_col1, info_col2 = st.columns(2)
-                            with info_col1:
-                                st.markdown(f"**💼 Business Model**  \n{business_model}")
-                            with info_col2:
-                                st.markdown(f"**📍 Location**  \n{location}")
+                            # Only show fields that have data
+                            show_col1 = business_model and business_model != "N/A"
+                            show_col2 = location and location != "N/A"
+                            
+                            if show_col1 or show_col2:
+                                info_col1, info_col2 = st.columns(2)
+                                with info_col1:
+                                    if show_col1:
+                                        st.markdown(f"**💼 Business Model**  \n{business_model}")
+                                with info_col2:
+                                    if show_col2:
+                                        st.markdown(f"**📍 Location**  \n{location}")
                             
                             # Expandable details section
                             with st.expander("📊 View Full Details"):
@@ -698,25 +709,29 @@ if not df.empty:
                                 deck_url = get_field_value(startup_row, ["deck_URL", "Deck_URL", "Deck URL"], "")
                                 deck_startup = get_field_value(startup_row, ["deck_$startup", "deck_startup", "Deck"], "")
                                 
-                                # Display financial info
-                                detail_col1, detail_col2 = st.columns(2)
-                                with detail_col1:
-                                    st.markdown(f"**💰 Round Size**  \n{round_size}")
-                                    st.markdown(f"**📈 Current Valuation**  \n{current_valuation}")
-                                with detail_col2:
-                                    st.markdown(f"**🎯 Stake**  \n{stake}")
-                                    
-                                    # Deck links
-                                    deck_links = []
-                                    if deck_url and deck_url not in ["N/A", "", " "]:
-                                        deck_links.append(f"[Deck URL]({deck_url})")
-                                    if deck_startup and deck_startup not in ["N/A", "", " "]:
-                                        deck_links.append(f"[Deck Attachment]({deck_startup})")
-                                    
-                                    if deck_links:
-                                        st.markdown(f"**📄 Deck**  \n{' | '.join(deck_links)}")
-                                    else:
-                                        st.markdown(f"**📄 Deck**  \nN/A")
+                                # Check what details we have
+                                has_financial = (round_size and round_size != "N/A") or (current_valuation and current_valuation != "N/A") or (stake and stake != "N/A")
+                                deck_links = []
+                                if deck_url and deck_url not in ["N/A", "", " "]:
+                                    deck_links.append(f"[Deck URL]({deck_url})")
+                                if deck_startup and deck_startup not in ["N/A", "", " "]:
+                                    deck_links.append(f"[Deck Attachment]({deck_startup})")
+                                
+                                if has_financial or deck_links:
+                                    # Display financial info
+                                    detail_col1, detail_col2 = st.columns(2)
+                                    with detail_col1:
+                                        if round_size and round_size != "N/A":
+                                            st.markdown(f"**💰 Round Size**  \n{round_size}")
+                                        if current_valuation and current_valuation != "N/A":
+                                            st.markdown(f"**📈 Current Valuation**  \n{current_valuation}")
+                                    with detail_col2:
+                                        if stake and stake != "N/A":
+                                            st.markdown(f"**🎯 Stake**  \n{stake}")
+                                        if deck_links:
+                                            st.markdown(f"**📄 Deck**  \n{' | '.join(deck_links)}")
+                                else:
+                                    st.info("No additional details available.")
         else:
             st.info("No startups with 'Qualified' stage found.")
     else:
@@ -759,17 +774,17 @@ if not df.empty:
                 cols = st.columns(num_cols)
                 for col_idx, (_, startup_row) in enumerate(row_data.iterrows()):
                     with cols[col_idx]:
-                        # Get startup name - look for Name field directly
+                        # Get startup name - prioritize fields with "startup" and "name"
                         startup_name = "Unknown Startup"
-                        if 'Name' in startup_row:
-                            startup_name = str(startup_row['Name']) if pd.notna(startup_row['Name']) else "Unknown Startup"
-                        else:
-                            # Fallback to searching
-                            startup_name_cols = [col for col in df.columns if ('startup' in col.lower() and 'name' in col.lower()) or col == 'Name']
-                            if startup_name_cols:
-                                val = startup_row.get(startup_name_cols[0])
-                                if pd.notna(val):
-                                    startup_name = str(val)
+                        startup_name_cols = [col for col in df.columns if 'startup' in col.lower() and 'name' in col.lower()]
+                        if not startup_name_cols:
+                            # Fallback to standard name fields
+                            startup_name_cols = [col for col in df.columns if col in ['Startup', 'Company', 'Name']]
+                        
+                        if startup_name_cols:
+                            val = startup_row.get(startup_name_cols[0])
+                            if pd.notna(val):
+                                startup_name = str(val)
                         
                         # Get founder name using helper function
                         founder_name = get_founder_full_name(startup_row, startup_name)
@@ -793,17 +808,30 @@ if not df.empty:
                         # Create card with main info
                         with st.container(border=True):
                             st.markdown(f"### 🔥 {startup_name}")
-                            st.markdown(f"**👤 Founder:** {founder_name}")
+                            
+                            # Only show founder if not N/A
+                            if founder_name and founder_name != "N/A":
+                                st.markdown(f"**👤 Founder:** {founder_name}")
+                            
+                            # Show one liner if available
                             if one_liner and one_liner != "N/A":
                                 st.markdown(f"*{one_liner}*")
                             
-                            # Basic info in columns
-                            info_col1, info_col2 = st.columns(2)
-                            with info_col1:
-                                st.markdown(f"**💼 Business Model**  \n{business_model}")
-                                st.markdown(f"**📊 Stage**  \n{stage}")
-                            with info_col2:
-                                st.markdown(f"**📍 Location**  \n{location}")
+                            # Only show fields that have data
+                            show_col1_bm = business_model and business_model != "N/A"
+                            show_col1_stage = stage and stage != "N/A"
+                            show_col2 = location and location != "N/A"
+                            
+                            if show_col1_bm or show_col1_stage or show_col2:
+                                info_col1, info_col2 = st.columns(2)
+                                with info_col1:
+                                    if show_col1_bm:
+                                        st.markdown(f"**💼 Business Model**  \n{business_model}")
+                                    if show_col1_stage:
+                                        st.markdown(f"**📊 Stage**  \n{stage}")
+                                with info_col2:
+                                    if show_col2:
+                                        st.markdown(f"**📍 Location**  \n{location}")
                             
                             # Expandable details section
                             with st.expander("📊 View Full Details"):
@@ -825,26 +853,31 @@ if not df.empty:
                                 contact_stage_patterns = ["Contact_Stage", "Contact Stage", "contact_stage"]
                                 contact_stage = get_field_value(startup_row, contact_stage_patterns, "N/A")
                                 
-                                # Display financial info
-                                detail_col1, detail_col2 = st.columns(2)
-                                with detail_col1:
-                                    st.markdown(f"**💰 Round Size**  \n{round_size}")
-                                    st.markdown(f"**📈 Current Valuation**  \n{current_valuation}")
-                                    st.markdown(f"**📞 Contact Stage**  \n{contact_stage}")
-                                with detail_col2:
-                                    st.markdown(f"**🎯 Stake**  \n{stake}")
-                                    
-                                    # Deck links
-                                    deck_links = []
-                                    if deck_url and deck_url not in ["N/A", "", " "]:
-                                        deck_links.append(f"[Deck URL]({deck_url})")
-                                    if deck_startup and deck_startup not in ["N/A", "", " "]:
-                                        deck_links.append(f"[Deck Attachment]({deck_startup})")
-                                    
-                                    if deck_links:
-                                        st.markdown(f"**📄 Deck**  \n{' | '.join(deck_links)}")
-                                    else:
-                                        st.markdown(f"**📄 Deck**  \nN/A")
+                                # Check what details we have
+                                has_financial = (round_size and round_size != "N/A") or (current_valuation and current_valuation != "N/A") or (stake and stake != "N/A") or (contact_stage and contact_stage != "N/A")
+                                deck_links = []
+                                if deck_url and deck_url not in ["N/A", "", " "]:
+                                    deck_links.append(f"[Deck URL]({deck_url})")
+                                if deck_startup and deck_startup not in ["N/A", "", " "]:
+                                    deck_links.append(f"[Deck Attachment]({deck_startup})")
+                                
+                                if has_financial or deck_links:
+                                    # Display financial info
+                                    detail_col1, detail_col2 = st.columns(2)
+                                    with detail_col1:
+                                        if round_size and round_size != "N/A":
+                                            st.markdown(f"**💰 Round Size**  \n{round_size}")
+                                        if current_valuation and current_valuation != "N/A":
+                                            st.markdown(f"**📈 Current Valuation**  \n{current_valuation}")
+                                        if contact_stage and contact_stage != "N/A":
+                                            st.markdown(f"**📞 Contact Stage**  \n{contact_stage}")
+                                    with detail_col2:
+                                        if stake and stake != "N/A":
+                                            st.markdown(f"**🎯 Stake**  \n{stake}")
+                                        if deck_links:
+                                            st.markdown(f"**📄 Deck**  \n{' | '.join(deck_links)}")
+                                else:
+                                    st.info("No additional details available.")
         else:
             st.info("No startups with 'Hot' urgency found.")
     else:
