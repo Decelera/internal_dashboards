@@ -609,14 +609,27 @@ if not df.empty:
     
     st.write("### Qualified Startups")
     
-    # Find stage field
-    stage_field_cols = [col for col in df.columns if col.lower() == 'stage' or 'stage' in col.lower()]
+    # Find stage field - be more specific
+    stage_field_cols = [col for col in df.columns if col == 'Stage' or col == 'stage']
+    if not stage_field_cols:
+        # Fallback: any field containing 'stage' but not other words
+        stage_field_cols = [col for col in df.columns if 'stage' in col.lower() and 'contact' not in col.lower()]
     
     if stage_field_cols:
         stage_field = stage_field_cols[0]
         
-        # Filter for "Qualified" stage
-        qualified_df = df[df[stage_field].astype(str).str.lower().str.contains('qualified', na=False)]
+        # Debug: Show what stage values exist
+        unique_stages = df[stage_field].dropna().unique().tolist()
+        st.write(f"**Debug - Stage field used:** `{stage_field}`")
+        st.write(f"**Debug - Unique stage values found:** {unique_stages}")
+        
+        # Filter for "Qualified" stage - try multiple matching strategies
+        # First try exact match
+        qualified_df = df[df[stage_field].astype(str).str.strip().str.lower() == 'qualified']
+        
+        # If empty, try contains
+        if qualified_df.empty:
+            qualified_df = df[df[stage_field].astype(str).str.lower().str.contains('qualified', na=False)]
         
         if not qualified_df.empty:
             # Get startup name field
