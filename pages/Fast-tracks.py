@@ -641,28 +641,30 @@ if not df.empty:
                 cols = st.columns(num_cols)
                 for col_idx, (_, startup_row) in enumerate(row_data.iterrows()):
                     with cols[col_idx]:
-                        # Get startup name - prioritize fields with "startup" and "name"
+                        # Get startup name - use "Startup name" field specifically
                         startup_name = "Unknown Startup"
-                        startup_name_cols = [col for col in df.columns if 'startup' in col.lower() and 'name' in col.lower()]
-                        if not startup_name_cols:
-                            # Fallback to standard name fields but check if it's actually a startup field
-                            for col in df.columns:
-                                if col in ['Startup_Name', 'StartupName', 'Company_Name', 'CompanyName', 'Startup', 'Company']:
-                                    startup_name_cols = [col]
-                                    break
-                            
-                            # Last resort: use 'Name' field
-                            if not startup_name_cols and 'Name' in df.columns:
-                                startup_name_cols = ['Name']
                         
-                        if startup_name_cols:
-                            val = startup_row.get(startup_name_cols[0])
+                        # Try exact match first: "Startup name"
+                        if 'Startup name' in df.columns:
+                            val = startup_row.get('Startup name')
                             if pd.notna(val):
                                 startup_name = str(val)
-                        
-                        # Debug: show which field is being used (temporary)
-                        if startup_name_cols and col_idx == 0 and row_idx == 0:
-                            st.caption(f"Debug: Using field '{startup_name_cols[0]}' for startup names")
+                        # Try variations
+                        elif 'Startup_name' in df.columns:
+                            val = startup_row.get('Startup_name')
+                            if pd.notna(val):
+                                startup_name = str(val)
+                        elif 'startup_name' in df.columns:
+                            val = startup_row.get('startup_name')
+                            if pd.notna(val):
+                                startup_name = str(val)
+                        else:
+                            # Fallback: find any column with "startup" and "name"
+                            startup_name_cols = [col for col in df.columns if 'startup' in col.lower() and 'name' in col.lower()]
+                            if startup_name_cols:
+                                val = startup_row.get(startup_name_cols[0])
+                                if pd.notna(val):
+                                    startup_name = str(val)
                         
                         # Get founder name using helper function
                         founder_name = get_founder_full_name(startup_row, startup_name)
@@ -779,28 +781,30 @@ if not df.empty:
                 cols = st.columns(num_cols)
                 for col_idx, (_, startup_row) in enumerate(row_data.iterrows()):
                     with cols[col_idx]:
-                        # Get startup name - prioritize fields with "startup" and "name"
+                        # Get startup name - use "Startup name" field specifically
                         startup_name = "Unknown Startup"
-                        startup_name_cols = [col for col in df.columns if 'startup' in col.lower() and 'name' in col.lower()]
-                        if not startup_name_cols:
-                            # Fallback to standard name fields but check if it's actually a startup field
-                            for col in df.columns:
-                                if col in ['Startup_Name', 'StartupName', 'Company_Name', 'CompanyName', 'Startup', 'Company']:
-                                    startup_name_cols = [col]
-                                    break
-                            
-                            # Last resort: use 'Name' field
-                            if not startup_name_cols and 'Name' in df.columns:
-                                startup_name_cols = ['Name']
                         
-                        if startup_name_cols:
-                            val = startup_row.get(startup_name_cols[0])
+                        # Try exact match first: "Startup name"
+                        if 'Startup name' in df.columns:
+                            val = startup_row.get('Startup name')
                             if pd.notna(val):
                                 startup_name = str(val)
-                        
-                        # Debug: show which field is being used (temporary)
-                        if startup_name_cols and col_idx == 0 and row_idx == 0:
-                            st.caption(f"Debug: Using field '{startup_name_cols[0]}' for startup names")
+                        # Try variations
+                        elif 'Startup_name' in df.columns:
+                            val = startup_row.get('Startup_name')
+                            if pd.notna(val):
+                                startup_name = str(val)
+                        elif 'startup_name' in df.columns:
+                            val = startup_row.get('startup_name')
+                            if pd.notna(val):
+                                startup_name = str(val)
+                        else:
+                            # Fallback: find any column with "startup" and "name"
+                            startup_name_cols = [col for col in df.columns if 'startup' in col.lower() and 'name' in col.lower()]
+                            if startup_name_cols:
+                                val = startup_row.get(startup_name_cols[0])
+                                if pd.notna(val):
+                                    startup_name = str(val)
                         
                         # Get founder name using helper function
                         founder_name = get_founder_full_name(startup_row, startup_name)
