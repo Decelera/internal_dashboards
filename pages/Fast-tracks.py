@@ -928,6 +928,174 @@ if not df.empty:
             st.info("No startups with 'Hot' urgency found.")
     else:
         st.warning("Urgency field not found in data.")
+    
+    st.markdown("---")
+    
+    # =============================================================================
+    # ZOMBIE DEALS
+    # =============================================================================
+    
+    st.write("### 🧟 Zombie Deals")
+    st.caption("Startups that haven't been updated in the last 7 days. An automated email reminder will be sent to the responsible person to follow up on these deals.")
+    st.write("")
+    
+    # Find Last Modified field
+    last_modified_cols = [col for col in df.columns if 'last' in col.lower() and 'modified' in col.lower()]
+    if not last_modified_cols:
+        last_modified_cols = [col for col in df.columns if col in ['Last Modified', 'Last_Modified', 'LastModified', 'Modified']]
+    
+    if last_modified_cols:
+        last_modified_field = last_modified_cols[0]
+        
+        # Calculate cutoff date (7 days ago)
+        cutoff_date = datetime.now() - timedelta(days=7)
+        
+        # Filter for startups not modified in last 7 days
+        zombie_records = []
+        for idx, row in df.iterrows():
+            last_modified = row.get(last_modified_field)
+            if pd.notna(last_modified):
+                try:
+                    # Convert to datetime if it's a string
+                    if isinstance(last_modified, str):
+                        modified_date = pd.to_datetime(last_modified)
+                    else:
+                        modified_date = last_modified
+                    
+                    # Check if last modified is older than 7 days
+                    if modified_date < cutoff_date:
+                        zombie_records.append(row)
+                except:
+                    pass
+        
+        if zombie_records:
+            zombie_df = pd.DataFrame(zombie_records)
+            st.write(f"**Total:** {len(zombie_df)} startups")
+            st.write("")
+            
+            # Display in a 2-column grid with cards
+            num_cols = 2
+            rows = [zombie_df.iloc[i:i+num_cols] for i in range(0, len(zombie_df), num_cols)]
+            
+            for row_idx, row_data in enumerate(rows):
+                cols = st.columns(num_cols)
+                for col_idx, (_, startup_row) in enumerate(row_data.iterrows()):
+                    with cols[col_idx]:
+                        # Get startup name - use "Startup name" field specifically
+                        startup_name = "Unknown Startup"
+                        
+                        # Try exact match first: "Startup name"
+                        if 'Startup name' in df.columns:
+                            val = startup_row.get('Startup name')
+                            if pd.notna(val):
+                                startup_name = str(val)
+                        # Try variations
+                        elif 'Startup_name' in df.columns:
+                            val = startup_row.get('Startup_name')
+                            if pd.notna(val):
+                                startup_name = str(val)
+                        elif 'startup_name' in df.columns:
+                            val = startup_row.get('startup_name')
+                            if pd.notna(val):
+                                startup_name = str(val)
+                        else:
+                            # Fallback: find any column with "startup" and "name"
+                            startup_name_cols = [col for col in df.columns if 'startup' in col.lower() and 'name' in col.lower()]
+                            if startup_name_cols:
+                                val = startup_row.get(startup_name_cols[0])
+                                if pd.notna(val):
+                                    startup_name = str(val)
+                        
+                        # Get founder name using helper function
+                        founder_name = get_founder_full_name(startup_row, startup_name)
+                        
+                        # Get one liner
+                        one_liner_cols = [col for col in df.columns if 'one' in col.lower() and 'liner' in col.lower()]
+                        one_liner = get_field_value(startup_row, one_liner_cols, "N/A") if one_liner_cols else "N/A"
+                        
+                        # Get last modified date for display
+                        last_modified = startup_row.get(last_modified_field)
+                        last_modified_str = "N/A"
+                        if pd.notna(last_modified):
+                            try:
+                                if isinstance(last_modified, str):
+                                    modified_date = pd.to_datetime(last_modified)
+                                else:
+                                    modified_date = last_modified
+                                last_modified_str = modified_date.strftime("%d/%m/%Y")
+                            except:
+                                pass
+                        
+                        # Get stage
+                        stage_patterns = ["Stage", "stage"]
+                        stage = get_field_value(startup_row, stage_patterns, "N/A")
+                        
+                        # Get contact stage
+                        contact_stage_patterns = ["Contact_Stage", "Contact Stage", "contact_stage"]
+                        contact_stage = get_field_value(startup_row, contact_stage_patterns, "N/A")
+                        
+                        # Create card with main info
+                        with st.container(border=True):
+                            st.markdown(f"### {startup_name}")
+                            
+                            # Show founder name above one liner
+                            if founder_name and founder_name != "N/A":
+                                st.markdown(f"**👤 {founder_name}**")
+                            
+                            # Show one liner if available
+                            if one_liner and one_liner != "N/A":
+                                st.markdown(f"*{one_liner}*")
+                            
+                            # Show last modified date prominently
+                            st.markdown(f"**⏰ Last Modified:** {last_modified_str}")
+                            
+                            # Expandable details section - ALL OTHER info goes here
+                            with st.expander("📊 View Full Details"):
+                                
+                                # Show stage and contact stage
+                                if (stage and stage != "N/A") or (contact_stage and contact_stage != "N/A"):
+                                    info_col1, info_col2 = st.columns(2)
+                                    with info_col1:
+                                        if stage and stage != "N/A":
+                                            st.markdown(f"**📊 Stage**  \n{stage}")
+                                    with info_col2:
+                                        if contact_stage and contact_stage != "N/A":
+                                            st.markdown(f"**📞 Contact Stage**  \n{contact_stage}")
+                                    st.markdown("")
+                                
+                                # Get business model and location
+                                bm_patterns = ["PH1_business_model", "Business Model", "business_model"]
+                                business_model = get_field_value(startup_row, bm_patterns, "N/A")
+                                location_patterns = ["PH1_Constitution_Location", "Constitution_Location", "Location", "location"]
+                                location = get_field_value(startup_row, location_patterns, "N/A")
+                                
+                                if (business_model and business_model != "N/A") or (location and location != "N/A"):
+                                    detail_col1, detail_col2 = st.columns(2)
+                                    with detail_col1:
+                                        if business_model and business_model != "N/A":
+                                            st.markdown(f"**💼 Business Model**  \n{business_model}")
+                                    with detail_col2:
+                                        if location and location != "N/A":
+                                            st.markdown(f"**📍 Location**  \n{location}")
+                                    st.markdown("")
+                                
+                                # Get deck links
+                                deck_url = get_field_value(startup_row, ["deck_URL", "Deck_URL", "Deck URL"], "")
+                                deck_startup = get_field_value(startup_row, ["deck_$startup", "deck_startup", "Deck"], "")
+                                
+                                # Show deck links
+                                deck_links = []
+                                if deck_url and deck_url not in ["N/A", "", " "]:
+                                    deck_links.append(f"[Deck URL]({deck_url})")
+                                if deck_startup and deck_startup not in ["N/A", "", " "]:
+                                    deck_links.append(f"[Deck Attachment]({deck_startup})")
+                                
+                                if deck_links:
+                                    st.markdown(f"**📄 Deck:** {' | '.join(deck_links)}")
+        else:
+            st.info("No zombie deals found. All startups have been updated recently!")
+    else:
+        st.warning("Last Modified field not found in data.")
 
 else:
     st.warning("No data available. Please check your Airtable configuration.")
