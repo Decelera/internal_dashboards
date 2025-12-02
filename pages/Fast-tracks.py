@@ -223,6 +223,14 @@ if not df.empty:
 # HELPER FUNCTIONS
 # =============================================================================
 
+def get_current_week_range():
+    """Devuelve inicio y fin de la semana actual lunes-domingo"""
+    today = datetime.today()
+
+    start_of_week = today - timedelta(days=today.weekday())
+    end_of_week = start_of_week + timedelta(days=6)
+    return start_of_week, end_of_week
+
 def get_founder_full_name(row, startup_name):
     """Combine founder name and surname"""
     # List of possible name field patterns
@@ -269,32 +277,68 @@ def get_founder_full_name(row, startup_name):
     return "N/A"
 
 def get_field_value(row, field_patterns, default="N/A"):
-    """Try multiple field patterns and return the first non-empty value"""
+    """Return the first non-empty value from multiple field name patterns."""
+    
     for pattern in field_patterns:
-        if pattern in row and pd.notna(row[pattern]):
-            value = row[pattern]
-            # Handle list values (e.g., ['Spain'] should become 'Spain')
-            if isinstance(value, list):
-                if len(value) > 0:
-                    return str(value[0])
-                else:
-                    continue
-            # Handle regular values
-            value_str = str(value).strip()
-            if value_str and value_str != 'nan':
-                return value_str
+        if pattern not in row:
+            continue
+        
+        value = row[pattern]
+
+        # 1) Si es NaN (float), saltar
+        if isinstance(value, float) and pd.isna(value):
+            continue
+
+        # 2) Si es array de numpy → convertir a lista
+        if isinstance(value, (list, tuple)):
+            pass  # se gestiona abajo
+        elif hasattr(value, "__array__"):  # numpy array
+            value = value.tolist()
+
+        # 3) Si es lista (Airtable multiselect o attachments)
+        if isinstance(value, list):
+            if len(value) == 0:
+                continue
+
+            first = value[0]
+
+            # 3.1 Caso attachment (dict con url y filename)
+            if isinstance(first, dict):
+                if "url" in first:
+                    return first["url"]
+                if "filename" in first:
+                    return first["filename"]
+                # fallback
+                return str(first)
+
+            # 3.2 Caso multiselect simple
+            first_str = str(first).strip()
+            if first_str and first_str.lower() != "nan":
+                return first_str
+            continue
+
+        # 4) Valor escalar válido
+        value_str = str(value).strip()
+        if value_str and value_str.lower() != "nan":
+            return value_str
+
     return default
+
 
 # =============================================================================
 # DASHBOARD METRICS
 # =============================================================================
 
+# Calculamos el inicio y fin de la semana actual
+start_of_week, end_of_week = get_current_week_range()
+
+# Y la semana pasada
+#start_of_last_week, end_of_last_week = get_current_week_range() - timedelta(weeks=1)
+
 if not df.empty:
     col1, col2, col3 = st.columns([1, 2, 1])
     
-    with col2:
-        total_startups = len(df)
-        st.metric(label="Total Startups in Dealflow", value=total_startups)
+    
     
     st.markdown("---")
     
@@ -303,10 +347,6 @@ if not df.empty:
     # =============================================================================
     
     st.write("### Weekly Dealflow Tracking")
-    
-    # Calculate weeks: last 2 weeks, current week, next 4 weeks (7 weeks total)
-    today = datetime.now()
-    current_week_start = today - timedelta(days=today.weekday())  # Monday of current week
     
     # Find required columns once
     date_sourced_cols = [col for col in df.columns if 'date' in col.lower() and 'source' in col.lower()]
@@ -321,7 +361,7 @@ if not df.empty:
     current_week_index = None  # Track which row is the current week
     
     for i in range(-2, 5):  # -2 (2 weeks ago) to 4 (4 weeks ahead)
-        week_start = current_week_start + timedelta(weeks=i)
+        week_start = start_of_week + timedelta(weeks=i)
         week_end = week_start + timedelta(days=6)  # Sunday
         
         # Calculate week number
@@ -563,7 +603,7 @@ if not df.empty:
                         sourced_date = date_sourced
                     
                     # Check if date falls within current week
-                    if current_week_start.date() <= sourced_date.date() <= (current_week_start + timedelta(days=6)).date():
+                    if start_of_week.date() <= sourced_date.date() <= (start_of_week + timedelta(days=6)).date():
                         reference = row.get(reference_col)
                         reference_other = row.get(reference_other_col) if reference_other_col else None
                         
@@ -605,7 +645,7 @@ if not df.empty:
             # Display header with total
             col_header1, col_header2 = st.columns([2, 1])
             with col_header1:
-                st.write(f"**📍 Current Week:** {current_week_start.strftime('%d/%m/%Y')} - {(current_week_start + timedelta(days=6)).strftime('%d/%m/%Y')}")
+                st.write(f"**📍 Current Week:** {start_of_week.strftime('%d/%m/%Y')} - {end_of_week.strftime('%d/%m/%Y')}")
             with col_header2:
                 st.write(f"**Total: {total_deals} deal{'s' if total_deals != 1 else ''}**")
             
@@ -729,6 +769,38 @@ if not df.empty:
                         # Get location
                         location_patterns = ["PH1_Constitution_Location", "Constitution_Location", "Location", "location"]
                         location = get_field_value(startup_row, location_patterns, "N/A")
+
+                        # Get stage
+                        stage_patterns = ["stage", "stage_$startup"]
+                        stage = get_field_value(startup_row, stage_patterns, "N/A")
+
+                        # Get round size
+                        round_size_patterns = ["PH1_Round_Size", "Round_Size", "round_size"]
+                        round_size = get_field_value(startup_row, round_size_patterns, "N/A")
+
+                        # Get stake
+                        stake_patterns = ["PH1_Stake", "Stake", "stake"]
+                        stake = get_field_value(startup_row, stake_patterns, "N/A")
+
+                        # Get reference
+                        reference_patterns = ["PH1_Reference", "Reference", "reference", "PH1_reference_$startups"]
+                        reference = get_field_value(startup_row, reference_patterns, "N/A")
+
+                        # Get reference details
+                        reference_details_patterns = ["PH1_Reference_Details", "Reference_Details", "reference_details", "PH1_reference_other_$startups"]
+                        reference_details = get_field_value(startup_row, reference_details_patterns, "N/A")
+
+                        # Get signals
+                        signals_patterns = ["Signals"]
+                        signals = get_field_value(startup_row, signals_patterns, "N/A")
+                        signals_list = [sign.strip() for sign in signals.split("|") if signals != "N/A"]
+
+                        # Get red and green flags
+                        red_flags = get_field_value(startup_row, ["redflags_summary"], "N/A")
+                        red_flags_list = [s.strip() for s in red_flags.split("\n")]
+
+                        green_flags = get_field_value(startup_row, ["greenflags_summary"], "N/A")
+                        green_flags_list = [s.strip() for s in green_flags.split("\n")]
                         
                         # Create card with main info
                         with st.container(border=True):
@@ -745,6 +817,10 @@ if not df.empty:
                             # Expandable details section - ALL OTHER info goes here
                             with st.expander("📊 View Full Details"):
                                 
+                                # Show stage
+                                if (stage and stage != "N/A"):
+                                    st.markdown(f"**🚀 Stage**  \n{stage}")
+
                                 # Show business model and location
                                 if (business_model and business_model != "N/A") or (location and location != "N/A"):
                                     info_col1, info_col2 = st.columns(2)
@@ -765,6 +841,10 @@ if not df.empty:
                                 # Get deck links
                                 deck_url = get_field_value(startup_row, ["deck_URL", "Deck_URL", "Deck URL"], "")
                                 deck_startup = get_field_value(startup_row, ["deck_$startup", "deck_startup", "Deck"], "")
+                                if isinstance(deck_startup, dict):
+                                    deck_attachment_url = deck_startup["url"]
+                                else:
+                                    deck_attachment_url = ""
                                 
                                 # Show financial info
                                 if (round_size and round_size != "N/A") or (current_valuation and current_valuation != "N/A") or (stake and stake != "N/A"):
@@ -779,15 +859,47 @@ if not df.empty:
                                             st.markdown(f"**🎯 Stake**  \n{stake}")
                                     st.markdown("")
                                 
-                                # Show deck links
-                                deck_links = []
-                                if deck_url and deck_url not in ["N/A", "", " "]:
-                                    deck_links.append(f"[Deck URL]({deck_url})")
-                                if deck_startup and deck_startup not in ["N/A", "", " "]:
-                                    deck_links.append(f"[Deck Attachment]({deck_startup})")
+                                # Show referal info
+                                if (reference and reference != "N/A") or (reference_details and referenece_details != "N/A"):
+                                    col1, col2 = st.columns(2)
+                                    with col1:
+                                        if reference and reference != "N/A":
+                                            st.markdown(f"**🔗 Reference**  \n{reference}")
+                                    with col2:
+                                        if reference_details and reference_details != "N/A":
+                                            st.markdown(f"**🔗 Reference Details**  \n{reference_details}")
+                                    st.markdown("")
                                 
-                                if deck_links:
-                                    st.markdown(f"**📄 Deck:** {' | '.join(deck_links)}")
+                                # Show signals and red flags
+                                cols_signals = st.columns(2)
+                                if (signals_list and signals_list != "N/A"):
+                                    with cols_signals[0]:
+                                        st.markdown("**Signals:**")
+                                        for signal in signals_list:
+                                            st.markdown(f"{signal}")
+                                
+                                if (red_flags_list and red_flags_list != ["N/A"]) or (green_flags_list and green_flags_list != ["N/A"]):
+                                    with cols_signals[1]:
+                                        st.markdown("**Red Flags:**")
+                                        for red_flag in red_flags_list:
+                                            st.markdown(f"{red_flag}")
+                                        st.markdown("**Green Flags:**")
+                                        for green_flag in green_flags_list:
+                                            st.markdown(f"{green_flag}")
+                                
+                                # Show alternativo de los links de los decks
+                                if deck_attachment_url and not deck_url:
+                                    st.markdown(f'<a href="{deck_attachment_url}">📄 Deck</a>', unsafe_allow_html=True)
+
+                                elif deck_url and not deck_attachment_url:
+                                    st.markdown(f'<a href="{deck_url}">📄 Deck</a>', unsafe_allow_html=True)
+
+                                elif deck_url and deck_attachment_url:
+                                    st.markdown(
+                                        f'<a href="{deck_url}">📄 Deck</a> | '
+                                        f'<a href="{deck_attachment_url}">📄 Deck (Attachment)</a>',
+                                        unsafe_allow_html=True
+                                    )
         else:
             st.info("No startups with 'Qualified' stage found.")
     else:
@@ -800,17 +912,17 @@ if not df.empty:
     # =============================================================================
     
     st.write("### 🔥 Hot Deals")
-    
-    # Find urgency field
+
+    # Find stage field - be more specific
     urgency_field_cols = [col for col in df.columns if col == 'Urgency' or col == 'urgency']
     if not urgency_field_cols:
-        # Fallback: any field containing 'urgency'
-        urgency_field_cols = [col for col in df.columns if 'urgency' in col.lower()]
+        # Fallback: any field containing 'stage' but not other words
+        urgency_field_cols = [col for col in df.columns if 'urgency' in col.lower() and 'contact' not in col.lower()]
     
     if urgency_field_cols:
         urgency_field = urgency_field_cols[0]
         
-        # Filter for "Hot" urgency - try multiple matching strategies
+        # Filter for "Qualified" stage - try multiple matching strategies
         # First try exact match
         hot_df = df[df[urgency_field].astype(str).str.strip().str.lower() == 'hot']
         
@@ -869,10 +981,38 @@ if not df.empty:
                         # Get location
                         location_patterns = ["PH1_Constitution_Location", "Constitution_Location", "Location", "location"]
                         location = get_field_value(startup_row, location_patterns, "N/A")
-                        
+
                         # Get stage
-                        stage_patterns = ["Stage", "stage"]
+                        stage_patterns = ["stage", "stage_$startup"]
                         stage = get_field_value(startup_row, stage_patterns, "N/A")
+
+                        # Get round size
+                        round_size_patterns = ["PH1_Round_Size", "Round_Size", "round_size"]
+                        round_size = get_field_value(startup_row, round_size_patterns, "N/A")
+
+                        # Get stake
+                        stake_patterns = ["PH1_Stake", "Stake", "stake"]
+                        stake = get_field_value(startup_row, stake_patterns, "N/A")
+
+                        # Get reference
+                        reference_patterns = ["PH1_Reference", "Reference", "reference", "PH1_reference_$startups"]
+                        reference = get_field_value(startup_row, reference_patterns, "N/A")
+
+                        # Get reference details
+                        reference_details_patterns = ["PH1_Reference_Details", "Reference_Details", "reference_details", "PH1_reference_other_$startups"]
+                        reference_details = get_field_value(startup_row, reference_details_patterns, "N/A")
+
+                        # Get signals
+                        signals_patterns = ["Signals"]
+                        signals = get_field_value(startup_row, signals_patterns, "N/A")
+                        signals_list = [sign.strip() for sign in signals.split("|") if signals != "N/A"]
+
+                        # Get red and green flags
+                        red_flags = get_field_value(startup_row, ["redflags_summary"], "N/A")
+                        red_flags_list = [s.strip() for s in red_flags.split("\n")]
+
+                        green_flags = get_field_value(startup_row, ["greenflags_summary"], "N/A")
+                        green_flags_list = [s.strip() for s in green_flags.split("\n")]
                         
                         # Create card with main info
                         with st.container(border=True):
@@ -889,14 +1029,16 @@ if not df.empty:
                             # Expandable details section - ALL OTHER info goes here
                             with st.expander("📊 View Full Details"):
                                 
-                                # Show business model, stage, and location
-                                if (business_model and business_model != "N/A") or (stage and stage != "N/A") or (location and location != "N/A"):
+                                # Show stage
+                                if (stage and stage != "N/A"):
+                                    st.markdown(f"**🚀 Stage**  \n{stage}")
+
+                                # Show business model and location
+                                if (business_model and business_model != "N/A") or (location and location != "N/A"):
                                     info_col1, info_col2 = st.columns(2)
                                     with info_col1:
                                         if business_model and business_model != "N/A":
                                             st.markdown(f"**💼 Business Model**  \n{business_model}")
-                                        if stage and stage != "N/A":
-                                            st.markdown(f"**📊 Stage**  \n{stage}")
                                     with info_col2:
                                         if location and location != "N/A":
                                             st.markdown(f"**📍 Location**  \n{location}")
@@ -908,42 +1050,73 @@ if not df.empty:
                                 current_valuation = get_field_value(startup_row, valuation_patterns, "N/A")
                                 stake = get_field_value(startup_row, ["Stake_Formula", "Stake Formula", "stake_formula", "Stake"], "N/A")
                                 
-                                # Get contact stage
-                                contact_stage_patterns = ["Contact_Stage", "Contact Stage", "contact_stage"]
-                                contact_stage = get_field_value(startup_row, contact_stage_patterns, "N/A")
-                                
                                 # Get deck links
                                 deck_url = get_field_value(startup_row, ["deck_URL", "Deck_URL", "Deck URL"], "")
                                 deck_startup = get_field_value(startup_row, ["deck_$startup", "deck_startup", "Deck"], "")
+                                if isinstance(deck_startup, dict):
+                                    deck_attachment_url = deck_startup["url"]
+                                else:
+                                    deck_attachment_url = ""
                                 
-                                # Show financial info and contact stage
-                                if (round_size and round_size != "N/A") or (current_valuation and current_valuation != "N/A") or (stake and stake != "N/A") or (contact_stage and contact_stage != "N/A"):
+                                # Show financial info
+                                if (round_size and round_size != "N/A") or (current_valuation and current_valuation != "N/A") or (stake and stake != "N/A"):
                                     detail_col1, detail_col2 = st.columns(2)
                                     with detail_col1:
                                         if round_size and round_size != "N/A":
                                             st.markdown(f"**💰 Round Size**  \n{round_size}")
                                         if current_valuation and current_valuation != "N/A":
                                             st.markdown(f"**📈 Current Valuation**  \n{current_valuation}")
-                                        if contact_stage and contact_stage != "N/A":
-                                            st.markdown(f"**📞 Contact Stage**  \n{contact_stage}")
                                     with detail_col2:
                                         if stake and stake != "N/A":
                                             st.markdown(f"**🎯 Stake**  \n{stake}")
                                     st.markdown("")
                                 
-                                # Show deck links
-                                deck_links = []
-                                if deck_url and deck_url not in ["N/A", "", " "]:
-                                    deck_links.append(f"[Deck URL]({deck_url})")
-                                if deck_startup and deck_startup not in ["N/A", "", " "]:
-                                    deck_links.append(f"[Deck Attachment]({deck_startup})")
+                                # Show referal info
+                                if (reference and reference != "N/A") or (reference_details and referenece_details != "N/A"):
+                                    col1, col2 = st.columns(2)
+                                    with col1:
+                                        if reference and reference != "N/A":
+                                            st.markdown(f"**🔗 Reference**  \n{reference}")
+                                    with col2:
+                                        if reference_details and reference_details != "N/A":
+                                            st.markdown(f"**🔗 Reference Details**  \n{reference_details}")
+                                    st.markdown("")
                                 
-                                if deck_links:
-                                    st.markdown(f"**📄 Deck:** {' | '.join(deck_links)}")
+                                # Show signals and red flags
+                                cols_signals = st.columns(2)
+                                if (signals_list and signals_list != "N/A"):
+                                    with cols_signals[0]:
+                                        st.markdown("**Signals:**")
+                                        for signal in signals_list:
+                                            st.markdown(f"{signal}")
+                                
+                                if (red_flags_list and red_flags_list != ["N/A"]) or (green_flags_list and green_flags_list != ["N/A"]):
+                                    with cols_signals[1]:
+                                        st.markdown("**Red Flags:**")
+                                        for red_flag in red_flags_list:
+                                            st.markdown(f"{red_flag}")
+                                        st.markdown("**Green Flags:**")
+                                        for green_flag in green_flags_list:
+                                            st.markdown(f"{green_flag}")
+                                        
+                                # Show alternativo de links
+                                if deck_attachment_url and not deck_url:
+                                    st.markdown(f'<a href="{deck_attachment_url}">📄 Deck</a>', unsafe_allow_html=True)
+
+                                elif deck_url and not deck_attachment_url:
+                                    st.markdown(f'<a href="{deck_url}">📄 Deck</a>', unsafe_allow_html=True)
+
+                                elif deck_url and deck_attachment_url:
+                                    st.markdown(
+                                        f'<a href="{deck_url}">📄 Deck</a> | '
+                                        f'<a href="{deck_attachment_url}">📄 Deck (Attachment)</a>',
+                                        unsafe_allow_html=True
+                                    )
+
         else:
-            st.info("No startups with 'Hot' urgency found.")
+            st.info("No startups with 'Qualified' stage found.")
     else:
-        st.warning("Urgency field not found in data.")
+        st.warning("Stage field not found in data.")
     
     st.markdown("---")
     
