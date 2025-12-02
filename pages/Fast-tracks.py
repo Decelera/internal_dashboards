@@ -544,16 +544,98 @@ if not df.empty:
             return ['background-color: #1e3a5f; color: white; font-weight: bold'] * len(row)
         else:
             return [''] * len(row)
+
+    # Fila de la semana actual
+    current_row = weeks_df.iloc[current_week_index]
+
+    # Fila de la semana anterior (si existe)
+    prev_row = weeks_df.iloc[current_week_index - 1] if current_week_index > 0 else None
+
+    # Valores de la tabla
+    current_new_deals = int(current_row["New Deals"])
+    current_contacted = int(current_row["Contacted"])
+    current_no_response = int(current_row["No Response"])
+    current_calls_done = int(current_row["Calls Done"])
+    current_calls_pending = int(current_row["Calls Pending"])
+    current_pending_info = int(current_row["Pending Info"])
+
+    prev_new_deals = int(prev_row["New Deals"]) if prev_row is not None else 0
+    prev_contacted = int(prev_row["Contacted"]) if prev_row is not None else 0
+    prev_no_response = int(prev_row["No Response"]) if prev_row is not None else 0
+    prev_calls_done = int(prev_row["Calls Done"]) if prev_row is not None else 0
+    prev_calls_pending = int(prev_row["Calls Pending"]) if prev_row is not None else 0
+    prev_pending_info = int(prev_row["Pending Info"]) if prev_row is not None else 0
+
+    delta_new_deals = f"{round((current_new_deals - prev_new_deals) / prev_new_deals * 100, 2)} %" if prev_new_deals != 0 else ""
+    delta_contacted = f"{round((current_contacted - prev_contacted) / prev_contacted * 100, 2)} %" if prev_contacted != 0 else ""
+    delta_no_response = f"{round((current_no_response - prev_no_response) / prev_no_response * 100, 2)} %" if prev_no_response != 0 else ""
+    delta_calls_done = f"{round((current_calls_done - prev_calls_done) / prev_calls_done * 100, 2)} %" if prev_calls_done != 0 else ""
+    delta_calls_pending = f"{round((current_calls_pending - prev_calls_pending) / prev_calls_pending * 100, 2)} %" if prev_calls_pending != 0 else ""
+    delta_pending_info = f"{round((current_pending_info - prev_pending_info) / prev_pending_info * 100, 2)} %" if prev_pending_info != 0 else ""
+
+    # Métricas arriba de la tabla
+    columns_tags = st.columns(3)
+
+    with columns_tags[0]:
+        st.metric(
+            label="Total number of leads",
+            value=df.shape[0],
+        )
+
+    with columns_tags[1]:
+        st.metric(
+            label="New deals this week",
+            value=current_new_deals,
+            delta=delta_new_deals,  # comparación con la semana anterior
+        )
+
+    with columns_tags[2]:
+        st.metric(
+            label="Contacted this week",
+            value=current_contacted,
+            delta=delta_contacted,  # comparación con la semana anterior
+        )
+    
+    columns_tags2 = st.columns(4)
+
+    with columns_tags2[0]:
+        st.metric(
+            label="No response this week",
+            value=current_no_response,
+            delta=delta_no_response,  # comparación con la semana anterior
+        )
+    
+    with columns_tags2[1]:
+        st.metric(
+            label="Calls done this week",
+            value=current_calls_done,
+            delta=delta_calls_done,  # comparación con la semana anterior
+        )
+    
+    with columns_tags2[2]:
+        st.metric(
+            label="Calls pending this week",
+            value=current_calls_pending,
+            delta=delta_calls_pending,  # comparación con la semana anterior
+        )
+    
+    with columns_tags2[3]:
+        st.metric(
+            label="Pending info this week",
+            value=current_pending_info,
+            delta=delta_pending_info,  # comparación con la semana anterior
+        )   
     
     # Apply styling
     styled_df = weeks_df.style.apply(highlight_current_week, axis=1)
-    
+
     # Display the styled table
-    st.dataframe(
-        styled_df,
-        use_container_width=True,
-        hide_index=True,
-        column_config={
+    with st.expander("View table of weekly deals"):
+        st.dataframe(
+            styled_df,
+            use_container_width=True,
+            hide_index=True,
+            column_config={
             "Week": st.column_config.TextColumn("Week", width="small"),
             "Start": st.column_config.TextColumn("Start", width="small"),
             "End": st.column_config.TextColumn("End", width="small"),
