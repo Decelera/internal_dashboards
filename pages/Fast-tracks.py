@@ -347,6 +347,7 @@ if not df.empty:
     # =============================================================================
     
     st.write("### Weekly Dealflow Tracking")
+    st.markdown("Fast-track metrics for the current week compared in percentage with the previous week")
     
     # Find required columns once
     date_sourced_cols = [col for col in df.columns if 'date' in col.lower() and 'source' in col.lower()]
