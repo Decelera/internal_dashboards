@@ -630,7 +630,7 @@ if not df.empty:
     styled_df = weeks_df.style.apply(highlight_current_week, axis=1)
 
     # Display the styled table
-    with st.expander("View table of weekly deals"):
+    with st.expander("View table of weekly fast-tracks"):
         st.dataframe(
             styled_df,
             use_container_width=True,
