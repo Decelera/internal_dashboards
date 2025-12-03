@@ -353,7 +353,7 @@ if not df.empty:
         df_metrics[date_col] = pd.to_datetime(df_metrics[date_col], errors='coerce')
 
         # 3. Filter data for the current week (Sourced this week)
-        mask_this_week = (df_metrics[date_col] >= start_of_week) & (df_metrics[date_col] <= end_of_week)
+        mask_this_week = (df_metrics[date_col].dt.date >= start_of_week.date()) & (df_metrics[date_col].dt.date <= end_of_week.date())
         df_this_week = df_metrics.loc[mask_this_week]
 
         # 4. Calculate counts based on Urgency status (Case insensitive)
