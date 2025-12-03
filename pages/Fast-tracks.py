@@ -334,6 +334,40 @@ start_of_week, end_of_week = get_current_week_range()
 
 if not df.empty:
 
+    # =============================================================================
+    # URGENCY METRICS (THIS WEEK)
+    # =============================================================================
+    
+    # 1. Identify the necessary columns dynamically
+    urgency_col = next((col for col in df.columns if col.lower() == 'urgency'), None)
+    
+    # Try to find Date Sourced column (checking multiple common variations)
+    date_col = next((col for col in df.columns if 'date' in col.lower() and 'source' in col.lower()), None)
+    if not date_col:
+        date_col = next((col for col in df.columns if col in ['Date Sourced', 'Date_Sourced', 'DateSourced']), None)
+
+    if urgency_col and date_col:
+        # 2. Process dates to ensure they are datetime objects
+        # We work on a copy to avoid SettingWithCopy warnings on the main df
+        df_metrics = df.copy()
+        df_metrics[date_col] = pd.to_datetime(df_metrics[date_col], errors='coerce')
+
+        # 3. Filter data for the current week (Sourced this week)
+        mask_this_week = (df_metrics[date_col] >= start_of_week) & (df_metrics[date_col] <= end_of_week)
+        df_this_week = df_metrics.loc[mask_this_week]
+
+        # 4. Calculate counts based on Urgency status (Case insensitive)
+        # Normalize the column to lower case strings for comparison
+        urgency_series = df_this_week[urgency_col].astype(str).str.lower().str.strip()
+
+        hot_count = len(urgency_series[urgency_series == 'hot'])
+        warm_count = len(urgency_series[urgency_series == 'warm'])
+        cold_count = len(urgency_series[urgency_series == 'cold'])
+
+    else:
+        # Fallback if columns are missing
+        st.warning("Could not display Urgency metrics: 'Urgency' or 'Date Sourced' column not found.")
+
     st.markdown("---")
     
     # =============================================================================
@@ -651,6 +685,20 @@ if not df.empty:
             value=current_pending_info,
             delta=delta_pending_info,  # comparación con la semana anterior
         )   
+
+    st.markdown("---")
+    
+    m_col1, m_col2, m_col3 = st.columns(3)
+        
+    if date_col and urgency_col:
+        with m_col1:
+            st.metric(label="🔥 Hot Deals", value=hot_count)
+        
+        with m_col2:
+            st.metric(label="🌤️ Warm Deals", value=warm_count)
+            
+        with m_col3:
+            st.metric(label="❄️ Cold Deals", value=cold_count)
     
     # Apply styling
     styled_df = weeks_df.style.apply(highlight_current_week, axis=1)
