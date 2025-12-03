@@ -223,7 +223,7 @@ if not df.empty:
 # HELPER FUNCTIONS
 # =============================================================================
 
-def get_current_week_range():
+def get_current_week_range() -> tuple[datetime, datetime]:
     """Devuelve inicio y fin de la semana actual lunes-domingo"""
     today = datetime.today()
 
@@ -332,14 +332,8 @@ def get_field_value(row, field_patterns, default="N/A"):
 # Calculamos el inicio y fin de la semana actual
 start_of_week, end_of_week = get_current_week_range()
 
-# Y la semana pasada
-#start_of_last_week, end_of_last_week = get_current_week_range() - timedelta(weeks=1)
-
 if not df.empty:
-    col1, col2, col3 = st.columns([1, 2, 1])
-    
-    
-    
+
     st.markdown("---")
     
     # =============================================================================
@@ -347,8 +341,39 @@ if not df.empty:
     # =============================================================================
     
     st.write("### Weekly Dealflow Tracking")
-    st.markdown("Fast-track metrics for the current week compared in percentage with the previous week")
+
+    df_leaders = df.copy()
+    df_leaders["date_sourced"] = pd.to_datetime(df_leaders["date_sourced"])
+    df_leaders["Date_First_Contact"] = pd.to_datetime(df_leaders["Date_First_Contact"])
     
+    # Leaderboard
+    df_leaders = df_leaders.groupby("Responsible", as_index=False).agg(
+        source_count=(
+            "date_sourced",
+            lambda s: ((s.dt.date >= start_of_week.date()) & (s.dt.date <= end_of_week.date())).sum()
+        ),  
+        contacted=(
+            "Date_First_Contact",
+            lambda s: ((s.dt.date >= start_of_week.date()) & (s.dt.date <= end_of_week.date())).sum()
+        ),
+    )
+
+    df_leaders["leader_score"] = (df_leaders["source_count"] + df_leaders["contacted"]) / 2
+    leader_row = df_leaders.loc[df_leaders["leader_score"].idxmax()]
+    leader = leader_row["Responsible"]
+    leader_sources = leader_row["source_count"]
+    leader_contacted = leader_row["contacted"]
+
+    leader_cols = st.columns(3)
+    with leader_cols[1]:
+        with st.container(border=True):
+            st.markdown(f"### 👑 Current week leader: {leader}")
+            secondary_cols = st.columns(2)
+            with secondary_cols[0]:
+                st.metric("Sources", leader_sources)
+            with secondary_cols[1]:
+                st.metric("Contacted", leader_contacted)
+
     # Find required columns once
     date_sourced_cols = [col for col in df.columns if 'date' in col.lower() and 'source' in col.lower()]
     if not date_sourced_cols:
