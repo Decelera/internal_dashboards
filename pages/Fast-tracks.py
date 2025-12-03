@@ -340,25 +340,11 @@ if not df.empty:
     
     # 1. Identify the necessary columns dynamically
     urgency_col = next((col for col in df.columns if col.lower() == 'urgency'), None)
-    
-    # Try to find Date Sourced column (checking multiple common variations)
-    date_col = next((col for col in df.columns if 'date' in col.lower() and 'source' in col.lower()), None)
-    if not date_col:
-        date_col = next((col for col in df.columns if col in ['Date Sourced', 'Date_Sourced', 'DateSourced']), None)
 
-    if urgency_col and date_col:
-        # 2. Process dates to ensure they are datetime objects
-        # We work on a copy to avoid SettingWithCopy warnings on the main df
+    if urgency_col:
         df_metrics = df.copy()
-        df_metrics[date_col] = pd.to_datetime(df_metrics[date_col], errors='coerce')
 
-        # 3. Filter data for the current week (Sourced this week)
-        mask_this_week = (df_metrics[date_col].dt.date >= start_of_week.date()) & (df_metrics[date_col].dt.date <= end_of_week.date())
-        df_this_week = df_metrics.loc[mask_this_week]
-
-        # 4. Calculate counts based on Urgency status (Case insensitive)
-        # Normalize the column to lower case strings for comparison
-        urgency_series = df_this_week[urgency_col].astype(str).str.lower().str.strip()
+        urgency_series = df_metrics[urgency_col].astype(str).str.lower().str.strip()
 
         hot_count = len(urgency_series[urgency_series == 'hot'])
         warm_count = len(urgency_series[urgency_series == 'warm'])
@@ -455,16 +441,17 @@ if not df.empty:
     df_leaders = df.copy()
     df_leaders["date_sourced"] = pd.to_datetime(df_leaders["date_sourced"])
     df_leaders["Date_First_Contact"] = pd.to_datetime(df_leaders["Date_First_Contact"])
+    df_leaders["Last Contacted"] = pd.to_datetime(df_leaders["Last Contacted"])
     
     # Leaderboard
     df_leaders = df_leaders.groupby("Responsible", as_index=False).agg(
         source_count=(
             "date_sourced",
-            lambda s: ((s.dt.date >= start_of_week.date()) & (s.dt.date <= end_of_week.date())).sum()
+            lambda s: ((s.dropna().dt.date >= start_of_week.date()) & (s.dropna().dt.date <= end_of_week.date())).sum()
         ),  
         contacted=(
-            "Date_First_Contact",
-            lambda s: ((s.dt.date >= start_of_week.date()) & (s.dt.date <= end_of_week.date())).sum()
+            "Last Contacted",
+            lambda s: ((s.dropna().dt.date >= start_of_week.date()) & (s.dropna().dt.date <= end_of_week.date())).sum()
         ),
     )
 
@@ -477,12 +464,26 @@ if not df.empty:
     leader_cols = st.columns(3)
     with leader_cols[1]:
         with st.container(border=True):
-            st.markdown(f"### 👑 Current week leader: {leader}")
+            st.markdown(f"## 👑 Current week leader: {leader}")
             secondary_cols = st.columns(2)
             with secondary_cols[0]:
-                st.metric("Sources", leader_sources)
+                st.metric("Sourced", leader_sources)
             with secondary_cols[1]:
-                st.metric("Contacted", leader_contacted)
+                st.metric("Contact", leader_contacted)
+
+    with st.expander("View table of the team leaderboard"):
+        st.dataframe(
+            df_leaders.sort_values(by="leader_score", ascending=False).drop(columns=["leader_score"]),
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+            "Responsible": st.column_config.TextColumn("Responsible", width="small"),
+            "source_count": st.column_config.NumberColumn("Sourced", width="small"),
+            "contacted": st.column_config.NumberColumn("Contact", width="small"),
+        }
+    )
+
+    st.markdown("---")
 
     # Find required columns once
     date_sourced_cols = [col for col in df.columns if 'date' in col.lower() and 'source' in col.lower()]
@@ -519,6 +520,7 @@ if not df.empty:
             stage_col = contact_stage_cols[0]
             
             # Look for Date_First_Contact field (when the contact/call happened)
+            last_contacted_cols = [col for col in df.columns if 'last' in col.lower() and 'contacted' in col.lower()]
             first_contact_date_cols = [col for col in df.columns if 'first' in col.lower() and 'contact' in col.lower() and 'date' in col.lower()]
             if not first_contact_date_cols:
                 first_contact_date_cols = [col for col in df.columns if col in ['Date_First_Contact', 'Date First Contact', 'First_Contact_Date', 'First Contact Date']]
@@ -541,15 +543,15 @@ if not df.empty:
                         pass
                 
                 # Count Contacted based on Date_First_Contact
-                if first_contact_date_cols:
-                    first_contact_date = row.get(first_contact_date_cols[0])
-                    if pd.notna(first_contact_date):
+                if last_contacted_cols:
+                    last_contacted_date = row.get(last_contacted_cols[0])
+                    if pd.notna(last_contacted_date):
                         try:
                             # Convert to datetime if it's a string
-                            if isinstance(first_contact_date, str):
-                                contact_date_obj = pd.to_datetime(first_contact_date)
+                            if isinstance(last_contacted_date, str):
+                                contact_date_obj = pd.to_datetime(last_contacted_date)
                             else:
-                                contact_date_obj = first_contact_date
+                                contact_date_obj = last_contacted_date
                             
                             # Check if date falls within this week
                             if week_start.date() <= contact_date_obj.date() <= week_end.date():
@@ -687,38 +689,33 @@ if not df.empty:
     # Fila de la semana anterior (si existe)
     prev_row = weeks_df.iloc[current_week_index - 1] if current_week_index > 0 else None
 
-    # Valores de la tabla
+    # Valores de las metrics
     current_new_deals = int(current_row["New Deals"])
     current_contacted = int(current_row["Contacted"])
-    current_no_response = int(current_row["No Response"])
-    current_calls_done = int(current_row["Calls Done"])
     current_calls_pending = int(current_row["Calls Pending"])
-    current_pending_info = int(current_row["Pending Info"])
+    pending_info = int(df[df["Contact_Stage"] == "Pending information"].shape[0])
 
     prev_new_deals = int(prev_row["New Deals"]) if prev_row is not None else 0
     prev_contacted = int(prev_row["Contacted"]) if prev_row is not None else 0
-    prev_no_response = int(prev_row["No Response"]) if prev_row is not None else 0
-    prev_calls_done = int(prev_row["Calls Done"]) if prev_row is not None else 0
     prev_calls_pending = int(prev_row["Calls Pending"]) if prev_row is not None else 0
-    prev_pending_info = int(prev_row["Pending Info"]) if prev_row is not None else 0
 
     delta_new_deals = f"{round((current_new_deals - prev_new_deals) / prev_new_deals * 100, 2)} %" if prev_new_deals != 0 else ""
     delta_contacted = f"{round((current_contacted - prev_contacted) / prev_contacted * 100, 2)} %" if prev_contacted != 0 else ""
-    delta_no_response = f"{round((current_no_response - prev_no_response) / prev_no_response * 100, 2)} %" if prev_no_response != 0 else ""
-    delta_calls_done = f"{round((current_calls_done - prev_calls_done) / prev_calls_done * 100, 2)} %" if prev_calls_done != 0 else ""
     delta_calls_pending = f"{round((current_calls_pending - prev_calls_pending) / prev_calls_pending * 100, 2)} %" if prev_calls_pending != 0 else ""
-    delta_pending_info = f"{round((current_pending_info - prev_pending_info) / prev_pending_info * 100, 2)} %" if prev_pending_info != 0 else ""
 
     # Métricas arriba de la tabla
+
+    st.markdown("### General metrics")
+
     columns_tags = st.columns(3)
 
-    with columns_tags[0]:
+    with columns_tags[1]:
         st.metric(
             label="Total number of leads",
             value=df.shape[0],
         )
 
-    with columns_tags[1]:
+    with columns_tags[0]:
         st.metric(
             label="New deals this week",
             value=current_new_deals,
@@ -731,38 +728,17 @@ if not df.empty:
             value=current_contacted,
             delta=delta_contacted,  # comparación con la semana anterior
         )
-    
-    columns_tags2 = st.columns(4)
-
-    with columns_tags2[0]:
-        st.metric(
-            label="No response this week",
-            value=current_no_response,
-            delta=delta_no_response,  # comparación con la semana anterior
-        )
-    
+        
+    columns_tags2 = st.columns(3)
     with columns_tags2[1]:
         st.metric(
-            label="Calls done this week",
-            value=current_calls_done,
-            delta=delta_calls_done,  # comparación con la semana anterior
-        )
-    
-    with columns_tags2[2]:
-        st.metric(
-            label="Calls pending this week",
-            value=current_calls_pending,
-            delta=delta_calls_pending,  # comparación con la semana anterior
-        )
-    
-    with columns_tags2[3]:
-        st.metric(
-            label="Pending info this week",
-            value=current_pending_info,
-            delta=delta_pending_info,  # comparación con la semana anterior
+            label="Companies with pending information",
+            value=pending_info,
         )   
 
     st.markdown("---")
+
+    st.markdown("### Geographic metrics")
 
     g_col1, g_col2 = st.columns(2)
 
@@ -774,6 +750,8 @@ if not df.empty:
             st.metric(label="Americas", value=americas_count)
 
     st.markdown("---")
+    
+    st.markdown("### Urgency metrics")
     
     m_col1, m_col2, m_col3 = st.columns(3)
         
