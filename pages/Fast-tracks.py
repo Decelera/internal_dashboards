@@ -163,8 +163,6 @@ with st.sidebar:
     if st.button("Breathe-Focus-Grow", key="mn_prog_agenda", use_container_width=True):
         st.switch_page(f"pages/Menorca_Breathe-Focus-Grow_{st.session_state.selected_year}.py")
 
-st.markdown("---")
-
 # =============================================================================
 # AIRTABLE DATA CONNECTION
 # =============================================================================
