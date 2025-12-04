@@ -448,14 +448,22 @@ if not df.empty:
         
         # Add totals row
         totals_row = pd.DataFrame({
-            "Responsible": ["**Total**"],
+            "Responsible": ["Total"],
             "source_count": [df_leaderboard["source_count"].sum()],
             "contacted": [df_leaderboard["contacted"].sum()]
         })
         df_leaderboard_with_totals = pd.concat([df_leaderboard, totals_row], ignore_index=True)
         
+        # Style the totals row (last row) with different background and bold
+        def highlight_totals_row(row):
+            if row.name == len(df_leaderboard_with_totals) - 1:
+                return ['background-color: #1e3a5f; color: white; font-weight: bold'] * len(row)
+            return [''] * len(row)
+        
+        styled_leaderboard = df_leaderboard_with_totals.style.apply(highlight_totals_row, axis=1)
+        
         st.dataframe(
-            df_leaderboard_with_totals,
+            styled_leaderboard,
             use_container_width=True,
             hide_index=True,
             column_config={
