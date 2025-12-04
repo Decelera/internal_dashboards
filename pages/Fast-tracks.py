@@ -492,8 +492,8 @@ if not df.empty:
                             # Check if date falls within this week
                             if week_start.date() <= first_contact_date_obj.date() <= week_end.date():
                                 first_contacted += 1
-                    except:
-                        pass
+                        except:
+                            pass
                 
                 # For contact stage statuses: use Date_First_Contact for timing
                 stage = row.get(stage_col, "")
@@ -712,23 +712,23 @@ if not df.empty:
     
     # Display the styled table
     with st.expander("View table of weekly fast-tracks"):
-    st.dataframe(
-        styled_df,
-        use_container_width=True,
-        hide_index=True,
+        st.dataframe(
+            styled_df,
+            use_container_width=True,
+            hide_index=True,
             column_config={
-            "Week": st.column_config.TextColumn("Week", width="small"),
-            "Start": st.column_config.TextColumn("Start", width="small"),
-            "End": st.column_config.TextColumn("End", width="small"),
-            "New Deals": st.column_config.NumberColumn("New Deals", width="small"),
-            "Contacted": st.column_config.NumberColumn("Contacted", width="small"),
-            "First Contact": st.column_config.NumberColumn("First Contact", width="small"),
-            "No Response": st.column_config.NumberColumn("No Response", width="small"),
-            "Calls Done": st.column_config.NumberColumn("Calls Done", width="small"),
-            "Calls Pending": st.column_config.NumberColumn("Calls Pending", width="small"),
-            "Pending Info": st.column_config.NumberColumn("Pending Info", width="small"),
-        }
-    )
+                "Week": st.column_config.TextColumn("Week", width="small"),
+                "Start": st.column_config.TextColumn("Start", width="small"),
+                "End": st.column_config.TextColumn("End", width="small"),
+                "New Deals": st.column_config.NumberColumn("New Deals", width="small"),
+                "Contacted": st.column_config.NumberColumn("Contacted", width="small"),
+                "First Contact": st.column_config.NumberColumn("First Contact", width="small"),
+                "No Response": st.column_config.NumberColumn("No Response", width="small"),
+                "Calls Done": st.column_config.NumberColumn("Calls Done", width="small"),
+                "Calls Pending": st.column_config.NumberColumn("Calls Pending", width="small"),
+                "Pending Info": st.column_config.NumberColumn("Pending Info", width="small"),
+            }
+        )
     
     st.markdown("---")
     
@@ -1092,7 +1092,7 @@ if not df.empty:
                                     st.markdown("")
                                 
                                 # Show referal info
-                                if (reference and reference != "N/A") or (reference_details and referenece_details != "N/A"):
+                                if (reference and reference != "N/A") or (reference_details and reference_details != "N/A"):
                                     col1, col2 = st.columns(2)
                                     with col1:
                                         if reference and reference != "N/A":
@@ -1307,7 +1307,7 @@ if not df.empty:
                                     st.markdown("")
                                 
                                 # Show referal info
-                                if (reference and reference != "N/A") or (reference_details and referenece_details != "N/A"):
+                                if (reference and reference != "N/A") or (reference_details and reference_details != "N/A"):
                                     col1, col2 = st.columns(2)
                                     with col1:
                                         if reference and reference != "N/A":
