@@ -693,7 +693,6 @@ if not df.empty:
     current_new_deals = int(current_row["New Deals"])
     current_contacted = int(current_row["Contacted"])
     current_calls_pending = int(current_row["Calls Pending"])
-    pending_info = int(df[df["Contact_Stage"] == "Pending information"].shape[0])
 
     prev_new_deals = int(prev_row["New Deals"]) if prev_row is not None else 0
     prev_contacted = int(prev_row["Contacted"]) if prev_row is not None else 0
@@ -727,14 +726,7 @@ if not df.empty:
             label="Contacted this week",
             value=current_contacted,
             delta=delta_contacted,  # comparación con la semana anterior
-        )
-        
-    columns_tags2 = st.columns(3)
-    with columns_tags2[1]:
-        st.metric(
-            label="Companies with pending information",
-            value=pending_info,
-        )   
+        )  
 
     st.markdown("---")
 
