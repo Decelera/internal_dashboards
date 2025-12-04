@@ -443,8 +443,19 @@ if not df.empty:
                 st.metric("Contact", leader_contacted)
 
     with st.expander("View table of the team leaderboard"):
+        # Prepare dataframe with totals row
+        df_leaderboard = df_leaders.sort_values(by="leader_score", ascending=False).drop(columns=["leader_score"])
+        
+        # Add totals row
+        totals_row = pd.DataFrame({
+            "Responsible": ["**Total**"],
+            "source_count": [df_leaderboard["source_count"].sum()],
+            "contacted": [df_leaderboard["contacted"].sum()]
+        })
+        df_leaderboard_with_totals = pd.concat([df_leaderboard, totals_row], ignore_index=True)
+        
         st.dataframe(
-            df_leaders.sort_values(by="leader_score", ascending=False).drop(columns=["leader_score"]),
+            df_leaderboard_with_totals,
             use_container_width=True,
             hide_index=True,
             column_config={
