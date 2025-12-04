@@ -265,7 +265,7 @@ def get_field_value(row, field_patterns, default="N/A"):
         if pattern not in row:
             continue
         
-        value = row[pattern]
+            value = row[pattern]
 
         # 1) Si es NaN (float), saltar
         if isinstance(value, float) and pd.isna(value):
@@ -278,9 +278,9 @@ def get_field_value(row, field_patterns, default="N/A"):
             value = value.tolist()
 
         # 3) Si es lista (Airtable multiselect o attachments)
-        if isinstance(value, list):
+            if isinstance(value, list):
             if len(value) == 0:
-                continue
+                    continue
 
             first = value[0]
 
@@ -300,9 +300,9 @@ def get_field_value(row, field_patterns, default="N/A"):
             continue
 
         # 4) Valor escalar válido
-        value_str = str(value).strip()
+            value_str = str(value).strip()
         if value_str and value_str.lower() != "nan":
-            return value_str
+                return value_str
 
     return default
 
@@ -335,11 +335,11 @@ if not df.empty:
     else:
         # Fallback if columns are missing
         st.warning("Could not display Urgency metrics: 'Urgency' or 'Date Sourced' column not found.")
-
+    
     # =============================================================================
     # LOCATION METRICS (ALL RECORDS)
     # =============================================================================
-
+    
     # 1. Find Location column
     location_col = next((col for col in df.columns if col.lower() in ['location', 'constitution_location', 'country', 'ph1_constitution_location', "PH1_Constitution_Location"]), None)
 
@@ -402,7 +402,7 @@ if not df.empty:
         st.warning("Could not display Geographic metrics: 'Location' column not found.")
 
     st.markdown("---")
-
+    
     # Find required columns once
     date_sourced_cols = [col for col in df.columns if 'date' in col.lower() and 'source' in col.lower()]
     if not date_sourced_cols:
@@ -428,6 +428,7 @@ if not df.empty:
         
         new_deals = 0
         contacted = 0
+        first_contacted = 0
         no_response = 0
         videocall_done = 0
         videocall_pending = 0
@@ -460,7 +461,7 @@ if not df.empty:
                     except:
                         pass
                 
-                # Count Contacted based on Date_First_Contact
+                # Count Contacted based on Last Contacted
                 if last_contacted_cols:
                     last_contacted_date = row.get(last_contacted_cols[0])
                     if pd.notna(last_contacted_date):
@@ -476,6 +477,23 @@ if not df.empty:
                                 contacted += 1
                         except:
                             pass
+                
+                # Count First Contacted based on Date_First_Contact
+                if first_contact_date_cols:
+                    first_contact_date = row.get(first_contact_date_cols[0])
+                    if pd.notna(first_contact_date):
+                        try:
+                            # Convert to datetime if it's a string
+                            if isinstance(first_contact_date, str):
+                                first_contact_date_obj = pd.to_datetime(first_contact_date)
+                            else:
+                                first_contact_date_obj = first_contact_date
+                            
+                            # Check if date falls within this week
+                            if week_start.date() <= first_contact_date_obj.date() <= week_end.date():
+                                first_contacted += 1
+                    except:
+                        pass
                 
                 # For contact stage statuses: use Date_First_Contact for timing
                 stage = row.get(stage_col, "")
@@ -543,6 +561,7 @@ if not df.empty:
             "End": week_end.strftime("%d/%m/%Y"),
             "New Deals": new_deals,
             "Contacted": contacted,
+            "First Contact": first_contacted,
             "No Response": no_response,
             "Calls Done": videocall_done,
             "Calls Pending": videocall_pending,
@@ -559,6 +578,7 @@ if not df.empty:
         "End": "",
         "New Deals": weeks_df["New Deals"].sum(),
         "Contacted": weeks_df["Contacted"].sum(),
+        "First Contact": weeks_df["First Contact"].sum(),
         "No Response": weeks_df["No Response"].sum(),
         "Calls Done": weeks_df["Calls Done"].sum(),
         "Calls Pending": weeks_df["Calls Pending"].sum(),
@@ -610,29 +630,32 @@ if not df.empty:
     # Valores de las metrics
     current_new_deals = int(current_row["New Deals"])
     current_contacted = int(current_row["Contacted"])
+    current_first_contact = int(current_row["First Contact"])
     current_calls_pending = int(current_row["Calls Pending"])
 
     prev_new_deals = int(prev_row["New Deals"]) if prev_row is not None else 0
     prev_contacted = int(prev_row["Contacted"]) if prev_row is not None else 0
+    prev_first_contact = int(prev_row["First Contact"]) if prev_row is not None else 0
     prev_calls_pending = int(prev_row["Calls Pending"]) if prev_row is not None else 0
 
     delta_new_deals = f"{round((current_new_deals - prev_new_deals) / prev_new_deals * 100, 2)} %" if prev_new_deals != 0 else ""
     delta_contacted = f"{round((current_contacted - prev_contacted) / prev_contacted * 100, 2)} %" if prev_contacted != 0 else ""
+    delta_first_contact = f"{round((current_first_contact - prev_first_contact) / prev_first_contact * 100, 2)} %" if prev_first_contact != 0 else ""
     delta_calls_pending = f"{round((current_calls_pending - prev_calls_pending) / prev_calls_pending * 100, 2)} %" if prev_calls_pending != 0 else ""
 
     # Métricas arriba de la tabla
 
     st.markdown("### General metrics")
 
-    columns_tags = st.columns(3)
+    columns_tags = st.columns(4)
 
-    with columns_tags[1]:
+    with columns_tags[0]:
         st.metric(
             label="Total number of leads",
             value=df.shape[0],
         )
 
-    with columns_tags[0]:
+    with columns_tags[1]:
         st.metric(
             label="New deals this week",
             value=current_new_deals,
@@ -644,6 +667,13 @@ if not df.empty:
             label="Contacted this week",
             value=current_contacted,
             delta=delta_contacted,  # comparación con la semana anterior
+        )
+    
+    with columns_tags[3]:
+        st.metric(
+            label="First contact this week",
+            value=current_first_contact,
+            delta=delta_first_contact,  # comparación con la semana anterior
         )  
 
     st.markdown("---")
@@ -679,19 +709,20 @@ if not df.empty:
     styled_df = weeks_df.style.apply(highlight_current_week, axis=1)
 
     st.markdown("---")
-
+    
     # Display the styled table
     with st.expander("View table of weekly fast-tracks"):
-        st.dataframe(
-            styled_df,
-            use_container_width=True,
-            hide_index=True,
+    st.dataframe(
+        styled_df,
+        use_container_width=True,
+        hide_index=True,
             column_config={
             "Week": st.column_config.TextColumn("Week", width="small"),
             "Start": st.column_config.TextColumn("Start", width="small"),
             "End": st.column_config.TextColumn("End", width="small"),
             "New Deals": st.column_config.NumberColumn("New Deals", width="small"),
             "Contacted": st.column_config.NumberColumn("Contacted", width="small"),
+            "First Contact": st.column_config.NumberColumn("First Contact", width="small"),
             "No Response": st.column_config.NumberColumn("No Response", width="small"),
             "Calls Done": st.column_config.NumberColumn("Calls Done", width="small"),
             "Calls Pending": st.column_config.NumberColumn("Calls Pending", width="small"),
@@ -1021,7 +1052,7 @@ if not df.empty:
                                 # Show stage
                                 if (stage and stage != "N/A"):
                                     st.markdown(f"**🚀 Stage**  \n{stage}")
-
+                                
                                 # Show business model and location
                                 if (business_model and business_model != "N/A") or (location and location != "N/A"):
                                     info_col1, info_col2 = st.columns(2)
@@ -1185,7 +1216,7 @@ if not df.empty:
                         # Get location
                         location_patterns = ["PH1_Constitution_Location", "Constitution_Location", "Location", "location"]
                         location = get_field_value(startup_row, location_patterns, "N/A")
-
+                        
                         # Get stage
                         stage_patterns = ["stage", "stage_$startup"]
                         stage = get_field_value(startup_row, stage_patterns, "N/A")
