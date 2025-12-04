@@ -265,7 +265,7 @@ def get_field_value(row, field_patterns, default="N/A"):
         if pattern not in row:
             continue
         
-            value = row[pattern]
+        value = row[pattern]
 
         # 1) Si es NaN (float), saltar
         if isinstance(value, float) and pd.isna(value):
@@ -278,9 +278,9 @@ def get_field_value(row, field_patterns, default="N/A"):
             value = value.tolist()
 
         # 3) Si es lista (Airtable multiselect o attachments)
-            if isinstance(value, list):
+        if isinstance(value, list):
             if len(value) == 0:
-                    continue
+                continue
 
             first = value[0]
 
@@ -300,9 +300,9 @@ def get_field_value(row, field_patterns, default="N/A"):
             continue
 
         # 4) Valor escalar válido
-            value_str = str(value).strip()
+        value_str = str(value).strip()
         if value_str and value_str.lower() != "nan":
-                return value_str
+            return value_str
 
     return default
 
