@@ -402,76 +402,6 @@ if not df.empty:
         st.warning("Could not display Geographic metrics: 'Location' column not found.")
 
     st.markdown("---")
-    
-    # =============================================================================
-    # WEEKLY TRACKING TABLE
-    # =============================================================================
-    
-    st.write("### Weekly Dealflow Tracking")
-
-    df_leaders = df.copy()
-    df_leaders["date_sourced"] = pd.to_datetime(df_leaders["date_sourced"])
-    df_leaders["Date_First_Contact"] = pd.to_datetime(df_leaders["Date_First_Contact"])
-    df_leaders["Last Contacted"] = pd.to_datetime(df_leaders["Last Contacted"])
-    
-    # Leaderboard
-    df_leaders = df_leaders.groupby("Responsible", as_index=False).agg(
-        source_count=(
-            "date_sourced",
-            lambda s: ((s.dropna().dt.date >= start_of_week.date()) & (s.dropna().dt.date <= end_of_week.date())).sum()
-        ),  
-        contacted=(
-            "Last Contacted",
-            lambda s: ((s.dropna().dt.date >= start_of_week.date()) & (s.dropna().dt.date <= end_of_week.date())).sum()
-        ),
-    )
-
-    df_leaders["leader_score"] = (df_leaders["source_count"] + df_leaders["contacted"]) / 2
-    leader_row = df_leaders.loc[df_leaders["leader_score"].idxmax()]
-    leader = leader_row["Responsible"]
-    leader_sources = leader_row["source_count"]
-    leader_contacted = leader_row["contacted"]
-
-    leader_cols = st.columns(3)
-    with leader_cols[1]:
-        with st.container(border=True):
-            st.markdown(f"## 👑 Current week leader: {leader}")
-            secondary_cols = st.columns(2)
-            with secondary_cols[0]:
-                st.metric("Sourced", leader_sources)
-            with secondary_cols[1]:
-                st.metric("Contact", leader_contacted)
-
-    with st.expander("View table of the team leaderboard"):
-        # Prepare dataframe with totals row
-        df_leaderboard = df_leaders.sort_values(by="leader_score", ascending=False).drop(columns=["leader_score"])
-        
-        # Add totals row
-        totals_row = pd.DataFrame({
-            "Responsible": ["Total"],
-            "source_count": [df_leaderboard["source_count"].sum()],
-            "contacted": [df_leaderboard["contacted"].sum()]
-        })
-        df_leaderboard_with_totals = pd.concat([df_leaderboard, totals_row], ignore_index=True)
-        
-        # Style the totals row (last row) with different background and bold
-        def highlight_totals_row(row):
-            if row.name == len(df_leaderboard_with_totals) - 1:
-                return ['background-color: #1e3a5f; color: white; font-weight: bold'] * len(row)
-            return [''] * len(row)
-        
-        styled_leaderboard = df_leaderboard_with_totals.style.apply(highlight_totals_row, axis=1)
-        
-        st.dataframe(
-            styled_leaderboard,
-            use_container_width=True,
-            hide_index=True,
-            column_config={
-            "Responsible": st.column_config.TextColumn("Responsible", width="small"),
-            "source_count": st.column_config.NumberColumn("Sourced", width="small"),
-            "contacted": st.column_config.NumberColumn("Contact", width="small"),
-        }
-    )
 
     # Find required columns once
     date_sourced_cols = [col for col in df.columns if 'date' in col.lower() and 'source' in col.lower()]
@@ -893,6 +823,78 @@ if not df.empty:
             st.info("No deals were referenced this week yet.")
     else:
         st.warning("Reference fields not found in data. Expected: 'PH1_reference_$startups' and 'PH1_reference_other_$startups'")
+    
+    st.markdown("---")
+    
+    # =============================================================================
+    # WEEKLY TRACKING TABLE - LEADERBOARD
+    # =============================================================================
+    
+    st.write("### Weekly Dealflow Tracking")
+
+    df_leaders = df.copy()
+    df_leaders["date_sourced"] = pd.to_datetime(df_leaders["date_sourced"])
+    df_leaders["Date_First_Contact"] = pd.to_datetime(df_leaders["Date_First_Contact"])
+    df_leaders["Last Contacted"] = pd.to_datetime(df_leaders["Last Contacted"])
+    
+    # Leaderboard
+    df_leaders = df_leaders.groupby("Responsible", as_index=False).agg(
+        source_count=(
+            "date_sourced",
+            lambda s: ((s.dropna().dt.date >= start_of_week.date()) & (s.dropna().dt.date <= end_of_week.date())).sum()
+        ),  
+        contacted=(
+            "Last Contacted",
+            lambda s: ((s.dropna().dt.date >= start_of_week.date()) & (s.dropna().dt.date <= end_of_week.date())).sum()
+        ),
+    )
+
+    df_leaders["leader_score"] = (df_leaders["source_count"] + df_leaders["contacted"]) / 2
+    leader_row = df_leaders.loc[df_leaders["leader_score"].idxmax()]
+    leader = leader_row["Responsible"]
+    leader_sources = leader_row["source_count"]
+    leader_contacted = leader_row["contacted"]
+
+    leader_cols = st.columns(3)
+    with leader_cols[1]:
+        with st.container(border=True):
+            st.markdown(f"#### 👑 Current week leader: {leader}")
+            secondary_cols = st.columns(2)
+            with secondary_cols[0]:
+                st.metric("Sourced", leader_sources)
+            with secondary_cols[1]:
+                st.metric("Contact", leader_contacted)
+
+    with st.expander("View table of the team leaderboard"):
+        # Prepare dataframe with totals row
+        df_leaderboard = df_leaders.sort_values(by="leader_score", ascending=False).drop(columns=["leader_score"])
+        
+        # Add totals row
+        totals_row = pd.DataFrame({
+            "Responsible": ["Total"],
+            "source_count": [df_leaderboard["source_count"].sum()],
+            "contacted": [df_leaderboard["contacted"].sum()]
+        })
+        df_leaderboard_with_totals = pd.concat([df_leaderboard, totals_row], ignore_index=True)
+        
+        # Style the totals row (last row) with different background and bold
+        def highlight_totals_row(row):
+            if row.name == len(df_leaderboard_with_totals) - 1:
+                return ['background-color: #1e3a5f; color: white; font-weight: bold'] * len(row)
+            return [''] * len(row)
+        
+        styled_leaderboard = df_leaderboard_with_totals.style.apply(highlight_totals_row, axis=1)
+        
+        st.dataframe(
+            styled_leaderboard,
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+            "Responsible": st.column_config.TextColumn("Responsible", width="small"),
+            "source_count": st.column_config.NumberColumn("Sourced", width="small"),
+            "contacted": st.column_config.NumberColumn("Contact", width="small"),
+        }
+    )
     
     st.markdown("---")
     
