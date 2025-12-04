@@ -203,22 +203,6 @@ def load_dealflow_data():
 # Load data
 df = load_dealflow_data()
 
-# Debug: Show available columns
-if not df.empty:
-    with st.expander("🔍 Debug: Available Columns in Data"):
-        st.write("**All columns:**")
-        founder_cols = [col for col in df.columns if 'founder' in col.lower() or 'name' in col.lower()]
-        if founder_cols:
-            st.write("**Columns containing 'founder' or 'name':**")
-            for col in founder_cols:
-                st.write(f"- `{col}`")
-        else:
-            st.write("No columns found containing 'founder' or 'name'")
-        
-        st.write("\n**All columns (alphabetically):**")
-        for col in sorted(df.columns):
-            st.write(f"- `{col}`")
-
 # =============================================================================
 # HELPER FUNCTIONS
 # =============================================================================
