@@ -454,8 +454,6 @@ if not df.empty:
         }
     )
 
-    st.markdown("---")
-
     # Find required columns once
     date_sourced_cols = [col for col in df.columns if 'date' in col.lower() and 'source' in col.lower()]
     if not date_sourced_cols:
