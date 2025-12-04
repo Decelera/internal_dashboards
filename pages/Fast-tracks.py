@@ -339,25 +339,14 @@ if not df.empty:
         st.warning("Could not display Urgency metrics: 'Urgency' or 'Date Sourced' column not found.")
 
     # =============================================================================
-    # LOCATION METRICS (THIS WEEK)
+    # LOCATION METRICS (ALL RECORDS)
     # =============================================================================
 
-    # 1. Find Location and Date columns
+    # 1. Find Location column
     location_col = next((col for col in df.columns if col.lower() in ['location', 'constitution_location', 'country', 'ph1_constitution_location', "PH1_Constitution_Location"]), None)
-    
-    # Reuse date_col found in the previous step, or find it again if needed
-    date_col = next((col for col in df.columns if 'date' in col.lower() and 'source' in col.lower()), None)
-    if not date_col:
-        date_col = next((col for col in df.columns if col in ['Date Sourced', 'Date_Sourced', 'DateSourced']), None)
 
-    if location_col and date_col:
-        # 2. Filter data for the current week
-        df_loc = df.copy()
-        df_loc[date_col] = pd.to_datetime(df_loc[date_col], errors='coerce')
-        mask_loc_week = (df_loc[date_col].dt.date >= start_of_week.date()) & (df_loc[date_col].dt.date <= end_of_week.date())
-        df_week_loc = df_loc.loc[mask_loc_week]
-
-        # 3. Define Keywords for Classification
+    if location_col:
+        # 2. Define Keywords for Classification
         europe_keywords = [
             'spain', 'espana', 'españa', 'uk', 'united kingdom', 'england', 'london', 
             'germany', 'france', 'italy', 'portugal', 'greece', 'poland', 'lithuania', 
@@ -375,12 +364,12 @@ if not df.empty:
             'bolivia', 'venezuela', 'mclean', 'ny', 'sf'
         ]
 
-        # 4. Counting Function
+        # 3. Counting Function - using all records
         europe_count = 0
         americas_count = 0
         other_count = 0
 
-        for location_raw in df_week_loc[location_col]:
+        for location_raw in df[location_col]:
             # --- CORRECCIÓN AQUÍ ---
             # Primero verificamos si es una lista (caso común en Airtable)
             if isinstance(location_raw, list):
@@ -412,7 +401,7 @@ if not df.empty:
         # Define defaults to avoid errors later if columns are missing
         europe_count = 0
         americas_count = 0
-        st.warning("Could not display Location metrics: 'Location' column not found.")
+        st.warning("Could not display Geographic metrics: 'Location' column not found.")
 
     st.markdown("---")
     
@@ -718,7 +707,7 @@ if not df.empty:
 
     g_col1, g_col2 = st.columns(2)
 
-    if location_col and date_col:
+    if location_col:
         with g_col1:
             st.metric(label="Europe", value=europe_count)
         
