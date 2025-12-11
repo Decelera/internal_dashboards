@@ -415,7 +415,7 @@ if not df.empty:
     weeks_data = []
     current_week_index = None  # Track which row is the current week
     
-    for i in range(-2, 5):  # -2 (2 weeks ago) to 4 (4 weeks ahead)
+    for i in range(-4, 5):  # -4 (4 weeks ago) to 4 (4 weeks ahead)
         week_start = start_of_week + timedelta(weeks=i)
         week_end = week_start + timedelta(days=6)  # Sunday
         
