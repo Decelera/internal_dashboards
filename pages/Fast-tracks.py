@@ -451,7 +451,7 @@ if not df.empty:
                     try:
                         # Convert to datetime if it's a string
                         if isinstance(date_sourced, str):
-                            sourced_date = pd.to_datetime(date_sourced, dayfirst=True)
+                            sourced_date = pd.to_datetime(date_sourced)
                         else:
                             sourced_date = date_sourced
                         
@@ -465,9 +465,9 @@ if not df.empty:
                 first_videocall_done_date = row.get("first_videocall_done")
                 if pd.notna(first_videocall_done_date):
                     try:
-                        # Convert to datetime if it's a string (use dayfirst=True for DD/MM/YYYY format)
+                        # Convert to datetime if it's a string
                         if isinstance(first_videocall_done_date, str):
-                            contact_date_obj = pd.to_datetime(first_videocall_done_date, dayfirst=True)
+                            contact_date_obj = pd.to_datetime(first_videocall_done_date)
                         else:
                             contact_date_obj = first_videocall_done_date
                         
