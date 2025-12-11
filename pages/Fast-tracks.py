@@ -660,7 +660,7 @@ if not df.empty:
 
     with columns_tags[2]:
         st.metric(
-            label="Contacted this week",
+            label="Calls this week",
             value=current_contacted,
             delta=delta_contacted,  # comparación con la semana anterior
         )  
