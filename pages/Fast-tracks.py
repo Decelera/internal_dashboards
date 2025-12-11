@@ -415,7 +415,10 @@ if not df.empty:
     weeks_data = []
     current_week_index = None  # Track which row is the current week
     
-    for i in range(-4, 5):  # -4 (4 weeks ago) to 4 (4 weeks ahead)
+    # Let user choose how many weeks back to display
+    weeks_back = st.slider("Weeks back to display", min_value=1, max_value=12, value=4, key="weeks_back_slider")
+    
+    for i in range(-weeks_back, 3):  # dynamic weeks ago to 2 weeks ahead
         week_start = start_of_week + timedelta(weeks=i)
         week_end = week_start + timedelta(days=6)  # Sunday
         
