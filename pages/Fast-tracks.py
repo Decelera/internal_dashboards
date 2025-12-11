@@ -556,15 +556,10 @@ if not df.empty:
         
         weeks_data.append({
             "Week": week_label,
-            "Start": week_start.strftime("%d/%m/%Y"),
-            "End": week_end.strftime("%d/%m/%Y"),
             "New Deals": new_deals,
-            "Contacted": contacted,
+            "Calls": contacted,
             "First Contact": first_contacted,
             "No Response": no_response,
-            "Calls Done": videocall_done,
-            "Calls Pending": videocall_pending,
-            "Pending Info": pending_info
         })
     
     # Create DataFrame and display as table
@@ -573,15 +568,10 @@ if not df.empty:
     # Add totals row
     totals = {
         "Week": "Totals",
-        "Start": "",
-        "End": "",
         "New Deals": weeks_df["New Deals"].sum(),
-        "Contacted": weeks_df["Contacted"].sum(),
+        "Calls": weeks_df["Calls"].sum(),
         "First Contact": weeks_df["First Contact"].sum(),
         "No Response": weeks_df["No Response"].sum(),
-        "Calls Done": weeks_df["Calls Done"].sum(),
-        "Calls Pending": weeks_df["Calls Pending"].sum(),
-        "Pending Info": weeks_df["Pending Info"].sum()
     }
     weeks_df = pd.concat([weeks_df, pd.DataFrame([totals])], ignore_index=True)
     
@@ -628,16 +618,13 @@ if not df.empty:
 
     # Valores de las metrics
     current_new_deals = int(current_row["New Deals"])
-    current_contacted = int(current_row["Contacted"])
-    current_calls_pending = int(current_row["Calls Pending"])
+    current_calls = int(current_row["Calls"])
 
     prev_new_deals = int(prev_row["New Deals"]) if prev_row is not None else 0
-    prev_contacted = int(prev_row["Contacted"]) if prev_row is not None else 0
-    prev_calls_pending = int(prev_row["Calls Pending"]) if prev_row is not None else 0
+    prev_calls = int(prev_row["Calls"]) if prev_row is not None else 0
 
     delta_new_deals = f"{round((current_new_deals - prev_new_deals) / prev_new_deals * 100, 2)} %" if prev_new_deals != 0 else ""
-    delta_contacted = f"{round((current_contacted - prev_contacted) / prev_contacted * 100, 2)} %" if prev_contacted != 0 else ""
-    delta_calls_pending = f"{round((current_calls_pending - prev_calls_pending) / prev_calls_pending * 100, 2)} %" if prev_calls_pending != 0 else ""
+    delta_calls = f"{round((current_calls - prev_calls) / prev_calls * 100, 2)} %" if prev_calls != 0 else ""
 
     # Métricas arriba de la tabla
 
@@ -661,8 +648,8 @@ if not df.empty:
     with columns_tags[2]:
         st.metric(
             label="Calls this week",
-            value=current_contacted,
-            delta=delta_contacted,  # comparación con la semana anterior
+            value=current_calls,
+            delta=delta_calls,  # comparación con la semana anterior
         )  
 
     st.markdown("---")
@@ -707,15 +694,10 @@ if not df.empty:
             hide_index=True,
             column_config={
                 "Week": st.column_config.TextColumn("Week", width="small"),
-                "Start": st.column_config.TextColumn("Start", width="small"),
-                "End": st.column_config.TextColumn("End", width="small"),
                 "New Deals": st.column_config.NumberColumn("New Deals", width="small"),
-                "Contacted": st.column_config.NumberColumn("Contacted", width="small"),
+                "Calls": st.column_config.NumberColumn("Calls", width="small"),
                 "First Contact": st.column_config.NumberColumn("First Contact", width="small"),
                 "No Response": st.column_config.NumberColumn("No Response", width="small"),
-                "Calls Done": st.column_config.NumberColumn("Calls Done", width="small"),
-                "Calls Pending": st.column_config.NumberColumn("Calls Pending", width="small"),
-                "Pending Info": st.column_config.NumberColumn("Pending Info", width="small"),
             }
         )
     
