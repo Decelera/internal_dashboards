@@ -1377,7 +1377,7 @@ if not df.empty:
                     # Check if last modified is older than 7 days
                     if modified_date < cutoff_date:
                         # Exclude startups with "Killed" stage
-                        stage_patterns = ["Stage", "stage"]
+                        stage_patterns = ["stage", "stage_$startup"]
                         stage = get_field_value(row, stage_patterns, "N/A")
                         if str(stage).strip().lower() != "killed":
                             zombie_records.append(row)
@@ -1443,7 +1443,7 @@ if not df.empty:
                                 pass
                         
                         # Get stage
-                        stage_patterns = ["Stage", "stage"]
+                        stage_patterns = ["stage", "stage_$startup"]
                         stage = get_field_value(startup_row, stage_patterns, "N/A")
                         
                         # Get contact stage
