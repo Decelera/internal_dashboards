@@ -414,11 +414,9 @@ if not df.empty:
     
     weeks_data = []
     current_week_index = None  # Track which row is the current week
+    max_weeks_back = 12  # Calculate data for up to 12 weeks back
     
-    # Let user choose how many weeks back to display
-    weeks_back = st.slider("Weeks back to display", min_value=1, max_value=12, value=4, key="weeks_back_slider")
-    
-    for i in range(-weeks_back, 3):  # dynamic weeks ago to 2 weeks ahead
+    for i in range(-max_weeks_back, 3):  # 12 weeks ago to 2 weeks ahead
         week_start = start_of_week + timedelta(weeks=i)
         week_end = week_start + timedelta(days=6)  # Sunday
         
@@ -689,10 +687,39 @@ if not df.empty:
 
     st.markdown("---")
     
+    # Slider to choose how many weeks back to display
+    weeks_back = st.slider("Weeks back to display", min_value=1, max_value=12, value=4, key="weeks_back_slider")
+    
+    # Filter dataframe based on slider (keep weeks_back past weeks + current + 2 future)
+    # The data has max_weeks_back (12) past weeks, current week is at index max_weeks_back (12)
+    start_idx = max_weeks_back - weeks_back  # e.g., if weeks_back=4, start at index 8
+    filtered_weeks_df = weeks_df.iloc[start_idx:-1].reset_index(drop=True)  # Exclude totals row
+    
+    # Recalculate totals for filtered data
+    totals_filtered = {
+        "Week": "Totals",
+        "New Deals": filtered_weeks_df["New Deals"].sum(),
+        "Calls": filtered_weeks_df["Calls"].sum(),
+        "First Contact": filtered_weeks_df["First Contact"].sum(),
+        "No Response": filtered_weeks_df["No Response"].sum(),
+    }
+    filtered_weeks_df = pd.concat([filtered_weeks_df, pd.DataFrame([totals_filtered])], ignore_index=True)
+    
+    # Re-apply styling to filtered data
+    def highlight_current_week_filtered(row):
+        if "📍" in str(row.get("Week", "")):
+            return ['background-color: #1e3a5f; color: white; font-weight: bold'] * len(row)
+        elif row.get("Week") == "Totals":
+            return ['background-color: #2d4a6f; color: white; font-weight: bold'] * len(row)
+        else:
+            return [''] * len(row)
+    
+    styled_filtered_df = filtered_weeks_df.style.apply(highlight_current_week_filtered, axis=1)
+    
     # Display the styled table
     with st.expander("View table of weekly fast-tracks"):
         st.dataframe(
-            styled_df,
+            styled_filtered_df,
             use_container_width=True,
             hide_index=True,
             column_config={
