@@ -444,12 +444,6 @@ if not df.empty:
             if not first_contact_date_cols:
                 first_contact_date_cols = [col for col in df.columns if col in ['Date_First_Contact', 'Date First Contact', 'First_Contact_Date', 'First Contact Date']]
             
-            # Look for first_videocall_done field (case-insensitive)
-            first_videocall_done_cols = [col for col in df.columns if 'first' in col.lower() and 'videocall' in col.lower() and 'done' in col.lower()]
-            if not first_videocall_done_cols:
-                first_videocall_done_cols = [col for col in df.columns if col.lower() == 'first_videocall_done']
-            first_videocall_done_col = first_videocall_done_cols[0] if first_videocall_done_cols else None
-            
             for idx, row in df.iterrows():
                 # Count New Deals based on Date Sourced
                 date_sourced = row.get(date_col)
@@ -457,7 +451,7 @@ if not df.empty:
                     try:
                         # Convert to datetime if it's a string
                         if isinstance(date_sourced, str):
-                            sourced_date = pd.to_datetime(date_sourced)
+                            sourced_date = pd.to_datetime(date_sourced, dayfirst=True)
                         else:
                             sourced_date = date_sourced
                         
@@ -468,21 +462,20 @@ if not df.empty:
                         pass
                 
                 # Count Contacted based on first_videocall_done
-                if first_videocall_done_col:
-                    first_videocall_done_date = row.get(first_videocall_done_col)
-                    if pd.notna(first_videocall_done_date):
-                        try:
-                            # Convert to datetime if it's a string
-                            if isinstance(first_videocall_done_date, str):
-                                contact_date_obj = pd.to_datetime(first_videocall_done_date, dayfirst=True)
-                            else:
-                                contact_date_obj = first_videocall_done_date
-                            
-                            # Check if date falls within this week
-                            if week_start.date() <= contact_date_obj.date() <= week_end.date():
-                                contacted += 1
-                        except:
-                            pass
+                first_videocall_done_date = row.get("first_videocall_done")
+                if pd.notna(first_videocall_done_date):
+                    try:
+                        # Convert to datetime if it's a string (use dayfirst=True for DD/MM/YYYY format)
+                        if isinstance(first_videocall_done_date, str):
+                            contact_date_obj = pd.to_datetime(first_videocall_done_date, dayfirst=True)
+                        else:
+                            contact_date_obj = first_videocall_done_date
+                        
+                        # Check if date falls within this week
+                        if week_start.date() <= contact_date_obj.date() <= week_end.date():
+                            contacted += 1
+                    except:
+                        pass
                 
                 # Count First Contacted based on Date_First_Contact
                 if first_contact_date_cols:
