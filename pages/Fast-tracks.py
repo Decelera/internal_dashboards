@@ -461,22 +461,21 @@ if not df.empty:
                     except:
                         pass
                 
-                # Count Contacted based on Last Contacted
-                if last_contacted_cols:
-                    last_contacted_date = row.get(last_contacted_cols[0])
-                    if pd.notna(last_contacted_date):
-                        try:
-                            # Convert to datetime if it's a string
-                            if isinstance(last_contacted_date, str):
-                                contact_date_obj = pd.to_datetime(last_contacted_date)
-                            else:
-                                contact_date_obj = last_contacted_date
-                            
-                            # Check if date falls within this week
-                            if week_start.date() <= contact_date_obj.date() <= week_end.date():
-                                contacted += 1
-                        except:
-                            pass
+                # Count Contacted based on first_videocall_done
+                first_videocall_done_date = row.get("first_videocall_done")
+                if pd.notna(first_videocall_done_date):
+                    try:
+                        # Convert to datetime if it's a string
+                        if isinstance(first_videocall_done_date, str):
+                            contact_date_obj = pd.to_datetime(first_videocall_done_date)
+                        else:
+                            contact_date_obj = first_videocall_done_date
+                        
+                        # Check if date falls within this week
+                        if week_start.date() <= contact_date_obj.date() <= week_end.date():
+                            contacted += 1
+                    except:
+                        pass
                 
                 # Count First Contacted based on Date_First_Contact
                 if first_contact_date_cols:
@@ -630,24 +629,21 @@ if not df.empty:
     # Valores de las metrics
     current_new_deals = int(current_row["New Deals"])
     current_contacted = int(current_row["Contacted"])
-    current_first_contact = int(current_row["First Contact"])
     current_calls_pending = int(current_row["Calls Pending"])
 
     prev_new_deals = int(prev_row["New Deals"]) if prev_row is not None else 0
     prev_contacted = int(prev_row["Contacted"]) if prev_row is not None else 0
-    prev_first_contact = int(prev_row["First Contact"]) if prev_row is not None else 0
     prev_calls_pending = int(prev_row["Calls Pending"]) if prev_row is not None else 0
 
     delta_new_deals = f"{round((current_new_deals - prev_new_deals) / prev_new_deals * 100, 2)} %" if prev_new_deals != 0 else ""
     delta_contacted = f"{round((current_contacted - prev_contacted) / prev_contacted * 100, 2)} %" if prev_contacted != 0 else ""
-    delta_first_contact = f"{round((current_first_contact - prev_first_contact) / prev_first_contact * 100, 2)} %" if prev_first_contact != 0 else ""
     delta_calls_pending = f"{round((current_calls_pending - prev_calls_pending) / prev_calls_pending * 100, 2)} %" if prev_calls_pending != 0 else ""
 
     # Métricas arriba de la tabla
 
     st.markdown("### General metrics")
 
-    columns_tags = st.columns(4)
+    columns_tags = st.columns(3)
 
     with columns_tags[0]:
         st.metric(
@@ -667,13 +663,6 @@ if not df.empty:
             label="Contacted this week",
             value=current_contacted,
             delta=delta_contacted,  # comparación con la semana anterior
-        )
-    
-    with columns_tags[3]:
-        st.metric(
-            label="First contact this week",
-            value=current_first_contact,
-            delta=delta_first_contact,  # comparación con la semana anterior
         )  
 
     st.markdown("---")
@@ -1359,7 +1348,7 @@ if not df.empty:
     # =============================================================================
     
     st.write("### 🧟 Zombie Deals")
-    st.caption("Startups that haven't been updated in the last 7 days. An automated email reminder will be sent to the responsible person to follow up on these deals.")
+    st.caption("Startups that haven't been updated in the last 7 days and are not marked as 'Killed'. An automated email reminder will be sent to the responsible person to follow up on these deals.")
     st.write("")
     
     # Find Last Modified field
@@ -1373,7 +1362,7 @@ if not df.empty:
         # Calculate cutoff date (7 days ago)
         cutoff_date = datetime.now() - timedelta(days=7)
         
-        # Filter for startups not modified in last 7 days
+        # Filter for startups not modified in last 7 days and NOT "Killed"
         zombie_records = []
         for idx, row in df.iterrows():
             last_modified = row.get(last_modified_field)
@@ -1387,7 +1376,11 @@ if not df.empty:
                     
                     # Check if last modified is older than 7 days
                     if modified_date < cutoff_date:
-                        zombie_records.append(row)
+                        # Exclude startups with "Killed" stage
+                        stage_patterns = ["Stage", "stage"]
+                        stage = get_field_value(row, stage_patterns, "N/A")
+                        if str(stage).strip().lower() != "killed":
+                            zombie_records.append(row)
                 except:
                     pass
         
