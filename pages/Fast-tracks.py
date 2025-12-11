@@ -867,6 +867,11 @@ if not df.empty:
         if hot_df.empty:
             hot_df = df[df[urgency_field].astype(str).str.lower().str.contains('hot', na=False)]
         
+        # Exclude startups with "Killed" stage
+        stage_col_for_filter = next((col for col in df.columns if col.lower() in ['stage', 'stage_$startup']), None)
+        if stage_col_for_filter and not hot_df.empty:
+            hot_df = hot_df[hot_df[stage_col_for_filter].astype(str).str.strip().str.lower() != 'killed']
+        
         if not hot_df.empty:
             st.write(f"**Total:** {len(hot_df)} startups")
             st.write("")
@@ -1082,6 +1087,10 @@ if not df.empty:
         if qualified_df.empty:
             qualified_df = df[df[stage_field].astype(str).str.lower().str.contains('qualified', na=False)]
         
+        # Exclude startups with "Killed" stage (in case stage field differs)
+        if not qualified_df.empty:
+            qualified_df = qualified_df[qualified_df[stage_field].astype(str).str.strip().str.lower() != 'killed']
+        
         if not qualified_df.empty:
             st.write(f"**Total:** {len(qualified_df)} startups")
             st.write("")
@@ -1276,7 +1285,7 @@ if not df.empty:
     # =============================================================================
     
     st.write("### 🧟 Zombie Deals")
-    st.caption("Startups that haven't been updated in the last 7 days and are not marked as 'Killed'. An automated email reminder will be sent to the responsible person to follow up on these deals.")
+    st.caption("Startups that haven't been updated in the last 7 days and are not marked as 'Killed'.")
     st.write("")
     
     # Find Last Modified field
