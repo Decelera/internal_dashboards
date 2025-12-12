@@ -862,7 +862,8 @@ if not df.empty:
     # HOT DEALS
     # =============================================================================
     
-    with st.expander("🔥 Hot Deals"):
+    st.write("### 🔥 Hot Deals")
+    with st.expander("View Hot Deals"):
         # Find urgency field
         urgency_field_cols = [col for col in df.columns if col == 'Urgency' or col == 'urgency']
         if not urgency_field_cols:
@@ -1077,8 +1078,9 @@ if not df.empty:
     # QUALIFIED STARTUPS TABLE
     # =============================================================================
     
-    with st.expander("🎯 Qualified Startups"):
-        st.caption("These startups have passed initial screening and can be used in VC meetings to exchange dealflow.")
+    st.write("### 🎯 Qualified Startups")
+    st.caption("These startups have passed initial screening and can be used in VC meetings to exchange dealflow.")
+    with st.expander("View Qualified Startups"):
         st.write("")
         
         # Find stage field - be more specific
